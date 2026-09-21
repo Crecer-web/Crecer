@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRECER - Tareas</title>
+  <link rel="stylesheet" href="css/tareas.css">
+</head>
+<body>
+  <header class="header">
+    <div class="brand">
+      <h1>CRECER</h1>
+      <span class="acronym-badge">Gestión de Tareas</span>
+    </div>
+    <nav class="nav">
+      <a href="index.html">Inicio</a>
+      <a href="tareas.html" class="active">Tareas</a>
+      <a href="examenes.html">Exámenes</a>
+    </nav>
+  </header>
+
+  <main class="main-container">
+    <h2>Registro de Tareas Pendientes</h2>
+
+    <section class="form-section">
+      <form id="taskForm">
+        <div class="form-group">
+          <label for="taskTitle">Materia / Título</label>
+          <input type="text" id="taskTitle" placeholder="Ej. Informe de Química" required>
+        </div>
+        <div class="form-group">
+          <label for="taskDueDate">Fecha de Entrega</label>
+          <input type="date" id="taskDueDate" required>
+        </div>
+        <button type="submit" class="btn-submit">Guardar Tarea</button>
+      </form>
+    </section>
+
+    <section class="list-section">
+      <h3>Lista de Tareas</h3>
+      <div id="loading" class="loading-text">Cargando tareas de Firestore...</div>
+      <ul id="taskList" class="item-list"></ul>
+    </section>
+  </main>
+
+  <script type="module" src="js/tareas.js"></script>
+</body>
+</html>
