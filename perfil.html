@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRECER - Mi Perfil</title>
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/perfil.css">
+</head>
+<body class="dashboard-body">
+
+  <header class="app-header">
+    <div class="header-container">
+        <div class="logo">
+            <a href="inicio.html">CRECER</a>
+        </div>
+        <nav class="nav-menu" id="navMenu" aria-label="Navegación principal">
+            <a href="inicio.html" class="nav-link">Inicio</a>
+            
+            <div class="dropdown">
+                <button class="dropdown-btn" id="dropdownBtn" aria-haspopup="true" aria-expanded="false">
+                    Módulos ▼
+                </button>
+                <div class="dropdown-content" id="dropdownContent">
+                    <a href="notas.html">Calificaciones</a>
+                    <a href="recursos.html">Recursos</a>
+                    <a href="#" id="logoutBtn" class="dropdown-logout">Cerrar Sesión</a>
+                </div>
+            </div>
+
+            <button id="themeToggle" class="theme-toggle" aria-label="Cambiar tema">🌙 Tema</button>
+        </nav>
+    </div>
+  </header>
+
+  <main class="app-main-container">
+    <div class="main-container">
+      
+      <header class="profile-header">
+        <h1>Configuración de Perfil</h1>
+        <p>Administra tu información personal y haz clic sobre tu foto de perfil para actualizarla.</p>
+      </header>
+
+      <section class="profile-card">
+        <div class="profile-avatar-section">
+          <div class="avatar-wrapper" id="avatarWrapper" title="Haz clic para cambiar tu foto">
+            <img id="profileImage" class="avatar-img" src="" alt="Foto de Perfil" style="display: none;">
+            <div id="avatarInitial" class="avatar-placeholder">?</div>
+            <div class="avatar-overlay">
+              <span>Cambiar</span>
+            </div>
+          </div>
+
+          <!-- Información del usuario -->
+          <div class="avatar-info">
+            <h2 id="profileDisplayName">Cargando...</h2>
+            <p id="profileFullName" class="profile-fullname-text">Nombre y Apellido: --</p>
+            <p id="profileUserEmailDisplay">correo@ejemplo.com</p>
+            <p class="profile-age-text">Edad: <span id="profileCalculatedAge">--</span> años</p>
+          </div>
+        </div>
+
+        <!-- Opciones flotantes al hacer clic en la foto -->
+        <div id="photoOptionsModal" class="photo-options-container" style="display: none;">
+          <h3>Actualizar Foto de Perfil</h3>
+          
+          <div class="form-group">
+            <label for="profilePhotoUrl">Subir por URL de imagen</label>
+            <input type="url" id="profilePhotoUrl" placeholder="https://ejemplo.com/tu-foto.jpg">
+          </div>
+
+          <div class="form-group">
+            <label>O subir archivo desde el dispositivo</label>
+            <div class="custom-file-input-wrapper">
+              <!-- IMPORTANTE: Cambiamos la etiqueta asociada para que apunte directo -->
+              <input type="file" id="profileFile" accept="image/*" class="input-file-hidden">
+              <label for="profileFile" class="btn-file-custom" id="fileCustomBtnLabel">📁 Seleccionar archivo</label>
+              <span id="fileNameDisplay" class="file-name-text">Ningún archivo seleccionado</span>
+            </div>
+          </div>
+
+          <div class="photo-options-actions">
+            <button type="button" id="cancelPhotoBtn" class="btn-secondary">Cancelar</button>
+            <button type="button" id="applyPhotoBtn" class="btn-save">Aplicar Foto</button>
+          </div>
+        </div>
+
+          <div class="profile-actions">
+            <button type="submit" class="btn-save">Guardar Cambios</button>
+          </div>
+        </form>
+      </section>
+
+    </div>
+  </main>
+
+  <footer class="app-footer">
+    <div class="footer-container">
+      <p>&copy; 2026 <strong>CRECER</strong>. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+  <script type="module" src="js/global.js"></script>
+  <script type="module" src="js/perfil.js?v=3.0"></script>
+</body>
+</html>

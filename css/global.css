@@ -1,0 +1,452 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* Paleta Formal / Profesional (Modo Claro) */
+  --primary: #0f172a;        /* Slate 900 */
+  --primary-hover: #1e293b;  /* Slate 800 */
+  --accent: #2563eb;         /* Royal Blue */
+  --accent-hover: #1d4ed8;
+  
+  --bg-main: #f8fafc;        /* Off-white */
+  --bg-color: #f8fafc;
+  --card-bg: #ffffff;
+  
+  /* Tipografía y Textos */
+  --font-main: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  
+  /* Header y Navegación */
+  --header-bg: #0f172a;
+  --header-text: #ffffff;
+  --nav-link: #94a3b8;
+  --nav-link-hover: #ffffff;
+  
+  /* Formularios y Filtros */
+  --input-bg: #ffffff;
+  --filter-bg: #f1f5f9;
+  --border-color: #e2e8f0;
+  
+  /* Bordes, Sombras y Radio */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 4px 12px -2px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 10px 25px -5px rgba(15, 23, 42, 0.12);
+  --shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.06), 0 2px 4px -1px rgba(15, 23, 42, 0.04);
+}
+
+/* Variables para Modo Oscuro */
+[data-theme="dark"] {
+  --primary: #0f172a;
+  --primary-hover: #1e293b;
+  --bg-main: #090d16;
+  --bg-color: #090d16;
+  --card-bg: #1e293b;
+  
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #64748b;
+  
+  --header-bg: #0f172a;
+  --header-text: #f8fafc;
+  --nav-link: #94a3b8;
+  --nav-link-hover: #f8fafc;
+  
+  --input-bg: #0f172a;
+  --filter-bg: #1e293b;
+  --border-color: #334155;
+  
+  --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+}
+
+/* ==========================================================================
+   RESET GLOBAL Y ESTILOS BASE (Con Layout Flex sticky footer)
+   ========================================================================== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  min-height: 100vh;
+}
+
+body {
+  font-family: var(--font-main);
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  overflow-x: hidden; /* Evita scrolls horizontales no deseados */
+}
+
+/* ==========================================================================
+   HEADER Y NAVEGACIÓN PROFESIONAL (CORREGIDO PARA DESPLEGABLES)
+   ========================================================================== */
+.header {
+  background-color: var(--header-bg);
+  color: var(--header-text);
+  padding: 0.85rem 2.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 9999; /* Z-index extremadamente alto para que flote sobre todo el cuerpo */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+  gap: 1.5rem;
+  width: 100%;
+  overflow: visible !important; /* CRUCIAL: Permite que el menú salga de los límites del header */
+}
+
+.brand-container, .logo {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex-shrink: 0;
+}
+
+.brand-container a, .logo a {
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.acronym-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  background-color: rgba(255, 255, 255, 0.12);
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-sm);
+  color: #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.nav, .nav-menu {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  overflow: visible !important; /* CRUCIAL: Evita cortes en contenedores internos */
+}
+
+.nav a, .nav-link, .nav-menu a {
+  color: var(--nav-link);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.9rem;
+  padding: 0.4rem 0.2rem;
+  transition: color 0.2s ease, border-color 0.2s ease;
+  border-bottom: 2px solid transparent;
+}
+
+.nav a:hover, 
+.nav a.active,
+.nav-link:hover,
+.nav-link.active,
+.nav-menu a:hover,
+.nav-menu a.active {
+  color: var(--nav-link-hover);
+  border-bottom-color: var(--accent);
+}
+
+.nav-auth {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+/* Botón de Conmutación de Modo Oscuro */
+.theme-toggle {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--header-text);
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.2s ease;
+}
+
+.theme-toggle:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: #ffffff;
+}
+
+/* ==========================================================================
+   MENÚ DESPLEGABLE (DROPDOWN) - TOTALMENTE VISIBLE Y CENTRADO
+   ========================================================================== */
+.dropdown {
+  position: relative;
+  display: inline-block;
+  overflow: visible !important;
+}
+
+.dropdown-btn {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--header-text);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.45rem 0.9rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dropdown-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.6rem); /* Se ubica de forma limpia por debajo del botón */
+  background-color: var(--card-bg);
+  min-width: 200px;
+  box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.3), var(--shadow-lg);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  z-index: 10000; /* Prioridad máxima por encima de cualquier elemento <main> o cuerpo */
+  animation: fadeIn 0.2s ease;
+}
+
+.dropdown-content a {
+  color: var(--text-primary);
+  padding: 0.75rem 1rem;
+  text-decoration: none;
+  display: flex;                  /* Cambiado a flex para control total del centrado */
+  align-items: center;
+  justify-content: center;        /* Centra el texto horizontalmente */
+  text-align: center;             /* Asegura la alineación simétrica del texto */
+  font-size: 0.88rem;
+  font-weight: 500;
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.dropdown-content a:last-child {
+  border-bottom: none;
+}
+
+.dropdown-content a:hover {
+  background-color: var(--filter-bg);
+  color: var(--accent);
+}
+
+/* Control de visibilidad mediante hover (PC) o clase .active (Móvil/JS) */
+.dropdown:hover .dropdown-content,
+.dropdown.active .dropdown-content,
+.dropdown-content.show {
+  display: block;
+}
+
+/* ==========================================================================
+   BOTONES FORMALES Y COMPONENTES
+   ========================================================================== */
+.btn, .btn-primary, .btn-secondary, .btn-submit, .btn-logout {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.25rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-primary, .btn-submit {
+  background-color: var(--accent);
+  color: #ffffff;
+}
+
+.btn-primary:hover, .btn-submit:hover {
+  background-color: var(--accent-hover);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.btn-secondary, .btn-logout {
+  background-color: transparent;
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.btn-secondary:hover, .btn-logout:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: #ffffff;
+}
+
+a.link-action {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: color 0.2s ease;
+}
+
+a.link-action:hover {
+  text-decoration: underline;
+  color: var(--accent-hover);
+}
+
+/* Estilos globales para Controles de Formulario */
+input, select, textarea {
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 0.85rem;
+  font-family: var(--font-main);
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease, color 0.3s ease;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* ==========================================================================
+   SISTEMA DE NOTIFICACIONES (TOASTS)
+   ========================================================================== */
+#toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  min-width: 280px;
+  max-width: 400px;
+  padding: 0.9rem 1.25rem;
+  border-radius: var(--radius-md);
+  color: #ffffff;
+  font-weight: 500;
+  font-size: 0.9rem;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.toast.toast-success { background-color: #10b981; }
+.toast.toast-danger  { background-color: #ef4444; }
+.toast.toast-info    { background-color: #3b82f6; }
+
+/* Animaciones */
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { transform: translateX(0); opacity: 1; }
+  to   { transform: translateX(100%); opacity: 0; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================================================
+   ADAPTABILIDAD RESPONSIVA (MOBILE & TABLET)
+   ========================================================================== */
+@media (max-width: 768px) {
+  .header {
+    padding: 0.8rem 1.25rem;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    overflow: visible !important;
+  }
+
+  .nav, .nav-menu {
+    width: 100%;
+    order: 3;
+    overflow-x: auto;
+    overflow-y: visible !important;
+    padding-bottom: 0.4rem;
+    gap: 1.2rem;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .nav-auth {
+    order: 2;
+  }
+
+  .btn, .btn-primary, .btn-secondary, .btn-submit, .btn-logout {
+    padding: 0.5rem 0.85rem;
+    font-size: 0.82rem;
+  }
+
+  /* Rejillas dinámicas de formularios en móviles */
+  #taskForm, 
+  #examForm, 
+  #gradeForm, 
+  #scheduleForm, 
+  #resourceForm,
+  .filter-section {
+    grid-template-columns: 1fr !important;
+  }
+
+  #toast-container {
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+  }
+
+  .toast {
+    min-width: 100%;
+  }
+}
+
+/* Color rojo distintivo para la opción de Cerrar Sesión */
+.dropdown-logout {
+    color: #dc2626 !important; /* Rojo profesional */
+    font-weight: 500;
+}
+
+.dropdown-logout:hover {
+    background-color: rgba(220, 38, 38, 0.1) !important; /* Fondo rojizo suave al pasar el mouse */
+    color: #b91c1c !important; /* Rojo un poco más oscuro en hover */
+}

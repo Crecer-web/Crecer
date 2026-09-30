@@ -1,0 +1,618 @@
+/* ==========================================================================
+   MÓDULO DE LISTADOS, FILTROS Y RESÚMENES (DASHBOARD & TARJETAS) - CRECER
+   Estilo: Formal, Ejecutivo y Ergonómico (Mobile & Desktop)
+   ========================================================================== */
+
+html, body {
+  height: 100%;
+}
+
+body.dashboard-body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--bg-color, #f8fafc);
+  color: var(--text-primary, #0f172a);
+  line-height: 1.6;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ==========================================
+   ENCABEZADO DE NAVEGACIÓN RESPONSIVO (CRECER)
+   ========================================== */
+.app-header {
+    background-color: var(--primary, #0f172a);
+    color: var(--header-text, #ffffff);
+    padding: 1.2rem 1.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.header-container {
+    display: flex;
+    flex-direction: column; /* Por defecto en celular: apilado */
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 1300px;
+    margin: 0 auto;
+    gap: 1rem;
+}
+
+/* Logo / Título CRECER */
+.logo a {
+    font-size: 1.7rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: #ffffff;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    text-transform: uppercase;
+    line-height: 1.1;
+}
+
+/* Navegación y elementos centrados por defecto en celular */
+.nav-menu {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    margin: 0;
+    padding: 0;
+    flex-wrap: wrap;
+    list-style: none;
+}
+
+/* Enlaces de navegación */
+.nav-link {
+    color: #94a3b8;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.92rem;
+    padding: 0.3rem 0;
+    margin-bottom: -2px;
+    border-bottom: 2px solid transparent;
+    position: relative;
+    transition: color 0.2s ease, border-color 0.2s ease;
+    background: transparent;
+}
+
+.nav-link:hover {
+    color: #ffffff;
+}
+
+/* Línea activa única para evitar duplicados */
+.nav-link.active {
+    color: #ffffff !important;
+    border-bottom: 2px solid var(--accent-color, #3b82f6) !important;
+}
+
+/* Botón de Cambio de Tema (Píldora) */
+.btn-theme-nav {
+    background: rgba(255, 255, 255, 0.08);
+    color: #f1f5f9;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 0.4rem 1rem;
+    border-radius: 50px;
+    font-weight: 500;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: all 0.2s ease;
+}
+
+.btn-theme-nav:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Menú Desplegable (Dropdown) */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-btn {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    font-family: inherit;
+    font-weight: 500;
+    font-size: 0.92rem;
+    cursor: pointer;
+    padding: 0.3rem 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: color 0.2s ease;
+}
+
+.dropdown-btn:hover {
+    color: #ffffff;
+}
+
+/* Contenido del dropdown perfectamente centrado en móvil y seguro */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 100%;
+    background-color: var(--card-bg, #1e293b);
+    min-width: 180px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-color, #334155);
+    border-radius: var(--radius-sm, 6px);
+    z-index: 1001;
+    overflow: hidden;
+    padding: 0.4rem 0;
+    margin-top: 0.5rem;
+    text-align: left;
+}
+
+.dropdown-content a {
+    color: var(--text-secondary, #cbd5e1);
+    padding: 0.6rem 1rem;
+    text-decoration: none;
+    display: block;
+    font-size: 0.9rem;
+    transition: background 0.2s, color 0.2s;
+}
+
+.dropdown-content a:hover,
+.dropdown-content a.active {
+    background-color: rgba(37, 99, 235, 0.15);
+    color: #ffffff;
+}
+
+.dropdown-divider {
+    height: 1px;
+    background-color: var(--border-color, #334155);
+    margin: 0.3rem 0;
+}
+
+.dropdown-logout {
+    color: #f87171 !important;
+    font-weight: 600;
+}
+
+.dropdown-logout:hover {
+    background-color: rgba(248, 113, 113, 0.15) !important;
+    color: #fca5a5 !important;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+
+/* ==========================================
+   MEDIA QUERY PARA ESCRITORIO (Pantallas >= 768px)
+   ========================================== */
+@media (min-width: 768px) {
+    .app-header {
+        padding: 1rem 3rem;
+    }
+
+    .header-container {
+        flex-direction: row; /* Pasa a estar en una sola línea horizontal */
+        justify-content: space-between; /* Logo a la izquierda, menú a la derecha */
+        align-items: center;
+    }
+
+    .nav-menu {
+        gap: 2rem;
+    }
+}
+
+/* ==========================================
+   CONTENEDOR PRINCIPAL
+   ========================================== */
+.app-main-container {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.main-container { 
+  max-width: 1200px; 
+  width: 100%;
+  margin: 2.5rem auto; 
+  padding: 0 2rem; 
+}
+
+/* ==========================================
+   PANEL DE RESUMEN (MÉTRICAS / STATS)
+   ========================================== */
+.summary-panel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.summary-card {
+  background: var(--card-bg, #ffffff);
+  padding: 1.25rem 1.5rem;
+  border-radius: var(--radius-md, 10px);
+  border: 1px solid var(--border-color, #e2e8f0);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(15, 23, 42, 0.05));
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.summary-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.08);
+  border-color: var(--accent, #2563eb);
+}
+
+.summary-card h3 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text-primary, #0f172a);
+  margin: 0;
+  line-height: 1.1;
+}
+
+.summary-card p {
+  color: var(--text-secondary, #475569);
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-top: 0.2rem;
+}
+
+/* ==========================================
+   BARRA DE CONTROL Y FILTROS
+   ========================================== */
+.control-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.search-and-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 260px;
+  padding: 0.7rem 0.95rem;
+  background-color: var(--input-bg, #ffffff);
+  color: var(--text-primary, #0f172a);
+  border: 1px solid var(--border-color, #cbd5e0);
+  border-radius: var(--radius-sm, 6px);
+  font-family: inherit;
+  font-size: 0.92rem;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease;
+}
+
+.search-input:focus {
+  border-color: var(--accent, #2563eb);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.btn-action {
+  padding: 0.7rem 1.2rem;
+  border-radius: var(--radius-sm, 6px);
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.btn-primary-action {
+  background-color: #0ea5e9;
+  color: #ffffff;
+}
+
+.btn-primary-action:hover {
+  background-color: #0284c7;
+}
+
+.btn-trash-nav {
+  background-color: var(--card-bg, #ffffff);
+  color: var(--text-secondary, #475569);
+  border-color: var(--border-color, #cbd5e0);
+}
+
+.btn-trash-nav:hover {
+  background-color: var(--filter-bg, #f8fafc);
+  color: var(--text-primary, #0f172a);
+  border-color: var(--text-muted, #94a3b8);
+}
+
+.filter-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.btn-filter {
+  padding: 0.55rem 1.1rem;
+  border: 1px solid var(--border-color, #cbd5e0);
+  background: var(--card-bg, #ffffff);
+  color: var(--text-secondary, #475569);
+  border-radius: var(--radius-sm, 6px);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.btn-filter:hover {
+  background: var(--filter-bg, #f8fafc);
+  color: var(--text-primary, #0f172a);
+  border-color: var(--text-muted, #94a3b8);
+}
+
+.btn-filter.active {
+  background: var(--accent, #2563eb);
+  color: #ffffff;
+  border-color: var(--accent, #2563eb);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+}
+
+/* ==========================================
+   GRILLA DE TARJETAS
+   ========================================== */
+.cards-section h2 {
+  color: var(--text-primary, #0f172a);
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 1.25rem;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.item-card {
+  background: var(--card-bg, #ffffff);
+  border-radius: var(--radius-md, 10px);
+  padding: 1.35rem;
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(15, 23, 42, 0.05));
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-left: 5px solid var(--accent, #2563eb);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.3s ease, background-color 0.3s ease;
+}
+
+.item-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px -5px rgba(15, 23, 42, 0.1);
+}
+
+.item-card.completed {
+  opacity: 0.75;
+  border-left-color: #10b981;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.8rem;
+}
+
+.item-card h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary, #0f172a);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.badge {
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-sm, 6px);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  display: inline-block;
+}
+
+.badge-tarea { 
+  background: #e2e8f0; 
+  color: #1e293b; 
+}
+
+.badge-examen { 
+  background: #fef3c7; 
+  color: #92400e; 
+}
+
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-top: 1.25rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--border-color, #e2e8f0);
+}
+
+.btn-status {
+  flex: 1;
+  padding: 0.55rem;
+  border: 1px solid var(--border-color, #cbd5e0);
+  border-radius: var(--radius-sm, 6px);
+  cursor: pointer;
+  background: var(--filter-bg, #f8fafc);
+  color: var(--text-primary, #0f172a);
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.btn-status:hover {
+  background: var(--border-color, #cbd5e0);
+}
+
+.btn-trash {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  border-radius: var(--radius-sm, 6px);
+  cursor: pointer;
+  padding: 0.55rem 0.85rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-trash:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #b91c1c;
+}
+
+/* ==========================================
+   PIE DE PÁGINA
+   ========================================== */
+.app-footer {
+  background-color: var(--primary, #0f172a);
+  color: var(--header-text, #ffffff);
+  padding: 1.5rem 3rem;
+  border-top: 1px solid var(--border, #334155);
+  width: 100%;
+  margin-top: auto;
+}
+
+.footer-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-width: 1300px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.footer-container p {
+  font-size: 0.9rem;
+  color: #94a3b8;
+  text-align: center;
+  margin: 0;
+}
+
+/* ==========================================================================
+   ADAPTACIÓN PARA MODO OSCURO (DARK MODE)
+   ========================================== */
+[data-theme="dark"] .badge-tarea { 
+  background: #334155; 
+  color: #f1f5f9; 
+}
+
+[data-theme="dark"] .badge-examen { 
+  background: #78350f; 
+  color: #fef3c7; 
+}
+
+/* ==========================================================================
+   RESPONSIVO (MOBILE & TABLET)
+   ========================================== */
+@media (max-width: 768px) {
+  .app-header {
+    padding: 1rem 1.25rem;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .header-container {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .nav-menu {
+    margin-left: 0;
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .summary-panel {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0.85rem;
+  }
+
+  .search-and-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-input {
+    width: 100%;
+    min-width: 100%;
+  }
+
+  .btn-action {
+    justify-content: center;
+  }
+
+  .filter-buttons {
+    width: 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+  }
+
+  .btn-filter {
+    flex: 1;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .app-footer {
+    padding: 1.25rem;
+  }
+}
+
+/* Color rojo distintivo para la opción de Cerrar Sesión */
+.dropdown-logout {
+    color: #dc2626 !important; /* Rojo profesional */
+    font-weight: 500;
+}
+
+.dropdown-logout:hover {
+    background-color: rgba(220, 38, 38, 0.1) !important; /* Fondo rojizo suave al pasar el mouse */
+    color: #b91c1c !important; /* Rojo un poco más oscuro en hover */
+}

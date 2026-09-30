@@ -1,7 +1,11 @@
+// ==========================================
+// CONFIGURACIÓN E INICIALIZACIÓN DE FIREBASE
+// ==========================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-// Configuración del proyecto de Firebase
+// Configuración del proyecto de Firebase con tus credenciales reales
 const firebaseConfig = {
   apiKey: "AIzaSyBvzStzUNt0kjfyL5mNBzIqI1PbdzypOTI",
   authDomain: "crecer-web.firebaseapp.com",
@@ -12,8 +16,9 @@ const firebaseConfig = {
   measurementId: "G-5SR5DK594M"
 };
 
-// Inicializar Firebase
+// Inicializar la aplicación de Firebase
 const app = initializeApp(firebaseConfig);
 
-// Exportar la instancia de Firestore para ser usada en los demás scripts
+// Exportar las instancias del servicio para ser utilizadas en los demás módulos
 export const db = getFirestore(app);
+export const auth = getAuth(app);

@@ -1,0 +1,585 @@
+/* ==========================================================================
+   MÓDULO DE RECURSOS Y MATERIALES DE ESTUDIO - CRECER
+   Estilo: Formal, Ejecutivo y Funcional (Dashboard / SaaS)
+   ========================================================================== */
+
+/* Estructura general de la página para Sticky Footer */
+html, body {
+  height: 100%;
+}
+
+body.dashboard-body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--bg-color, #f8fafc);
+  color: var(--text-primary, #0f172a);
+  line-height: 1.6;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ====================================================================================
+   ENCABEZADO DE NAVEGACIÓN Y LOGO (Diseño Responsive: Escritorio vs Celular)
+   ==================================================================================== */
+.app-header {
+    background-color: var(--primary, #0f172a);
+    color: var(--header-text, #ffffff);
+    padding: 1rem 1.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.header-container {
+    display: flex;
+    width: 100%;
+    max-width: 1300px;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+/* Título / Logo CRECER */
+.logo a {
+    font-size: 1.7rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: #ffffff;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    text-transform: uppercase;
+    line-height: 1.1;
+}
+
+/* Barra de navegación base */
+.nav-menu {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* Enlaces de navegación */
+.nav-link {
+    color: #94a3b8;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    padding: 0.3rem 0;
+    position: relative;
+    transition: color 0.2s ease;
+    background: transparent;
+    border: none;
+}
+
+.nav-link:hover {
+    color: #ffffff;
+}
+
+.nav-link.active {
+    color: #ffffff;
+}
+
+/* Línea inferior única para el enlace activo (Sin duplicados) */
+.nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: var(--accent-color, #3b82f6);
+    border-radius: 2px;
+}
+
+/* Botón de Modo Tema */
+.theme-toggle {
+    background-color: transparent;
+    color: #cbd5e1;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 0.45rem 1rem;
+    border-radius: 50px;
+    font-weight: 500;
+    font-size: 0.88rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.theme-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* Menú Desplegable (Dropdown) */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-btn {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    font-family: inherit;
+    font-weight: 500;
+    font-size: 0.95rem;
+    cursor: pointer;
+    padding: 0.3rem 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: color 0.2s ease;
+}
+
+.dropdown-btn:hover {
+    color: #ffffff;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: var(--card-bg, #1e293b);
+    min-width: 180px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-color, #334155);
+    border-radius: var(--radius-sm, 6px);
+    z-index: 1001;
+    overflow: hidden;
+    padding: 0.4rem 0;
+    margin-top: 0.4rem;
+}
+
+.dropdown-content a {
+    color: var(--text-secondary, #cbd5e1);
+    padding: 0.6rem 1rem;
+    text-decoration: none;
+    display: block;
+    font-size: 0.9rem;
+    transition: background 0.2s, color 0.2s;
+}
+
+.dropdown-content a:hover,
+.dropdown-content a.active {
+    background-color: rgba(37, 99, 235, 0.15);
+    color: #ffffff;
+}
+
+.dropdown-divider {
+    height: 1px;
+    background-color: var(--border-color, #334155);
+    margin: 0.2rem 0;
+}
+
+.dropdown-content .dropdown-logout {
+    color: #f87171;
+}
+
+.dropdown-content .dropdown-logout:hover {
+    background-color: rgba(248, 113, 113, 0.1);
+    color: #f87171;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+
+/* ====================================================================================
+   MEDIA QUERIES (COMPORTAMIENTO RESPONSIVE)
+   ==================================================================================== */
+
+/* VISTA ESCRITORIO (Pantallas medianas y grandes) */
+@media (min-width: 768px) {
+    .app-header {
+        padding: 1.2rem 3rem;
+    }
+    .header-container {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .nav-menu {
+        margin-left: auto;
+    }
+    /* En escritorio el dropdown se alinea hacia la derecha del botón */
+    .dropdown-content {
+        right: 0;
+        left: auto;
+        transform: none;
+    }
+}
+
+/* VISTA CELULAR (Pantallas menores a 768px) */
+@media (max-width: 767px) {
+    .app-header {
+        padding: 1.2rem 1rem;
+    }
+    .header-container {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+    }
+    .nav-menu {
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 1.2rem;
+    }
+    /* En celular el dropdown se centra perfectamente respecto al botón */
+    .dropdown-content {
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+    }
+}
+
+/* ==========================================
+   CONTENEDOR PRINCIPAL (Sticky Footer Compatible)
+   ========================================== */
+.app-main-container {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.main-container { 
+  max-width: 1000px; 
+  width: 100%;
+  margin: 2.5rem auto; 
+  padding: 0 1.5rem; 
+  box-sizing: border-box;
+}
+
+h2 { 
+  color: var(--text-primary, #0f172a); 
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 1.25rem; 
+}
+
+.list-section h3 {
+  color: var(--text-primary, #0f172a);
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin-bottom: 1rem;
+}
+
+/* ==========================================
+   FORMULARIO DE REGISTRO DE RECURSOS
+   ========================================== */
+.form-section { 
+  background: var(--card-bg, #ffffff); 
+  padding: 1.5rem; 
+  border-radius: var(--radius-md, 10px); 
+  border: 1px solid var(--border-color, #e2e8f0); 
+  margin-bottom: 2rem; 
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(15, 23, 42, 0.08));
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+#resourceForm { 
+  display: grid; 
+  grid-template-columns: 1.5fr 2fr 2fr auto; 
+  gap: 1rem; 
+  align-items: end; 
+}
+
+.form-group { 
+  display: flex; 
+  flex-direction: column; 
+}
+
+.form-group label { 
+  font-size: 0.82rem; 
+  font-weight: 600; 
+  color: var(--text-primary, #0f172a);
+  margin-bottom: 0.35rem; 
+  letter-spacing: -0.01em;
+}
+
+#resourceForm input { 
+  width: 100%;
+  padding: 0.65rem 0.85rem; 
+  background-color: var(--input-bg, #ffffff);
+  color: var(--text-primary, #0f172a);
+  border: 1px solid var(--border-color, #cbd5e0); 
+  border-radius: var(--radius-sm, 6px); 
+  font-family: inherit;
+  font-size: 0.9rem; 
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease;
+}
+
+#resourceForm input:focus { 
+  border-color: var(--accent, #2563eb);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.btn-submit { 
+  background-color: var(--accent, #2563eb); 
+  color: #ffffff; 
+  border: 1px solid transparent; 
+  padding: 0.65rem 1.4rem; 
+  border-radius: var(--radius-sm, 6px); 
+  font-family: inherit;
+  font-weight: 600; 
+  font-size: 0.9rem;
+  cursor: pointer; 
+  white-space: nowrap;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-submit:hover { 
+  background-color: var(--accent-hover, #1d4ed8); 
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+
+/* ==========================================
+   GRILLA Y TARJETAS DE RECURSOS
+   ========================================== */
+.resource-grid { 
+  display: grid; 
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+  gap: 1.25rem; 
+}
+
+.resource-card { 
+  background: var(--card-bg, #ffffff); 
+  border: 1px solid var(--border-color, #e2e8f0); 
+  border-radius: var(--radius-md, 10px); 
+  padding: 1.25rem; 
+  display: flex; 
+  flex-direction: column; 
+  justify-content: space-between; 
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(15, 23, 42, 0.08));
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.3s ease, background-color 0.3s ease;
+}
+
+.resource-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(15, 23, 42, 0.1));
+  border-color: var(--accent, #2563eb);
+}
+
+.resource-card h4 { 
+  color: var(--text-primary, #0f172a); 
+  font-size: 1.05rem; 
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.25rem; 
+}
+
+.resource-card span { 
+  font-size: 0.8rem; 
+  color: var(--accent, #2563eb); 
+  font-weight: 600; 
+  display: block; 
+  margin-bottom: 1rem; 
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* Botón de Enlace Externo */
+.link-btn { 
+  display: inline-block; 
+  text-decoration: none; 
+  background-color: var(--filter-bg, #f8fafc); 
+  color: var(--text-primary, #0f172a); 
+  font-weight: 600; 
+  padding: 0.55rem 0.9rem; 
+  border-radius: var(--radius-sm, 6px); 
+  font-size: 0.85rem; 
+  margin-bottom: 1rem; 
+  text-align: center; 
+  border: 1px solid var(--border-color, #cbd5e0);
+  transition: all 0.2s ease;
+}
+
+.link-btn:hover { 
+  background-color: var(--accent, #2563eb); 
+  color: #ffffff; 
+  border-color: var(--accent, #2563eb);
+}
+
+/* Botón de Eliminar Recurso */
+.btn-delete { 
+  background: transparent; 
+  color: #ef4444; 
+  border: 1px solid rgba(239, 68, 68, 0.4); 
+  padding: 0.4rem 0.8rem; 
+  border-radius: var(--radius-sm, 6px); 
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer; 
+  transition: all 0.2s ease;
+  align-self: flex-start;
+}
+
+.btn-delete:hover { 
+  background: #ef4444; 
+  color: #ffffff; 
+  border-color: #ef4444;
+}
+
+/* Estado de Carga / Vacío */
+.loading-text { 
+  color: var(--text-muted, #94a3b8); 
+  font-style: italic; 
+  font-size: 0.9rem;
+  padding: 1rem 0;
+}
+
+/* ==========================================
+   PIE DE PÁGINA INSTITUCIONAL (Sticky Footer)
+   ========================================== */
+.app-footer {
+  background-color: var(--primary, #0f172a);
+  color: var(--header-text, #ffffff);
+  padding: 1.5rem 3rem;
+  border-top: 1px solid var(--border, #334155);
+  width: 100%;
+  margin-top: auto;
+  box-sizing: border-box;
+}
+
+.footer-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-width: 1300px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.footer-container p {
+  font-size: 0.9rem;
+  color: #94a3b8;
+  text-align: center;
+  margin: 0;
+}
+
+/* ==========================================================================
+   ADAPTACIÓN PARA MODO OSCURO (DARK MODE)
+   ========================================== */
+[data-theme="dark"] .form-section {
+  background-color: var(--card-bg, #1e293b);
+  border-color: var(--border-color, #334155);
+}
+
+[data-theme="dark"] .resource-card {
+  background-color: var(--card-bg, #1e293b);
+  border-color: var(--border-color, #334155);
+}
+
+[data-theme="dark"] .link-btn {
+  background-color: rgba(255, 255, 255, 0.03);
+  border-color: var(--border-color, #334155);
+}
+
+[data-theme="dark"] .link-btn:hover {
+  background-color: var(--accent, #2563eb);
+  border-color: var(--accent, #2563eb);
+}
+
+[data-theme="dark"] .btn-delete {
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+}
+
+[data-theme="dark"] .btn-delete:hover {
+  background: #dc2626;
+  color: #ffffff;
+  border-color: #dc2626;
+}
+
+/* ==========================================================================
+   ADAPTABILIDAD RESPONSIVA (MÓVILES Y TABLETS)
+   ========================================== */
+@media (max-width: 860px) {
+  .app-header {
+    padding: 1rem 1.25rem;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .header-container {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .nav-menu {
+    margin-left: 0;
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 850px) {
+  #resourceForm { 
+    grid-template-columns: 1fr 1fr; 
+  }
+
+  .btn-submit {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 580px) {
+  .main-container {
+    margin: 1.5rem auto;
+    padding: 0 1rem;
+  }
+
+  #resourceForm { 
+    grid-template-columns: 1fr; 
+  }
+
+  .btn-submit {
+    grid-column: span 1;
+    width: 100%;
+  }
+
+  .resource-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .app-footer {
+    padding: 1.25rem;
+  }
+}
+
+/* Color rojo distintivo para la opción de Cerrar Sesión */
+.dropdown-logout {
+    color: #dc2626 !important; /* Rojo profesional */
+    font-weight: 500;
+}
+
+.dropdown-logout:hover {
+    background-color: rgba(220, 38, 38, 0.1) !important; /* Fondo rojizo suave al pasar el mouse */
+    color: #b91c1c !important; /* Rojo un poco más oscuro en hover */
+}
+
+/* Esto permite que se despliegue tanto por hover (PC) como por la clase .active generada por JS (Móvil) */
+.dropdown:hover .dropdown-content,
+.dropdown.active .dropdown-content {
+  display: block;
+}

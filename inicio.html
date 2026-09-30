@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Inicio | CRECER</title>
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/inicio.css">
+</head>
+<body class="dashboard-body">
+
+    <!-- Encabezado de Navegación del Dashboard unificado -->
+    <header class="app-header">
+        <div class="header-container">
+    <div class="logo">
+        <a href="inicio.html">CRECER</a>
+    </div>
+    <nav class="nav-menu" id="navMenu" aria-label="Navegación principal">
+        <a href="inicio.html" class="active nav-link">Inicio</a>
+        
+        <!-- Menú Desplegable de Módulos Unificado y Extendido -->
+        <div class="dropdown">
+            <button class="dropdown-btn" id="dropdownBtn" aria-haspopup="true" aria-expanded="false" type="button">
+                Módulos ▼
+            </button>
+            <div class="dropdown-content" id="dropdownContent">
+                <a href="notas.html">Calificaciones</a>
+                <a href="recursos.html">Recursos</a>
+                <a href="perfil.html">Mi Perfil</a>
+                <a href="#" id="logoutBtn" class="dropdown-logout">Cerrar Sesión</a>
+            </div>
+        </div>
+
+        <!-- Botón de Modo Claro / Oscuro Estándar -->
+        <button id="themeToggle" class="theme-toggle" type="button" aria-label="Cambiar tema">🌙 Tema</button>
+    </nav>
+</div>
+    </header>
+
+    <!-- Contenedor Principal -->
+    <main class="app-main-container">
+        <div class="main-container">
+            
+            <!-- Panel Resumen de Métricas -->
+            <section class="summary-panel">
+                <div class="summary-card">
+                    <div class="summary-content">
+                        <h3 id="cantPendientes">0</h3>
+                        <p>Pendientes</p>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-content">
+                        <h3 id="cantCompletadas">0</h3>
+                        <p>Completadas</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Barra de Control: Búsqueda y Filtros -->
+            <section class="control-bar">
+                <div class="search-and-actions">
+                    <input type="text" id="searchInput" placeholder="Buscar por materia o tema..." class="search-input">
+                    <a href="formularios.html" class="btn-action btn-primary-action">➕ Nueva Tarea</a>
+                    <a href="papelera.html" class="btn-action btn-trash-nav">🗑️ Papelera</a>
+                </div>
+                
+                <div class="filter-buttons">
+                    <button class="btn-filter active" data-filter="Todos">Todos</button>
+                    <button class="btn-filter" data-filter="Tarea">Tareas</button>
+                    <button class="btn-filter" data-filter="Examen">Exámenes</button>
+                </div>
+            </section>
+
+            <!-- Lista de Tarjetas Activas -->
+            <section class="cards-section">
+                <h2>Mis Entregas y Actividades</h2>
+                <div id="cardsGrid" class="cards-grid">
+                    <!-- Se cargan dinámicamente desde Firestore -->
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Pie de Página Institucional -->
+    <footer class="app-footer">
+        <div class="footer-container">
+            <p>&copy; 2026 <strong>CRECER</strong>. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <script type="module" src="js/global.js"></script>
+    <script type="module" src="js/inicio.js"></script>
+</body>
+</html>

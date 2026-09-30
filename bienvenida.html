@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" sizes="32x32" href="img/logo.png">
+    <link rel="apple-touch-icon" href="img/logo.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenido | CRECER</title>
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/bienvenida.css">
+</head>
+<body class="welcome-page">
+
+    <!-- Encabezado Principal (Título a la Izquierda / Botones a la Derecha) -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <a href="bienvenida.html">CRECER</a>
+            </div>
+            <nav class="nav-menu" aria-label="Navegación principal">
+                <a href="login.html" class="btn-secondary">Iniciar Sesión</a>
+                <!-- CORREGIDO: Ahora apunta correctamente a register.html -->
+                <a href="register.html" class="btn-primary">Registrarse</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Contenedor Principal (Evita que el contenido toque las paredes) -->
+    <main class="main-container">
+        
+        <!-- Sección Hero / Presentación -->
+        <section class="hero">
+            <div class="hero-badge">Plataforma Académica Integral</div>
+            <h1>Potencia tu rendimiento académico con <span>CRECER</span></h1>
+            <p>La plataforma integral diseñada para organizar tus tareas, exámenes, horarios y calificaciones en un solo lugar de manera eficiente y segura.</p>
+            
+            <div class="hero-buttons">
+                <!-- CORREGIDO: El botón principal de empezar ahora lleva al registro -->
+                <a href="register.html" class="btn-hero-primary">Comenzar Ahora</a>
+                <a href="#caracteristicas" class="btn-hero-secondary">Saber Más</a>
+            </div>
+        </section>
+
+        <!-- Sección de Características -->
+        <section id="caracteristicas" class="features-section">
+            <div class="section-title">
+                <h2>Diseñado para optimizar tu día a día</h2>
+                <p>Herramientas potentes y minimalistas enfocadas en tu éxito estudiantil.</p>
+            </div>
+
+            <div class="features-grid">
+                <article class="feature-card">
+                    <div class="feature-icon-wrapper">
+                        <!-- Icono decorativo o SVG opcional -->
+                    </div>
+                    <h3>Gestión de Formularios</h3>
+                    <p>Crea registros detallados de tus Tareas y Exámenes, adjuntando material de estudio y fechas límites de entrega sin complicaciones.</p>
+                </article>
+
+                <article class="feature-card">
+                    <div class="feature-icon-wrapper"></div>
+                    <h3>Seguimiento de Notas</h3>
+                    <p>Lleva el control absoluto de tus calificaciones por materia y visualiza tu promedio general en tiempo real con analíticas claras.</p>
+                </article>
+
+                <article class="feature-card">
+                    <div class="feature-icon-wrapper"></div>
+                    <h3>Horario y Recursos</h3>
+                    <p>Organiza tu agenda semanal de clases y mantén tu biblioteca personal de documentos y enlaces siempre al alcance de tu mano.</p>
+                </article>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Pie de Página Institucional (Fijo abajo, texto centrado, enlaces a la derecha) -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2026 <strong>CRECER</strong>. Todos los derechos reservados.</p>
+            <div class="footer-links">
+                <a href="#">Privacidad</a>
+                <a href="#">Términos</a>
+                <a href="#">Soporte</a>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module" src="js/global.js"></script>
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Formulario | CRECER</title>
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/formularios.css">
+</head>
+<body class="dashboard-body">
+
+<body class="welcome-page">
+
+    <header class="app-header">
+    <div class="header-container">
+        <div class="logo">
+            <a href="inicio.html">CRECER</a>
+        </div>
+        <nav class="nav-menu" id="navMenu" aria-label="Navegación principal">
+            <a href="inicio.html" class="nav-link">Inicio</a>
+            
+            <!-- Menú Desplegable de Módulos Unificado -->
+            <div class="dropdown">
+                <button class="dropdown-btn" id="dropdownBtn" aria-haspopup="true" aria-expanded="false">
+                    Módulos ▼
+                </button>
+                <div class="dropdown-content" id="dropdownContent">
+                    <a href="notas.html">Calificaciones</a>
+                    <a href="horario.html">Horario</a>
+                    <a href="recursos.html">Recursos</a>
+                    <a href="perfil.html">Mi Perfil</a>
+                    <a href="#" id="logoutBtn" class="dropdown-logout">Cerrar Sesión</a>
+                </div>
+            </div>
+
+            <!-- Botón de Modo Claro / Oscuro Estándar -->
+            <button id="themeToggle" class="theme-toggle" aria-label="Cambiar tema">🌙 Tema</button>
+        </nav>
+    </div>
+</header>
+
+    <!-- Contenedor Principal (Empuja el footer hacia abajo) -->
+    <main class="app-main-container">
+        <div class="form-wrapper">
+            <section class="form-card">
+                <div class="form-card-header">
+                    <h1>Cargar Nuevo Formulario</h1>
+                    <p class="subtitle">Registra una nueva Tarea o Examen detallando sus pautas y material de apoyo.</p>
+                </div>
+
+                <form id="formularioForm" class="dashboard-form" novalidate>
+                    <!-- Tipo: Tarea o Examen -->
+                    <div class="form-group">
+                        <label for="tipoFormulario">Tipo de Formulario *</label>
+                        <select id="tipoFormulario" required>
+                            <option value="" disabled selected>Selecciona una opción</option>
+                            <option value="Tarea">Tarea</option>
+                            <option value="Examen">Examen</option>
+                        </select>
+                    </div>
+
+                    <!-- Materia y Tema -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="materiaInput">Materia *</label>
+                            <input type="text" id="materiaInput" placeholder="Ej. Matemática, Historia" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="temaInput">Tema / Título *</label>
+                            <input type="text" id="temaInput" placeholder="Ej. Ecuaciones de 2do Grado" required>
+                        </div>
+                    </div>
+
+                    <!-- Descripción -->
+                    <div class="form-group">
+                        <label for="descripcionInput">Descripción breve</label>
+                        <textarea id="descripcionInput" rows="3" placeholder="Detalles de la entrega, pautas o contenido..."></textarea>
+                    </div>
+
+                    <!-- Adjuntar Archivo / Material -->
+                    <div class="form-group">
+                        <label for="materialInput">Material de estudio / Adjuntos</label>
+                        <input type="file" id="materialInput" class="file-input">
+                        <small class="help-text">Puedes adjuntar guías, PDFs o imágenes de apoyo.</small>
+                    </div>
+
+                    <!-- Fecha y Hora de entrega -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fechaEntregaInput">Fecha de Entrega *</label>
+                            <input type="date" id="fechaEntregaInput" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="horaEntregaInput">Hora de Entrega *</label>
+                            <input type="time" id="horaEntregaInput" required>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" id="btnGuardar" class="btn-primary">Guardar Formulario</button>
+                        <a href="inicio.html" class="btn-secondary">Cancelar</a>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </main>
+
+    <!-- Pie de Página Institucional (Fijo al fondo y centrado) -->
+    <footer class="app-footer">
+        <div class="footer-container">
+            <p>&copy; 2026 <strong>CRECER</strong>. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <script type="module" src="js/global.js"></script>
+    <script type="module" src="js/formularios.js"></script>
+</body>
+</html>
