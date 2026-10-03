@@ -36,8 +36,8 @@ Tu función es ayudar a los estudiantes a organizar sus tareas, dar consejos de 
 Responde siempre de forma motivadora, concisa y en español.${contextoUsuario ? ` Contexto actual del estudiante: ${JSON.stringify(contextoUsuario)}` : ''}`;
 
   try {
-    // Consulta HTTP a la API de Gemini utilizando el modelo activo gemini-2.5-flash
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+    // Consulta HTTP a la API de Gemini utilizando el modelo activo gemini-3.8-flash
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -55,7 +55,7 @@ Responde siempre de forma motivadora, concisa y en español.${contextoUsuario ? 
     // Procesar la respuesta recibida en formato JSON
     const data = await response.json();
 
-    // Validar si la respuesta de la API devuelve un código de estado de error (p. ej., 400, 403, 500)
+    // Validar si la respuesta de la API devuelve un código de estado de error
     if (!response.ok) {
       console.error("Error devuelto por la API de Gemini:", data);
       return res.status(response.status).json({ 
