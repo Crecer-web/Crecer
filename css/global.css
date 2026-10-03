@@ -267,6 +267,46 @@ body {
   display: block;
 }
 
+/* Color rojo distintivo para la opción de Cerrar Sesión */
+.dropdown-logout {
+  color: #dc2626 !important; /* Rojo profesional */
+  font-weight: 500;
+}
+
+.dropdown-logout:hover {
+  background-color: rgba(220, 38, 38, 0.1) !important; /* Fondo rojizo suave al pasar el mouse */
+  color: #b91c1c !important; /* Rojo un poco más oscuro en hover */
+}
+
+/* ==========================================================================
+   ESTILOS PARA EL LOGO Y MARCA DE LA AGENDA
+   ========================================================================== */
+.brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-img {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  border-radius: 10px;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
+  transition: transform 0.2s ease;
+}
+
+.logo-img:hover {
+  transform: scale(1.05);
+}
+
+.brand-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #f8fafc;
+}
+
 /* ==========================================================================
    BOTONES FORMALES Y COMPONENTES
    ========================================================================== */
@@ -389,6 +429,54 @@ input:focus, select:focus, textarea:focus {
 }
 
 /* ==========================================================================
+   ESTILOS GLOBALES DEL PIE DE PÁGINA (FOOTER)
+   ========================================================================== */
+.footer {
+  width: 100%;
+  background-color: #0f172a;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 20px 0;
+  margin-top: auto; /* Empuja el footer al final si el contenedor usa flexbox */
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+}
+
+.footer-content p {
+  margin: 0;
+}
+
+.footer-content strong {
+  color: #f8fafc;
+}
+
+.footer-links {
+  display: flex;
+  gap: 20px;
+}
+
+.footer-links a {
+  color: #94a3b8;
+  text-decoration: none;
+  transition: color 0.2s ease, text-decoration 0.2s ease;
+}
+
+.footer-links a:hover {
+  color: #38bdf8;
+  text-decoration: underline;
+}
+
+/* ==========================================================================
    ADAPTABILIDAD RESPONSIVA (MOBILE & TABLET)
    ========================================================================== */
 @media (max-width: 768px) {
@@ -440,13 +528,13 @@ input:focus, select:focus, textarea:focus {
   }
 }
 
-/* Color rojo distintivo para la opción de Cerrar Sesión */
-.dropdown-logout {
-    color: #dc2626 !important; /* Rojo profesional */
-    font-weight: 500;
-}
+@media (max-width: 600px) {
+  .footer-content {
+    flex-direction: column;
+    text-align: center;
+  }
 
-.dropdown-logout:hover {
-    background-color: rgba(220, 38, 38, 0.1) !important; /* Fondo rojizo suave al pasar el mouse */
-    color: #b91c1c !important; /* Rojo un poco más oscuro en hover */
+  .footer-links {
+    justify-content: center;
+  }
 }
