@@ -1,51 +1,50 @@
-// api/chat-ia.js - Servidor Serverless integrado con Groq para CrecerIA
-module.exports = async (req, res) => {
-  // 1. Configuración de cabeceras CORS para permitir peticiones desde el frontend
+// api/chat-ia.js - Función Serverless para Vercel
+export default async function handler(req, res) {
+  // 1. Cabeceras CORS obligatorias
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  // Responder a la petición preflight de CORS
+  // Responder a peticiones OPTIONS (Preflight)
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
 
-  // Validar que únicamente se procesen peticiones HTTP POST
+  // Permitir solo peticiones POST
   if (req.method !== 'POST') {
     return res.status(405).json({
       status: 'error',
-      message: 'Método no permitido. Utiliza POST.'
+      message: 'Método no permitido. Usa POST.'
     });
   }
 
-  // 2. Extraer y validar el prompt y contexto enviados por el usuario
+  // 2. Extraer datos del cuerpo de la petición
   const { prompt, contextoUsuario } = req.body || {};
 
   if (!prompt || typeof prompt !== 'string' || prompt.trim() === '') {
     return res.status(400).json({
       status: 'error',
-      message: 'Escribe un mensaje para poder procesarlo.'
+      message: 'El campo "prompt" es obligatorio.'
     });
   }
 
-  // 3. Obtener la clave de API desde las variables de entorno de Vercel
+  // 3. Obtener la API Key de Groq desde las variables de Vercel
   const apiKey = process.env.GROQ_API_KEY;
 
   if (!apiKey) {
     return res.status(500).json({
       status: 'error',
-      message: 'Falta la variable GROQ_API_KEY en las variables de entorno de Vercel.'
+      message: 'Falta la variable GROQ_API_KEY en Vercel.'
     });
   }
 
-  // 4. Construir la instrucción del sistema agregando el contexto si existe
+  // 4. Preparar el mensaje para Groq
   let systemMessage = 'Eres CrecerIA, un asistente virtual educativo amable e inteligente integrado en la app escolar CRECER. Responde de forma clara y directa en español.';
-  
   if (contextoUsuario) {
     systemMessage += ` Contexto del estudiante: ${JSON.stringify(contextoUsuario)}`;
   }
 
-  // 5. Consumir la API de Groq
+  // 5. Llamada a la API de Groq
   try {
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
@@ -56,14 +55,8 @@ module.exports = async (req, res) => {
       body: JSON.stringify({
         model: 'llama-3.1-8b-instant',
         messages: [
-          {
-            role: 'system',
-            content: systemMessage
-          },
-          {
-            role: 'user',
-            content: prompt.trim()
-          }
+          { role: 'system', content: systemMessage },
+          { role: 'user', content: prompt.trim() }
         ],
         temperature: 0.7,
         max_tokens: 1024
@@ -72,15 +65,13 @@ module.exports = async (req, res) => {
 
     const data = await response.json();
 
-    // Validar si la API devolvió algún error HTTP (ejemplo: 401, 429, etc.)
     if (!response.ok) {
       return res.status(response.status).json({
         status: 'error',
-        message: data.error?.message || 'Ocurrió un error al comunicarse con la API de Groq.'
+        message: data.error?.message || 'Error al comunicarse con Groq.'
       });
     }
 
-    // 6. Extraer y retornar la respuesta generada por la IA
     const respuestaIA = data.choices?.[0]?.message?.content || 'Sin respuesta generada por la IA.';
 
     return res.status(200).json({
@@ -89,11 +80,10 @@ module.exports = async (req, res) => {
     });
 
   } catch (error) {
-    // Manejo de errores imprevistos (pérdida de red, timeout, etc.)
     return res.status(500).json({
       status: 'error',
-      message: 'Error interno del servidor al procesar la solicitud.',
+      message: 'Error interno del servidor.',
       detalle: error.message
     });
   }
-};
+}
