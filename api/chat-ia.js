@@ -1,77 +1,47 @@
-// api/chat-ia.js
-
+// api/chat-ia.js - Integración con Groq (Llama 3)
 export default async function handler(req, res) {
-  // Manejo de cabeceras CORS para peticiones seguras entre cliente y backend
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  // Responder inmediatamente a las peticiones de verificación previa OPTIONS (Preflight)
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ status: 'error', message: 'Método no permitido' });
 
-  // Validar que únicamente se procesen solicitudes mediante el método POST
-  if (req.method !== 'POST') {
-    return res.status(405).json({ status: 'error', message: 'Método no permitido' });
-  }
-
-  // Extraer el mensaje y el contexto del cuerpo de la petición con fallback seguro
   const { prompt, contextoUsuario } = req.body || {};
+  if (!prompt) return res.status(400).json({ status: 'error', message: 'Escribe un mensaje.' });
 
-  // Validar que el prompt no llegue vacío
-  if (!prompt) {
-    return res.status(400).json({ status: 'error', message: 'Escribe una pregunta o mensaje.' });
-  }
+  // Usamos GROQ_API_KEY en lugar de GEMINI_API_KEY
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) return res.status(500).json({ status: 'error', message: 'Falta GROQ_API_KEY en Vercel.' });
 
-  // Obtener la clave de API desde las variables de entorno de Vercel
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    return res.status(500).json({ status: 'error', message: 'Error de configuración: Falta la clave GEMINI_API_KEY en Vercel.' });
-  }
-
-  // Definir las instrucciones de comportamiento y personalidad de la IA (CrecerIA)
-  const systemInstruction = `Eres "CrecerIA", un tutor académico integrado en la agenda estudiantil CRECER.
-Tu función es ayudar a los estudiantes a organizar sus tareas, dar consejos de estudio y resolver dudas sobre sus exámenes.
-Responde siempre de forma motivadora, concisa y en español.${contextoUsuario ? ` Contexto actual del estudiante: ${JSON.stringify(contextoUsuario)}` : ''}`;
+  const systemMessage = `Eres CrecerIA, un asistente virtual educativo amable e inteligente integrado en la app escolar CRECER. Responde de forma clara y directa en español.${contextoUsuario ? ` Contexto del estudiante: ${JSON.stringify(contextoUsuario)}` : ''}`;
 
   try {
-    // Consulta HTTP a la API de Gemini utilizando el modelo activo gemini-3.8-flash
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`, {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
+        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        contents: [
-          {
-            role: 'user',
-            parts: [{ text: `${systemInstruction}\n\nPregunta del alumno: ${prompt}` }]
-          }
-        ]
+        model: 'llama-3.3-70b-versatile',
+        messages: [
+          { role: 'system', content: systemMessage },
+          { role: 'user', content: prompt }
+        ],
+        temperature: 0.7,
+        max_tokens: 1024
       })
     });
 
-    // Procesar la respuesta recibida en formato JSON
     const data = await response.json();
-
-    // Validar si la respuesta de la API devuelve un código de estado de error
     if (!response.ok) {
-      console.error("Error devuelto por la API de Gemini:", data);
-      return res.status(response.status).json({ 
-        status: 'error', 
-        message: data.error?.message || 'Error al procesar la consulta con Gemini.' 
-      });
+      return res.status(response.status).json({ status: 'error', message: data.error?.message || 'Error en la API de Groq.' });
     }
 
-    // Extraer la respuesta generada por el modelo
-    const respuestaIA = data.candidates?.[0]?.content?.parts?.[0]?.text || "No pude procesar la respuesta en este momento.";
-
-    // Retornar la respuesta al cliente
+    const respuestaIA = data.choices?.[0]?.message?.content || "Sin respuesta.";
     return res.status(200).json({ status: 'success', respuesta: respuestaIA });
-
   } catch (error) {
-    console.error("Error en Serverless Function:", error);
-    return res.status(500).json({ status: 'error', message: 'Error interno en el servidor.' });
+    return res.status(500).json({ status: 'error', message: 'Error interno del servidor.' });
   }
 }
