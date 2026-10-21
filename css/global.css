@@ -603,3 +603,62 @@ body {
     gap: 0.2rem;
   }
 }
+
+
+/* ==========================================================================
+   PIE DE PÁGINA PROFESIONAL Y RESPONSIVO - CRECER
+   ========================================================================== */
+
+.app-footer, 
+.auth-footer-simple {
+    background-color: var(--header-bg, #0f172a);
+    color: #94a3b8;
+    text-align: center;
+    padding: 1.15rem 1.5rem;
+    margin-top: auto;
+    width: 100%;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    box-sizing: border-box;
+}
+
+.app-footer .footer-container, 
+.auth-footer-simple {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 1550px;
+    margin: 0 auto;
+}
+
+.app-footer p, 
+.auth-footer-simple p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #94a3b8;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    line-height: 1.5;
+    text-align: center;
+}
+
+.app-footer strong, 
+.auth-footer-simple strong {
+    color: #f8fafc;
+    font-weight: 600;
+}
+
+/* ==========================================
+   ADAPTABILIDAD MÓVIL (RESPONSIVE)
+   ========================================== */
+@media (max-width: 768px) {
+    .app-footer, 
+    .auth-footer-simple {
+        padding: 1rem 1rem;
+    }
+
+    .app-footer p, 
+    .auth-footer-simple p {
+        font-size: 0.78rem;
+        line-height: 1.4;
+    }
+}

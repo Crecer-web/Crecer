@@ -4,33 +4,33 @@
 import { auth } from './firebase-config.js';
 import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-// Observador de autenticación
+/**
+ * Observador de autenticación de Firebase
+ */
 export function observarSesion(callback) {
     return onAuthStateChanged(auth, (user) => {
         callback(user);
     });
 }
 
-// Cierre de sesión de Firebase
+/**
+ * Cierre de sesión seguro de Firebase y redirección al login
+ */
 export async function cerrarSesion() {
     try {
         await signOut(auth);
         window.location.href = 'login.html';
     } catch (error) {
         console.error("Error al cerrar sesión:", error);
-        mostrarToast("No se pudo cerrar sesión", "danger");
+        mostrarToast("No se pudo cerrar sesión correctamente.", "danger");
     }
 }
 
 /**
  * Reemplazo asíncrono estilizado para confirm() nativo del navegador
- * @param {string} mensaje - Pregunta o advertencia a mostrar
- * @param {string} titulo - Título de la alerta
- * @returns {Promise<boolean>} Devuelve true si el usuario hace clic en Aceptar
  */
 export function mostrarConfirmacion(mensaje, titulo = '¿Estás seguro?') {
     return new Promise((resolve) => {
-        // Eliminar modal previo si existe
         const modalExistente = document.getElementById('customConfirmModal');
         if (modalExistente) modalExistente.remove();
 
@@ -51,7 +51,6 @@ export function mostrarConfirmacion(mensaje, titulo = '¿Estás seguro?') {
 
         document.body.appendChild(overlay);
 
-        // Animación de entrada
         requestAnimationFrame(() => {
             overlay.classList.add('show');
         });
@@ -87,9 +86,6 @@ export function mostrarConfirmacion(mensaje, titulo = '¿Estás seguro?') {
 
 /**
  * Sistema de Notificaciones Flotantes (Toast)
- * @param {string} mensaje 
- * @param {string} tipo - 'success', 'danger', 'error', 'warning', 'info'
- * @param {number} duracion - Tiempo en milisegundos
  */
 export function mostrarToast(mensaje, tipo = 'info', duracion = 3500) {
     let container = document.getElementById('toast-container');
@@ -150,48 +146,47 @@ function sanearTextoGlobal(str) {
         .replace(/'/g, '&#039;');
 }
 
-function actualizarTextoBotonTema(btn, theme) {
-    if (!btn) return;
-    btn.innerHTML = theme === 'dark' ? '☀️ Modo Claro' : '🌙 Modo Oscuro';
-}
-
-// Inicialización de Interfaz y Eventos Globales
-document.addEventListener('DOMContentLoaded', () => {
-    // 1. Gestión de Tema Modo Claro / Oscuro
-    const currentTheme = localStorage.getItem('crecer-theme') || localStorage.getItem('theme') || 'light';
-    
-    if (currentTheme === 'dark') {
+/**
+ * Aplica el tema de manera segura sobre la etiqueta principal
+ */
+function aplicarTema(tema) {
+    if (tema === 'dark') {
         document.documentElement.setAttribute('data-theme', 'dark');
-        document.body.classList.add('dark-mode');
     } else {
         document.documentElement.removeAttribute('data-theme');
-        document.body.classList.remove('dark-mode');
     }
+}
 
+function actualizarIconoTema(btn, tema) {
+    if (!btn) return;
+    btn.textContent = tema === 'dark' ? '☀️' : '🌙';
+}
+
+// Aplicar tema de forma inmediata apenas se ejecuta el script
+const temaInicial = localStorage.getItem('theme') || 'light';
+aplicarTema(temaInicial);
+
+// Eventos tras la carga completa del DOM
+document.addEventListener('DOMContentLoaded', () => {
     const themeBtn = document.getElementById('themeToggle');
+    const temaActual = localStorage.getItem('theme') || 'light';
+
+    aplicarTema(temaActual);
     if (themeBtn) {
-        actualizarTextoBotonTema(themeBtn, currentTheme);
+        actualizarIconoTema(themeBtn, temaActual);
         
         themeBtn.addEventListener('click', () => {
-            const isDark = document.documentElement.getAttribute('data-theme') === 'dark' || document.body.classList.contains('dark-mode');
-
-            if (isDark) {
-                document.documentElement.removeAttribute('data-theme');
-                document.body.classList.remove('dark-mode');
-                localStorage.setItem('crecer-theme', 'light');
-                localStorage.setItem('theme', 'light');
-                actualizarTextoBotonTema(themeBtn, 'light');
-            } else {
-                document.documentElement.setAttribute('data-theme', 'dark');
-                document.body.classList.add('dark-mode');
-                localStorage.setItem('crecer-theme', 'dark');
-                localStorage.setItem('theme', 'dark');
-                actualizarTextoBotonTema(themeBtn, 'dark');
-            }
+            const esDarkActual = document.documentElement.getAttribute('data-theme') === 'dark';
+            const nuevoTema = esDarkActual ? 'light' : 'dark';
+            
+            aplicarTema(nuevoTema);
+            localStorage.setItem('theme', nuevoTema);
+            localStorage.setItem('crecer-theme', nuevoTema);
+            actualizarIconoTema(themeBtn, nuevoTema);
         });
     }
 
-    // 2. Control del Menú Desplegable (Dropdowns)
+    // Control del Menú Desplegable (Dropdowns)
     const dropdowns = document.querySelectorAll(".dropdown");
 
     dropdowns.forEach((dropdown) => {
@@ -231,7 +226,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 3. Manejo Unificado de Cierre de Sesión
+    // Manejo de Cierre de Sesión
     const ejecutarCierreSesion = async (e) => {
         if (e) e.preventDefault();
         await cerrarSesion();
