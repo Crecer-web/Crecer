@@ -1,68 +1,187 @@
 /* ==========================================================================
-   ESTILOS DE FORMULARIOS Y TARJETAS DE CAPTURA - CRECER (VERSIÓN DEFINITIVA)
-   Estilo: Formal, Elegante y Ergonómico (SaaS / Dashboard)
+   ESTILOS DE FORMULARIOS Y TARJETAS DE CAPTURA - CRECER
+   Estilo: Formal, Elegante y Ergonómico (SaaS / Dashboard Academic)
    ========================================================================== */
 
-/* Estructura general de la página en Dashboard para Sticky Footer */
+:root {
+  --bg-color: #f1f5f9;
+  --card-bg: #ffffff;
+  --border-color: #e2e8f0;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --filter-bg: #f8fafc;
+  --header-bg: #0f172a;
+  --header-text: #ffffff;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --modal-overlay: rgba(15, 23, 42, 0.65);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+  --shadow-md: 0 10px 25px -5px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+}
+
+[data-theme="dark"] {
+  --bg-color: #090d16;
+  --card-bg: #1e293b;
+  --border-color: #334155;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --filter-bg: #0f172a;
+  --header-bg: #0f172a;
+  --header-text: #ffffff;
+  --accent: #3b82f6;
+  --accent-hover: #2563eb;
+  --modal-overlay: rgba(0, 0, 0, 0.82);
+  --shadow-md: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 html, body {
   height: 100%;
 }
 
 body.dashboard-body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background-color: var(--bg-color, #f8fafc);
-  color: var(--text-primary, #0f172a);
+  background-color: var(--bg-color);
+  color: var(--text-primary);
   line-height: 1.6;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
   margin: 0;
   padding: 0;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-/* ==========================================
-   ENCABEZADO DE NAVEGACIÓN DEL DASHBOARD
-   ========================================== */
-.app-header {
-  background-color: var(--primary, #0f172a);
-  color: var(--header-text, #ffffff);
-  padding: 1.2rem 3rem;
+/* --------------------------------------------------------------------------
+   2. BANNER DE NOTIFICACIÓN FLOTANTE (ESTILO IN-APP)
+   -------------------------------------------------------------------------- */
+.phone-notification {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-150%);
+  width: 90%;
+  max-width: 420px;
+  background: rgba(15, 23, 42, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 14px 18px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+  z-index: 99999;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+  opacity: 0;
+  cursor: pointer;
+  color: #ffffff;
+}
+
+.phone-notification.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+.phone-notification.hidden {
+  display: block;
+  pointer-events: none;
+}
+
+.notification-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 6px;
+}
+
+.app-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.app-icon {
+  font-size: 1rem;
+}
+
+.app-name {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.notification-time {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.notification-body h4 {
+  margin: 0 0 2px 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.notification-body p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #cbd5e1;
+  line-height: 1.3;
+}
+
+/* --------------------------------------------------------------------------
+   3. ENCABEZADO DE NAVEGACIÓN Y ALINEACIÓN DERECHA
+   -------------------------------------------------------------------------- */
+.app-header {
+  background-color: var(--header-bg);
+  color: var(--header-text);
+  padding: 0.85rem 2rem;
   position: sticky;
   top: 0;
   z-index: 1000;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
   width: 100%;
 }
 
 .header-container {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   width: 100%;
-  max-width: 1300px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
 .logo a {
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   font-weight: 800;
-  letter-spacing: -0.03em;
   color: #ffffff;
   text-decoration: none;
-  display: inline-flex;
-  align-items: center;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
 }
 
-/* Navegación y elementos a la derecha */
+.header-right-group {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-left: auto;
+}
+
 .nav-menu {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
-  margin-left: auto;
+  gap: 1.25rem;
 }
 
 .nav-link {
@@ -70,7 +189,6 @@ body.dashboard-body {
   text-decoration: none;
   font-weight: 500;
   font-size: 0.92rem;
-  padding: 0.3rem 0;
   transition: color 0.2s ease;
 }
 
@@ -78,92 +196,134 @@ body.dashboard-body {
   color: #ffffff;
 }
 
-/* Botón de Cerrar Sesión Estilizado */
-.btn-logout {
-  background-color: transparent;
-  color: #f87171;
-  border: 1px solid rgba(248, 113, 113, 0.3);
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius-sm, 6px);
-  font-weight: 600;
-  font-size: 0.88rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-logout:hover {
-  background-color: rgba(248, 113, 113, 0.1);
-  border-color: rgba(248, 113, 113, 0.6);
-}
-
-/* Menú Desplegable (Dropdown) */
+/* Dropdown */
 .dropdown {
   position: relative;
   display: inline-block;
 }
 
 .dropdown-btn {
-  background: transparent;
-  border: none;
-  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #ffffff;
   font-family: inherit;
-  font-weight: 500;
-  font-size: 0.92rem;
+  font-weight: 600;
+  font-size: 0.88rem;
   cursor: pointer;
-  padding: 0.3rem 0;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  transition: color 0.2s ease;
+  padding: 0.45rem 0.95rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
 }
 
 .dropdown-btn:hover {
-  color: #ffffff;
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .dropdown-content {
   display: none;
   position: absolute;
   right: 0;
-  background-color: var(--card-bg, #1e293b);
-  min-width: 180px;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-  border: 1px solid var(--border-color, #334155);
-  border-radius: var(--radius-sm, 6px);
-  z-index: 1001;
+  top: calc(100% + 0.5rem);
+  background-color: var(--card-bg);
+  min-width: 200px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  z-index: 1005;
   overflow: hidden;
-  padding: 0.4rem 0;
+  padding: 0.35rem 0;
+  transition: background-color 0.25s ease, border-color 0.25s ease;
 }
 
 .dropdown-content a {
-  color: var(--text-secondary, #cbd5e1);
-  padding: 0.6rem 1rem;
+  color: var(--text-primary);
+  padding: 0.7rem 1.2rem;
   text-decoration: none;
   display: block;
   font-size: 0.9rem;
-  transition: background 0.2s, color 0.2s;
+  font-weight: 500;
+  transition: background 0.18s ease, color 0.18s ease;
 }
 
-.dropdown-content a:hover,
-.dropdown-content a.active {
-  background-color: rgba(37, 99, 235, 0.15);
-  color: #ffffff;
+.dropdown-content a:hover, .dropdown-content a.active {
+  background-color: rgba(37, 99, 235, 0.12);
+  color: var(--accent);
 }
 
-/* Muestra el dropdown al pasar el mouse (o mediante JS de soporte) */
-.dropdown:hover .dropdown-content {
+.dropdown-divider {
+  height: 1px;
+  background-color: var(--border-color);
+  margin: 0.35rem 0;
+}
+
+.dropdown-logout {
+  color: #ef4444 !important;
+}
+
+.dropdown-logout:hover {
+  background-color: rgba(239, 68, 68, 0.12) !important;
+}
+
+.dropdown:hover .dropdown-content,
+.dropdown.active .dropdown-content {
   display: block;
 }
 
-/* ==========================================
-   CONTENEDOR PRINCIPAL
-   ========================================== */
+/* Botón de Tema */
+.theme-toggle {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, transform 0.2s ease;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+.menu-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 30px;
+  height: 21px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 1010;
+}
+
+.menu-toggle .bar {
+  height: 3px;
+  width: 100%;
+  background-color: #ffffff;
+  border-radius: 3px;
+  transition: all 0.3s ease;
+}
+
+/* --------------------------------------------------------------------------
+   4. CONTENEDOR PRINCIPAL
+   -------------------------------------------------------------------------- */
 .app-main-container {
   flex: 1;
   width: 100%;
   max-width: 1100px;
   margin: 2.5rem auto;
   padding: 0 1.5rem;
+  box-sizing: border-box;
 }
 
 .form-wrapper {
@@ -172,30 +332,45 @@ body.dashboard-body {
   width: 100%;
 }
 
+/* --------------------------------------------------------------------------
+   5. TARJETA DEL FORMULARIO
+   -------------------------------------------------------------------------- */
 .form-card {
-  background: var(--card-bg, #ffffff);
+  background: var(--card-bg);
   max-width: 680px;
   width: 100%;
   padding: 2.5rem;
-  border-radius: var(--radius-lg, 14px);
-  border: 1px solid var(--border-color, #e2e8f0);
-  box-shadow: var(--shadow-md, 0 4px 12px -2px rgba(15, 23, 42, 0.08));
-  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-md);
+  transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.form-card-header {
+  margin-bottom: 1.5rem;
 }
 
 .form-card h1 {
   font-size: 1.75rem;
   font-weight: 700;
   letter-spacing: -0.02em;
-  color: var(--text-primary, #0f172a);
+  color: var(--text-primary);
   margin-bottom: 0.35rem;
 }
 
 .subtitle {
-  color: var(--text-secondary, #475569);
+  color: var(--text-secondary);
   margin-bottom: 2rem;
   font-size: 0.95rem;
   line-height: 1.5;
+}
+
+/* --------------------------------------------------------------------------
+   6. CAMPOS DE ENTRADA Y FORMULARIOS
+   -------------------------------------------------------------------------- */
+.dashboard-form {
+  display: flex;
+  flex-direction: column;
 }
 
 .form-row {
@@ -212,7 +387,7 @@ body.dashboard-body {
 
 .form-group label {
   font-weight: 600;
-  color: var(--text-primary, #0f172a);
+  color: var(--text-primary);
   margin-bottom: 0.45rem;
   font-size: 0.88rem;
   letter-spacing: -0.01em;
@@ -223,13 +398,14 @@ body.dashboard-body {
 .form-group textarea {
   width: 100%;
   padding: 0.75rem 0.95rem;
-  background-color: var(--card-bg, #ffffff);
-  color: var(--text-primary, #0f172a);
-  border: 1px solid var(--border-color, #cbd5e0);
-  border-radius: var(--radius-sm, 6px);
+  background-color: var(--filter-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
   font-family: inherit;
   font-size: 0.95rem;
   outline: none;
+  box-sizing: border-box;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
@@ -239,61 +415,116 @@ body.dashboard-body {
   line-height: 1.5;
 }
 
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: var(--text-muted);
+  opacity: 0.8;
+}
+
 .form-group input:hover,
 .form-group select:hover,
 .form-group textarea:hover {
-  border-color: var(--text-muted, #94a3b8);
+  border-color: var(--text-muted);
 }
 
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
-  border-color: var(--secondary, #2563eb);
+  border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
-.help-text {
-  font-size: 0.8rem;
-  color: var(--text-muted, #94a3b8);
-  margin-top: 0.4rem;
-  line-height: 1.4;
+/* --------------------------------------------------------------------------
+   7. INPUT DE ARCHIVO (DROPZONE CUSTOMIZADO)
+   -------------------------------------------------------------------------- */
+.file-dropzone {
+  position: relative;
+  border: 2px dashed var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1.25rem 1rem;
+  text-align: center;
+  background-color: var(--filter-bg);
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
+.file-dropzone:hover {
+  border-color: var(--accent);
+  background-color: rgba(37, 99, 235, 0.04);
+}
+
+.file-input-hidden {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.file-dropzone-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  pointer-events: none;
+}
+
+.file-icon {
+  font-size: 1.25rem;
+}
+
+.file-text {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator,
+[data-theme="dark"] input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.8);
+}
+
+/* --------------------------------------------------------------------------
+   8. BOTONES DE ACCIÓN
+   -------------------------------------------------------------------------- */
 .form-actions {
   display: flex;
   align-items: center;
   gap: 1rem;
   margin-top: 2rem;
   padding-top: 1.25rem;
-  border-top: 1px solid var(--border-color, #e2e8f0);
+  border-top: 1px solid var(--border-color);
 }
 
 .form-actions .btn-primary {
-  background-color: var(--secondary, #2563eb);
+  background-color: var(--accent);
   color: #ffffff;
   padding: 0.75rem 1.5rem;
-  border: 1px solid transparent;
-  border-radius: var(--radius-sm, 6px);
+  border: none;
+  border-radius: var(--radius-sm);
   font-weight: 600;
   font-size: 0.92rem;
   cursor: pointer;
   flex: 1;
   text-align: center;
   text-decoration: none;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .form-actions .btn-primary:hover {
-  background-color: var(--secondary-hover, #1d4ed8);
+  background-color: var(--accent-hover);
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
 }
 
 .form-actions .btn-secondary {
   background-color: transparent;
-  color: var(--text-secondary, #475569);
+  color: var(--text-secondary);
   padding: 0.75rem 1.5rem;
-  border: 1px solid var(--border-color, #cbd5e0);
-  border-radius: var(--radius-sm, 6px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
   text-decoration: none;
   text-align: center;
   font-weight: 600;
@@ -303,18 +534,18 @@ body.dashboard-body {
 
 .form-actions .btn-secondary:hover {
   background-color: rgba(148, 163, 184, 0.1);
-  color: var(--text-primary, #0f172a);
-  border-color: var(--text-muted, #94a3b8);
+  color: var(--text-primary);
+  border-color: var(--text-muted);
 }
 
-/* ==========================================
-   PIE DE PÁGINA INSTITUCIONAL (Sticky Footer)
-   ========================================== */
+/* --------------------------------------------------------------------------
+   9. PIE DE PÁGINA
+   -------------------------------------------------------------------------- */
 .app-footer {
-  background-color: var(--primary, #0f172a);
-  color: var(--header-text, #ffffff);
+  background-color: var(--header-bg);
+  color: var(--header-text);
   padding: 1.5rem 3rem;
-  border-top: 1px solid var(--border, #334155);
+  border-top: 1px solid var(--border-color);
   width: 100%;
   margin-top: auto;
 }
@@ -323,7 +554,7 @@ body.dashboard-body {
   display: flex;
   justify-content: center;
   align-items: center;
-  max-width: 1300px;
+  max-width: 1200px;
   margin: 0 auto;
   width: 100%;
 }
@@ -335,71 +566,49 @@ body.dashboard-body {
   margin: 0;
 }
 
-/* ==========================================
-   MODO OSCURO (DARK THEME)
-   ========================================== */
-[data-theme="dark"] .form-card {
-  background-color: var(--card-bg, #1e293b);
-  border-color: var(--border-color, #334155);
-}
-
-[data-theme="dark"] .form-group input,
-[data-theme="dark"] .form-group select,
-[data-theme="dark"] .form-group textarea {
-  background-color: #0f172a;
-  border-color: #334155;
-  color: #f8fafc;
-}
-
-[data-theme="dark"] .form-group input:hover,
-[data-theme="dark"] .form-group select:hover,
-[data-theme="dark"] .form-group textarea:hover {
-  border-color: #64748b;
-}
-
-[data-theme="dark"] .form-group input:focus,
-[data-theme="dark"] .form-group select:focus,
-[data-theme="dark"] .form-group textarea:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
-}
-
-[data-theme="dark"] .form-actions {
-  border-top-color: #334155;
-}
-
-[data-theme="dark"] .form-actions .btn-secondary {
-  color: #cbd5e1;
-  border-color: #334155;
-}
-
-[data-theme="dark"] .form-actions .btn-secondary:hover {
-  background-color: rgba(255, 255, 255, 0.05);
-  color: #ffffff;
-  border-color: #64748b;
-}
-
-/* ==========================================
-   RESPONSIVO MÓVIL
-   ========================================== */
+/* --------------------------------------------------------------------------
+   10. ADAPTABILIDAD RESPONSIVA MÓVIL
+   -------------------------------------------------------------------------- */
 @media (max-width: 768px) {
-  .app-header {
-    padding: 1rem 1.25rem;
-    flex-direction: column;
-    gap: 0.8rem;
-  }
-
-  .header-container {
-    flex-direction: column;
-    gap: 0.8rem;
+  .menu-toggle {
+    display: flex;
   }
 
   .nav-menu {
-    margin-left: 0;
+    position: fixed;
+    top: 60px;
+    right: -100%;
+    width: 260px;
+    height: calc(100vh - 60px);
+    background-color: var(--header-bg);
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1.5rem;
+    gap: 1.25rem;
+    box-shadow: -5px 0 15px rgba(0,0,0,0.3);
+    transition: right 0.3s ease;
+    z-index: 999;
+  }
+
+  .nav-menu.active {
+    right: 0;
+  }
+
+  .dropdown, .dropdown-btn {
     width: 100%;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 1rem;
+  }
+
+  .dropdown-content {
+    position: static;
+    box-shadow: none;
+    border: none;
+    background-color: rgba(255, 255, 255, 0.05);
+    margin-top: 0.5rem;
+    width: 100%;
+  }
+
+  .dropdown-content a {
+    color: #cbd5e1;
   }
 
   .app-main-container {
@@ -408,9 +617,7 @@ body.dashboard-body {
   }
 
   .form-card {
-    margin: 0;
     padding: 1.5rem;
-    width: 100%;
   }
 
   .form-row {
@@ -427,25 +634,4 @@ body.dashboard-body {
   .form-actions .btn-secondary {
     width: 100%;
   }
-
-  .app-footer {
-    padding: 1.25rem;
-  }
-}
-
-/* Color rojo distintivo para la opción de Cerrar Sesión */
-.dropdown-logout {
-    color: #dc2626 !important; /* Rojo profesional */
-    font-weight: 500;
-}
-
-.dropdown-logout:hover {
-    background-color: rgba(220, 38, 38, 0.1) !important; /* Fondo rojizo suave al pasar el mouse */
-    color: #b91c1c !important; /* Rojo un poco más oscuro en hover */
-}
-
-/* Esto permite que se despliegue tanto por hover (PC) como por la clase .active generada por JS (Móvil) */
-.dropdown:hover .dropdown-content,
-.dropdown.active .dropdown-content {
-  display: block;
 }

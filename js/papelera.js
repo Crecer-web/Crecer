@@ -1,15 +1,107 @@
 /* =================================================================
-   MÓDULO PAPELERA DE RECICLAJE - CRECER (Versión Definitiva y Robusta)
+   MÓDULO PAPELERA DE RECICLAJE - CRECER (Versión Definitiva)
    ================================================================= */
 
 import { db } from './firebase-config.js';
-import { collection, query, where, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { observarSesion } from './global.js';   
+import { 
+    collection, 
+    query, 
+    where, 
+    getDocs, 
+    doc, 
+    updateDoc, 
+    deleteDoc 
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { observarSesion, mostrarToast } from './global.js';   
+
+/**
+ * Aplica el tema dado de forma estricta, unificada y sincronizada
+ * @param {string} tema - 'dark' o 'light'
+ */
+function aplicarTema(tema) {
+    const esOscuro = tema === 'dark';
+
+    if (esOscuro) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.body.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
+    } else {
+        document.documentElement.removeAttribute('data-theme');
+        document.body.removeAttribute('data-theme');
+        localStorage.setItem('theme', 'light');
+    }
+
+    const themeToggle = document.getElementById('themeToggle');
+    if (themeToggle) {
+        themeToggle.textContent = esOscuro ? '☀️' : '🌙';
+    }
+}
+
+/**
+ * Conmutación directa e instantánea garantizada con 1 solo clic
+ */
+function toggleTema() {
+    // Leemos el tema actual directamente de localStorage
+    const temaActual = localStorage.getItem('theme') || 
+                      (document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
+
+    const nuevoTema = temaActual === 'dark' ? 'light' : 'dark';
+    aplicarTema(nuevoTema);
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     const trashGrid = document.getElementById('trashGrid');
+    let themeToggle = document.getElementById('themeToggle');
+    const menuToggle = document.getElementById('menuToggle');
+    const navMenu = document.getElementById('navMenu');
 
-    // 1. Verificación de sesión activa al cargar la vista de la papelera
+    // 1. Cargar e inicializar tema al montar el DOM
+    const temaGuardado = localStorage.getItem('theme');
+    const prefiereDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const temaInicial = temaGuardado ? temaGuardado : (prefiereDark ? 'dark' : 'light');
+    
+    aplicarTema(temaInicial);
+
+    // 2. Limpieza de listeners previos y asignación directa de 1 clic
+    if (themeToggle) {
+        // Clonamos el nodo para remover cualquier event listener heredado de global.js
+        const nuevoBtn = themeToggle.cloneNode(true);
+        themeToggle.parentNode.replaceChild(nuevoBtn, themeToggle);
+        themeToggle = nuevoBtn;
+
+        themeToggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleTema();
+        });
+    }
+
+    // 3. Menú hamburguesa para vista móvil
+    if (menuToggle && navMenu) {
+        menuToggle.onclick = (e) => {
+            e.preventDefault();
+            navMenu.classList.toggle('active');
+        };
+    }
+
+    // 4. Menú desplegable (Dropdown de módulos)
+    const dropdown = document.querySelector(".dropdown");
+    const dropdownBtn = document.getElementById("dropdownBtn");
+
+    if (dropdownBtn && dropdown) {
+        dropdownBtn.onclick = (e) => {
+            e.preventDefault();
+            dropdown.classList.toggle("active");
+        };
+
+        window.addEventListener("click", (e) => {
+            if (!dropdown.contains(e.target)) {
+                dropdown.classList.remove("active");
+            }
+        });
+    }
+
+    // 5. Verificación de sesión e inicialización de Firestore
     observarSesion(async (user) => {
         if (!user) {
             window.location.href = 'login.html';
@@ -19,14 +111,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     /**
-     * Función unificada para escanear registros eliminados en múltiples colecciones de Firestore.
-     * Cubre 'formularios', 'notas' y 'tareas' para prevenir cualquier pérdida visual.
+     * Escanea registros eliminados en colecciones de Firestore
      */
     async function cargarElementosPapelera(userId) {
         if (!trashGrid) return;
 
         try {
-            // Mostrar indicador visual de carga inicial
             trashGrid.innerHTML = `
                 <div class="trash-empty" style="font-style: normal;">
                     <p>🔄 Sincronizando elementos eliminados...</p>
@@ -38,7 +128,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             for (const nombreColeccion of coleccionesAEvaluar) {
                 try {
-                    // Consulta estricta filtrando por el usuario actual y el estado de eliminación
                     const q = query(
                         collection(db, nombreColeccion), 
                         where('userId', '==', userId)
@@ -48,13 +137,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     querySnapshot.forEach((documento) => {
                         const data = documento.data();
                         
-                        // Verificación flexible de banderas de papelera (enPapelera o eliminado)
                         const estaEliminado = data.enPapelera === true || 
                                               data.eliminado === true || 
                                               data.eliminado === "true";
 
                         if (estaEliminado) {
-                            // Evitar duplicados por seguridad en el array global
                             if (!elementosEliminadosTotales.some(el => el.id === documento.id)) {
                                 elementosEliminadosTotales.push({
                                     id: documento.id,
@@ -69,7 +156,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            // Renderizar la cuadrícula con los datos encontrados
             renderizarCuadriculaPapelera(elementosEliminadosTotales);
 
         } catch (error) {
@@ -86,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Dibuja dinámicamente las tarjetas dentro del contenedor de la papelera.
+     * Renderiza dinámicamente las tarjetas de la papelera
      */
     function renderizarCuadriculaPapelera(elementos) {
         trashGrid.innerHTML = '';
@@ -101,9 +187,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         elementos.forEach((item) => {
-            // Extracción inteligente de propiedades según la estructura del documento
-            const tituloVisual = item.titulo || item.nombre || item.tema || 'Sin título o tema';
-            const descripcionVisual = item.contenido || item.descripcion || item.detalle || 'Sin descripción adicional registrada.';
+            const tituloVisual = item.titulo || item.nombre || item.materia || item.tema || 'Sin título o tema';
+            const descripcionVisual = item.contenido || item.descripcion || item.evaluacion || item.detalle || 'Sin descripción adicional registrada.';
             
             let tipoEtiqueta = 'Elemento';
             if (item.coleccion === 'tareas') tipoEtiqueta = 'Tarea';
@@ -130,17 +215,15 @@ document.addEventListener('DOMContentLoaded', () => {
             trashGrid.appendChild(card);
         });
 
-        // Vincular los eventos interactivos a los botones recién creados
         vincularAccionesBotones();
     }
 
     /**
-     * Asigna los eventos de clic para restaurar o borrar definitivamente los elementos.
+     * Asigna eventos para restaurar o eliminar definitivamente
      */
     function vincularAccionesBotones() {
-        // Botones para Restaurar (vuelve las banderas a false)
         document.querySelectorAll('.btn-restore').forEach(btn => {
-            btn.addEventListener('click', async (e) => {
+            btn.onclick = async (e) => {
                 const id = e.currentTarget.getAttribute('data-id');
                 const coleccion = e.currentTarget.getAttribute('data-coleccion');
 
@@ -149,12 +232,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     await updateDoc(docRef, { 
                         enPapelera: false,
                         eliminado: false,
-                        restauradoEn: new Date()
+                        restauradoEn: new Date().toISOString()
                     });
 
                     mostrarToast('Elemento restaurado con éxito al panel activo', 'success');
                     
-                    // Recargar los elementos de la papelera actualizados
                     observarSesion(user => {
                         if (user) cargarElementosPapelera(user.uid);
                     });
@@ -162,21 +244,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     console.error("Error al intentar restaurar el elemento:", err);
                     mostrarToast('Error al restaurar el elemento seleccionado', 'danger');
                 }
-            });
+            };
         });
 
-        // Botones para Borrado Definitivo de la base de datos
         document.querySelectorAll('.btn-delete-perm').forEach(btn => {
-            btn.addEventListener('click', async (e) => {
+            btn.onclick = async (e) => {
                 const id = e.currentTarget.getAttribute('data-id');
                 const coleccion = e.currentTarget.getAttribute('data-coleccion');
 
                 if (window.confirm('¿Estás totalmente seguro de eliminar este elemento de forma permanente? Esta acción no se puede deshacer.')) {
                     try {
                         await deleteDoc(doc(db, coleccion, id));
-                        mostrarToast('Elemento eliminado permanentemente de la base de datos', 'success');
+                        mostrarToast('Elemento eliminado permanentemente', 'success');
                         
-                        // Recargar los elementos de la papelera actualizados
                         observarSesion(user => {
                             if (user) cargarElementosPapelera(user.uid);
                         });
@@ -185,12 +265,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         mostrarToast('No se pudo eliminar el elemento del sistema', 'danger');
                     }
                 }
-            });
+            };
         });
     }
 
     /**
-     * Función de seguridad para limpiar textos y prevenir problemas de inyección HTML.
+     * Sanea cadenas para evitar inyección HTML
      */
     function sanearTexto(texto) {
         if (!texto) return '';
@@ -201,32 +281,4 @@ document.addEventListener('DOMContentLoaded', () => {
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#039;');
     }
-});
-
-document.addEventListener("DOMContentLoaded", function () {
-  // Seleccionamos todos los contenedores de menú desplegable
-  const dropdowns = document.querySelectorAll(".dropdown");
-
-  dropdowns.forEach(function (dropdown) {
-    const dropBtn = dropdown.querySelector(".dropbtn"); // Ajusta la clase del botón si es distinta
-
-    if (dropBtn) {
-      dropBtn.addEventListener("click", function (e) {
-        // Previene el comportamiento por defecto si es un enlace
-        e.preventDefault();
-        
-        // Alterna la clase 'active' para mostrar/ocultar el contenido
-        dropdown.classList.toggle("active");
-      });
-    }
-  });
-
-  // Cierra el menú si se hace clic fuera de él
-  window.addEventListener("click", function (e) {
-    dropdowns.forEach(function (dropdown) {
-      if (!dropdown.contains(e.target)) {
-        dropdown.classList.remove("active");
-      }
-    });
-  });
 });

@@ -1,127 +1,246 @@
+/* =================================================================
+   MÓDULO DE RECURSOS Y APUNTES - PLATAFORMA CRECER (Versión Definitiva)
+   ================================================================= */
+
 import { db } from './firebase-config.js';
 import { 
     collection, 
     addDoc, 
     getDocs, 
-    deleteDoc, 
+    updateDoc, 
     doc, 
     query, 
     where 
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { observarSesion } from './global.js';
+import { observarSesion, mostrarToast } from './global.js';
+
 let currentUser = null;
 
-observarSesion((user) => {
-    if (user) {
-        currentUser = user;
-        cargarRecursos();
+/**
+ * Conmutación e inicialización estricta del Tema
+ */
+function aplicarTema(tema) {
+    const esOscuro = tema === 'dark';
+
+    if (esOscuro) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.body.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
     } else {
-        window.location.href = 'login.html';
+        document.documentElement.removeAttribute('data-theme');
+        document.body.removeAttribute('data-theme');
+        localStorage.setItem('theme', 'light');
     }
+
+    actualizarIconoTema(tema);
+}
+
+function actualizarIconoTema(tema) {
+    const themeToggle = document.getElementById('themeToggle');
+    if (themeToggle) {
+        themeToggle.textContent = tema === 'dark' ? '☀️' : '🌙';
+    }
+}
+
+function toggleTema() {
+    const temaActual = localStorage.getItem('theme') || 
+                      (document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
+
+    const nuevoTema = temaActual === 'dark' ? 'light' : 'dark';
+    aplicarTema(nuevoTema);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    let themeToggle = document.getElementById('themeToggle');
+    const menuToggle = document.getElementById('menuToggle');
+    const navMenu = document.getElementById('navMenu');
+
+    // Inicialización del tema según preferencia guardada
+    const temaGuardado = localStorage.getItem('theme');
+    const prefiereDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const temaInicial = temaGuardado ? temaGuardado : (prefiereDark ? 'dark' : 'light');
+    
+    aplicarTema(temaInicial);
+
+    // Conmutación directa con 1 solo clic removiendo duplicados
+    if (themeToggle) {
+        const nuevoBtn = themeToggle.cloneNode(true);
+        themeToggle.parentNode.replaceChild(nuevoBtn, themeToggle);
+        themeToggle = nuevoBtn;
+
+        themeToggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleTema();
+        });
+    }
+
+    // Menú hamburguesa para vista móvil
+    if (menuToggle && navMenu) {
+        menuToggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            navMenu.classList.toggle('active');
+        });
+    }
+
+    // Dropdown de módulos
+    const dropdown = document.querySelector(".dropdown");
+    const dropdownBtn = document.getElementById("dropdownBtn");
+
+    if (dropdownBtn && dropdown) {
+        dropdownBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            dropdown.classList.toggle("active");
+        });
+
+        window.addEventListener("click", (e) => {
+            if (!dropdown.contains(e.target)) {
+                dropdown.classList.remove("active");
+            }
+        });
+    }
+
+    // Protección de Ruta y observación de sesión
+    observarSesion((user) => {
+        if (user) {
+            currentUser = user;
+            cargarRecursos();
+        } else {
+            window.location.href = 'login.html';
+        }
+    });
 });
 
-const recursoForm = document.getElementById('recursoForm');
-const recursosGrid = document.getElementById('recursosGrid');
+const resourceForm = document.getElementById('resourceForm');
+const resourceGrid = document.getElementById('resourceGrid');
+const loadingResources = document.getElementById('loadingResources');
 
-if (recursoForm) {
-    recursoForm.addEventListener('submit', async (e) => {
+// Guardar Recurso
+if (resourceForm) {
+    resourceForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         if (!currentUser) return;
 
-        const titulo = document.getElementById('tituloInput').value.trim();
-        const categoria = document.getElementById('categoriaSelect').value;
-        const url = document.getElementById('urlInput').value.trim();
-        const descripcion = document.getElementById('descripcionInput').value.trim();
+        const materia = document.getElementById('resSubject').value.trim();
+        const titulo = document.getElementById('resTitle').value.trim();
+        const url = document.getElementById('resUrl').value.trim();
+
+        if (!materia || !titulo || !url) {
+            mostrarToast('Por favor, completa todos los campos requeridos.', 'danger');
+            return;
+        }
+
+        const btn = document.getElementById('btnGuardarRecurso');
+        if (btn) btn.disabled = true;
 
         try {
             await addDoc(collection(db, "recursos"), {
                 userId: currentUser.uid,
-                titulo,
-                categoria,
-                url,
-                descripcion,
+                materia: materia,
+                titulo: titulo,
+                url: url,
+                enPapelera: false,
+                eliminado: false,
                 creadoEn: new Date().toISOString()
             });
 
-            recursoForm.reset();
+            mostrarToast('Recurso guardado con éxito', 'success');
+
+            resourceForm.reset();
             cargarRecursos();
         } catch (error) {
             console.error("Error al guardar recurso:", error);
-            alert("Error al guardar el recurso.");
+            mostrarToast('Error al guardar el recurso.', 'danger');
+        } finally {
+            if (btn) btn.disabled = false;
         }
     });
 }
 
+// Cargar Recursos
 async function cargarRecursos() {
-    if (!currentUser || !recursosGrid) return;
+    if (!currentUser || !resourceGrid) return;
 
     try {
+        if (loadingResources) loadingResources.style.display = 'block';
+
         const q = query(collection(db, "recursos"), where("userId", "==", currentUser.uid));
         const querySnapshot = await getDocs(q);
 
-        recursosGrid.innerHTML = '';
+        resourceGrid.innerHTML = '';
+        if (loadingResources) loadingResources.style.display = 'none';
+
+        if (querySnapshot.empty) {
+            resourceGrid.innerHTML = '<p class="loading-text">No tienes recursos ni enlaces guardados.</p>';
+            return;
+        }
+
+        let elementosVisibles = 0;
 
         querySnapshot.forEach((docSnapshot) => {
             const data = docSnapshot.data();
 
+            // Filtrar eliminados o movidos a papelera
+            if (data.enPapelera === true || data.eliminado === true || data.eliminado === "true") return;
+
+            elementosVisibles++;
+
             const card = document.createElement('div');
-            card.className = 'recurso-card';
+            card.className = 'resource-card';
             card.innerHTML = `
-                <div class="recurso-header">
-                    <span class="badge ${data.categoria.toLowerCase()}">${data.categoria}</span>
-                    <button class="btn-eliminar-recurso" data-id="${docSnapshot.id}">🗑️</button>
+                <div>
+                    <span>${sanearTexto(data.materia)}</span>
+                    <h4>${sanearTexto(data.titulo)}</h4>
+                    <a href="${sanearTexto(data.url)}" target="_blank" rel="noopener noreferrer" class="link-btn">Abrir Recurso 🔗</a>
                 </div>
-                <h3>${data.titulo}</h3>
-                ${data.descripcion ? `<p>${data.descripcion}</p>` : ''}
-                <a href="${data.url}" target="_blank" rel="noopener noreferrer" class="btn-enlace">Abrir Recurso 🔗</a>
+                <button type="button" class="btn-delete" data-id="${docSnapshot.id}">🗑️ Eliminar</button>
             `;
 
-            recursosGrid.appendChild(card);
+            resourceGrid.appendChild(card);
         });
 
-        // Eventos para borrar recursos
-        document.querySelectorAll('.btn-eliminar-recurso').forEach(btn => {
+        if (elementosVisibles === 0) {
+            resourceGrid.innerHTML = '<p class="loading-text">No tienes recursos activos guardados.</p>';
+            return;
+        }
+
+        // Eventos para mover recurso a la papelera
+        document.querySelectorAll('.btn-delete').forEach(btn => {
             btn.addEventListener('click', async (e) => {
-                const id = e.target.getAttribute('data-id');
-                try {
-                    await deleteDoc(doc(db, "recursos", id));
-                    cargarRecursos();
-                } catch (err) {
-                    console.error("Error al eliminar recurso:", err);
+                const id = e.currentTarget.getAttribute('data-id');
+                if (confirm('¿Deseas enviar este recurso a la papelera de reciclaje?')) {
+                    try {
+                        const docRef = doc(db, "recursos", id);
+                        await updateDoc(docRef, {
+                            enPapelera: true,
+                            eliminado: true,
+                            eliminadoEn: new Date().toISOString()
+                        });
+                        mostrarToast('Recurso enviado a la papelera', 'info');
+                        cargarRecursos();
+                    } catch (err) {
+                        console.error("Error al mover recurso a papelera:", err);
+                        mostrarToast('Error al eliminar el recurso', 'danger');
+                    }
                 }
             });
         });
 
     } catch (error) {
         console.error("Error al cargar recursos:", error);
+        if (loadingResources) loadingResources.style.display = 'none';
+        mostrarToast('Error al cargar la lista de recursos', 'danger');
     }
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-  // Seleccionamos todos los contenedores de menú desplegable
-  const dropdowns = document.querySelectorAll(".dropdown");
-
-  dropdowns.forEach(function (dropdown) {
-    const dropBtn = dropdown.querySelector(".dropbtn"); // Ajusta la clase del botón si es distinta
-
-    if (dropBtn) {
-      dropBtn.addEventListener("click", function (e) {
-        // Previene el comportamiento por defecto si es un enlace
-        e.preventDefault();
-        
-        // Alterna la clase 'active' para mostrar/ocultar el contenido
-        dropdown.classList.toggle("active");
-      });
-    }
-  });
-
-  // Cierra el menú si se hace clic fuera de él
-  window.addEventListener("click", function (e) {
-    dropdowns.forEach(function (dropdown) {
-      if (!dropdown.contains(e.target)) {
-        dropdown.classList.remove("active");
-      }
-    });
-  });
-});
+// Función de saneamiento contra inyección HTML
+function sanearTexto(texto) {
+    if (!texto) return '';
+    return String(texto)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}

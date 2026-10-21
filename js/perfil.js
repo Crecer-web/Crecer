@@ -1,29 +1,129 @@
-import { db, auth } from './firebase-config.js';
+/* =================================================================
+   MÓDULO DE PERFIL - PLATAFORMA CRECER (Versión Definitiva)
+   ================================================================= */
+
+import { db } from './firebase-config.js';
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { observarSesion } from './global.js';
+import { observarSesion, mostrarToast } from './global.js';
 
 function calcularEdad(fechaNacimiento) {
     if (!fechaNacimiento) return '--';
+    const partes = fechaNacimiento.split('-');
+    if (partes.length !== 3) return '--';
+    
+    const anio = parseInt(partes[0], 10);
+    const mes = parseInt(partes[1], 10) - 1;
+    const dia = parseInt(partes[2], 10);
+    
     const hoy = new Date();
-    const cumpleanos = new Date(fechaNacimiento);
+    const cumpleanos = new Date(anio, mes, dia);
+    
+    if (isNaN(cumpleanos.getTime())) return '--';
+    
     let edad = hoy.getFullYear() - cumpleanos.getFullYear();
     const m = hoy.getMonth() - cumpleanos.getMonth();
+    
     if (m < 0 || (m === 0 && hoy.getDate() < cumpleanos.getDate())) {
         edad--;
     }
-    return edad;
+    return edad >= 0 ? edad : '--';
+}
+
+function formatearFecha(fechaStr) {
+    if (!fechaStr) return '--';
+    const partes = fechaStr.split('-');
+    if (partes.length !== 3) return fechaStr;
+    
+    const meses = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+    const dia = parseInt(partes[2], 10);
+    const mes = meses[parseInt(partes[1], 10) - 1];
+    const anio = partes[0];
+    
+    return `${dia} ${mes}. ${anio}`;
+}
+
+function comprimirImagen(file, maxWidth = 250, maxHeight = 250) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+
+                if (width > height) {
+                    if (width > maxWidth) {
+                        height = Math.round((height * maxWidth) / width);
+                        width = maxWidth;
+                    }
+                } else {
+                    if (height > maxHeight) {
+                        width = Math.round((width * maxHeight) / height);
+                        height = maxHeight;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                const dataUrlComprimida = canvas.toDataURL('image/jpeg', 0.7);
+                resolve(dataUrlComprimida);
+            };
+            img.onerror = (err) => reject(err);
+        };
+        reader.onerror = (err) => reject(err);
+    });
+}
+
+function aplicarTema(tema) {
+    const esOscuro = tema === 'dark';
+
+    if (esOscuro) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.body.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
+    } else {
+        document.documentElement.removeAttribute('data-theme');
+        document.body.removeAttribute('data-theme');
+        localStorage.setItem('theme', 'light');
+    }
+
+    actualizarIconoTema(tema);
+}
+
+function actualizarIconoTema(tema) {
+    const themeToggle = document.getElementById('themeToggle');
+    if (themeToggle) {
+        themeToggle.textContent = tema === 'dark' ? '☀️' : '🌙';
+    }
+}
+
+function toggleTema() {
+    const temaActual = localStorage.getItem('theme') || 
+                      (document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
+
+    const nuevoTema = temaActual === 'dark' ? 'light' : 'dark';
+    aplicarTema(nuevoTema);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const profileForm = document.getElementById('profileForm');
-    const profileEmail = document.getElementById('profileEmail');
-    const profilePhotoUrl = document.getElementById('profilePhotoUrl');
+    // Referencias DOM
     const profileImage = document.getElementById('profileImage');
     const avatarInitial = document.getElementById('avatarInitial');
     const profileDisplayName = document.getElementById('profileDisplayName');
-    const profileFullName = document.getElementById('profileFullName');
     const profileUserEmailDisplay = document.getElementById('profileUserEmailDisplay');
-    const edadSpan = document.getElementById('profileCalculatedAge');
+    
+    const profileFullName = document.getElementById('profileFullName');
+    const profileBirthDateDisplay = document.getElementById('profileBirthDateDisplay');
+    const profileCalculatedAge = document.getElementById('profileCalculatedAge');
+    const profileEmailVal = document.getElementById('profileEmailVal');
+
+    const profilePhotoUrl = document.getElementById('profilePhotoUrl');
     const profileFile = document.getElementById('profileFile');
     const fileNameDisplay = document.getElementById('fileNameDisplay');
 
@@ -31,89 +131,173 @@ document.addEventListener('DOMContentLoaded', () => {
     const photoOptionsModal = document.getElementById('photoOptionsModal');
     const cancelPhotoBtn = document.getElementById('cancelPhotoBtn');
     const applyPhotoBtn = document.getElementById('applyPhotoBtn');
+    const closePhotoModalBtn = document.getElementById('closePhotoModalBtn');
 
-    let fotoActualTemporal = '';
+    let themeToggle = document.getElementById('themeToggle');
+    const menuToggle = document.getElementById('menuToggle');
+    const navMenu = document.getElementById('navMenu');
+
     let usuarioActual = null;
     let nombreUsuarioActual = 'Usuario';
 
-    // 1. Mostrar/Ocultar modal de foto al hacer clic en el avatar
-    if (avatarWrapper && photoOptionsModal) {
-        avatarWrapper.addEventListener('click', () => {
-            photoOptionsModal.style.display = photoOptionsModal.style.display === 'none' ? 'flex' : 'none';
+    // Inicialización del tema según preferencia guardada
+    const temaGuardado = localStorage.getItem('theme');
+    const prefiereDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const temaInicial = temaGuardado ? temaGuardado : (prefiereDark ? 'dark' : 'light');
+    aplicarTema(temaInicial);
+
+    // Event Listener único para el botón de conmutación de tema
+    if (themeToggle) {
+        const nuevoBtn = themeToggle.cloneNode(true);
+        themeToggle.parentNode.replaceChild(nuevoBtn, themeToggle);
+        themeToggle = nuevoBtn;
+
+        themeToggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleTema();
         });
     }
 
-    if (cancelPhotoBtn && photoOptionsModal) {
-        cancelPhotoBtn.addEventListener('click', () => {
-            photoOptionsModal.style.display = 'none';
+    // Menú hamburguesa móvil
+    if (menuToggle && navMenu) {
+        menuToggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            navMenu.classList.toggle('active');
         });
     }
 
-    // 2. Control al seleccionar un archivo local
+    // Dropdown de módulos
+    const dropdown = document.querySelector(".dropdown");
+    const dropdownBtn = document.getElementById("dropdownBtn");
+
+    if (dropdownBtn && dropdown) {
+        dropdownBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            dropdown.classList.toggle("active");
+        });
+
+        window.addEventListener("click", (e) => {
+            if (!dropdown.contains(e.target)) {
+                dropdown.classList.remove("active");
+            }
+        });
+    }
+
+    // Control de Modal
+    const abrirModal = (e) => {
+        if (e) e.preventDefault();
+        if (photoOptionsModal) photoOptionsModal.style.display = 'flex';
+    };
+
+    const cerrarModal = (e) => {
+        if (e) e.preventDefault();
+        if (photoOptionsModal) photoOptionsModal.style.display = 'none';
+        if (profilePhotoUrl) profilePhotoUrl.value = '';
+        if (profileFile) {
+            try { profileFile.value = ''; } catch(err) {}
+        }
+        if (fileNameDisplay) fileNameDisplay.textContent = 'Ningún archivo seleccionado';
+    };
+
+    if (avatarWrapper) {
+        avatarWrapper.addEventListener('click', abrirModal);
+        avatarWrapper.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                abrirModal(e);
+            }
+        });
+    }
+
+    if (cancelPhotoBtn) cancelPhotoBtn.addEventListener('click', cerrarModal);
+    if (closePhotoModalBtn) closePhotoModalBtn.addEventListener('click', cerrarModal);
+
+    if (photoOptionsModal) {
+        photoOptionsModal.addEventListener('click', (e) => {
+            if (e.target === photoOptionsModal) cerrarModal(e);
+        });
+    }
+
     if (profileFile) {
         profileFile.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
-                if (fileNameDisplay) fileNameDisplay.textContent = file.name;
-                // Limpiar el campo de URL de forma segura sin provocar errores
-                if (profilePhotoUrl) profilePhotoUrl.value = ''; 
+                if (fileNameDisplay) fileNameDisplay.textContent = `📎 ${file.name}`;
+                if (profilePhotoUrl) profilePhotoUrl.value = '';
             } else {
                 if (fileNameDisplay) fileNameDisplay.textContent = 'Ningún archivo seleccionado';
             }
         });
     }
 
-    // 3. Control al escribir una URL (Limpia el archivo seleccionado visualmente)
     if (profilePhotoUrl) {
         profilePhotoUrl.addEventListener('input', () => {
             if (profilePhotoUrl.value.trim() !== '') {
                 if (profileFile) {
-                    try { profileFile.value = ''; } catch(err) { /* Ignorar si el navegador bloquea reseteo */ }
+                    try { profileFile.value = ''; } catch(err) {}
                 }
                 if (fileNameDisplay) fileNameDisplay.textContent = 'Ningún archivo seleccionado';
             }
         });
     }
 
-    // 4. Botón Aplicar Foto (Procesa URL o Archivo con seguridad)
+    // Aplicar Foto de Perfil
     if (applyPhotoBtn) {
-        applyPhotoBtn.addEventListener('click', (e) => {
+        applyPhotoBtn.addEventListener('click', async (e) => {
             e.preventDefault();
+
+            if (!usuarioActual) {
+                mostrarToast('No hay una sesión activa.', 'danger');
+                return;
+            }
 
             const urlVal = profilePhotoUrl ? profilePhotoUrl.value.trim() : '';
             const fileVal = (profileFile && profileFile.files && profileFile.files.length > 0) ? profileFile.files[0] : null;
 
+            let nuevaFoto = '';
+
             if (urlVal !== '') {
-                // Caso A: Usar URL directa
-                fotoActualTemporal = urlVal;
-                actualizarVisualizacionFoto(fotoActualTemporal, nombreUsuarioActual);
-                mostrarMensaje('Foto actualizada por URL. Haz clic en "Guardar Cambios".', 'success');
-                if (photoOptionsModal) photoOptionsModal.style.display = 'none';
-
+                nuevaFoto = urlVal;
             } else if (fileVal !== null) {
-                // Caso B: Usar archivo local mediante FileReader
-                const reader = new FileReader();
-                
-                reader.onload = function(event) {
-                    fotoActualTemporal = event.target.result;
-                    actualizarVisualizacionFoto(fotoActualTemporal, nombreUsuarioActual);
-                    mostrarMensaje('Foto cargada desde archivo. Haz clic en "Guardar Cambios".', 'success');
-                    if (photoOptionsModal) photoOptionsModal.style.display = 'none';
-                };
-
-                reader.onerror = function(err) {
-                    console.error("Error al leer el archivo:", err);
-                    mostrarMensaje('Error al leer el archivo de imagen local.', 'danger');
-                };
-
-                reader.readAsDataURL(fileVal);
+                try {
+                    nuevaFoto = await comprimirImagen(fileVal, 250, 250);
+                } catch (error) {
+                    console.error("Error al comprimir imagen:", error);
+                    mostrarToast('Error al procesar la imagen seleccionada.', 'danger');
+                    return;
+                }
             } else {
-                mostrarMensaje('Por favor, ingresa una URL válida o selecciona un archivo de imagen.', 'warning');
+                mostrarToast('Por favor, ingresa una URL o selecciona una imagen.', 'warning');
+                return;
+            }
+
+            try {
+                applyPhotoBtn.disabled = true;
+                applyPhotoBtn.textContent = 'Guardando... ⏳';
+
+                const userRef = doc(db, 'usuarios', usuarioActual.uid);
+                await setDoc(userRef, {
+                    userId: usuarioActual.uid,
+                    fotoPerfil: nuevaFoto,
+                    actualizadoEn: new Date().toISOString()
+                }, { merge: true });
+
+                actualizarVisualizacionFoto(nuevaFoto, nombreUsuarioActual);
+                mostrarToast('¡Foto de perfil actualizada correctamente!', 'success');
+                cerrarModal();
+
+            } catch (err) {
+                console.error("Error al guardar foto en Firestore:", err);
+                mostrarToast('Error al guardar la foto de perfil.', 'danger');
+            } finally {
+                applyPhotoBtn.disabled = false;
+                applyPhotoBtn.textContent = 'Aplicar Foto';
             }
         });
     }
 
-    // 5. Cargar datos del usuario desde Firestore
+    // Carga de la Sesión de Usuario y Documento en Firestore
     observarSesion(async (user) => {
         if (!user) {
             window.location.href = 'login.html';
@@ -121,8 +305,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         usuarioActual = user;
-        if (profileEmail) profileEmail.value = user.email || '';
-        if (profileUserEmailDisplay) profileUserEmailDisplay.textContent = user.email || '';
+        const emailUser = user.email || 'correo@ejemplo.com';
+
+        if (profileUserEmailDisplay) profileUserEmailDisplay.textContent = emailUser;
+        if (profileEmailVal) profileEmailVal.textContent = emailUser;
 
         const userRef = doc(db, 'usuarios', user.uid);
         try {
@@ -139,107 +325,61 @@ document.addEventListener('DOMContentLoaded', () => {
                 fechaNac = data.fechaNacimiento || '';
                 foto = data.fotoPerfil || foto;
             } else {
-                const parts = (user.displayName || user.email.split('@')[0]).split(' ');
-                nombre = parts[0] || 'Usuario';
+                const parts = (user.displayName || emailUser.split('@')[0]).split(' ');
+                nombre = parts[0] || 'Estudiante';
                 apellido = parts.slice(1).join(' ') || '';
+
+                await setDoc(userRef, {
+                    userId: user.uid,
+                    nombre: nombre,
+                    apellido: apellido,
+                    email: emailUser,
+                    creadoEn: new Date().toISOString()
+                }, { merge: true });
             }
 
-            nombreUsuarioActual = nombre;
-            const nombreCompleto = `${nombre} ${apellido}`.trim();
+            nombreUsuarioActual = nombre || 'Usuario';
+            const nombreCompleto = `${nombre} ${apellido}`.trim() || 'Estudiante';
+
             if (profileDisplayName) profileDisplayName.textContent = nombreCompleto;
-            if (profileFullName) profileFullName.textContent = `Nombre y Apellido: ${nombreCompleto}`;
-            
-            if (edadSpan && fechaNac) {
-                edadSpan.textContent = calcularEdad(fechaNac);
-            }
+            if (profileFullName) profileFullName.textContent = nombreCompleto;
+            if (profileBirthDateDisplay) profileBirthDateDisplay.textContent = formatearFecha(fechaNac);
+            if (profileCalculatedAge) profileCalculatedAge.textContent = calcularEdad(fechaNac);
 
-            fotoActualTemporal = foto;
-            actualizarVisualizacionFoto(fotoActualTemporal, nombreUsuarioActual);
+            actualizarVisualizacionFoto(foto, nombreUsuarioActual);
 
         } catch (error) {
-            console.error("Error al obtener perfil:", error);
+            console.error("Error al obtener información de Firestore:", error);
+            mostrarToast('Error al cargar la información del usuario.', 'danger');
         }
     });
 
-    // 6. Enviar y guardar cambios definitivos en Firestore
-    if (profileForm) {
-        profileForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if (!usuarioActual) {
-                mostrarMensaje('No hay una sesión activa.', 'danger');
-                return;
-            }
-
-            try {
-                const userRef = doc(db, 'usuarios', usuarioActual.uid);
-                await setDoc(userRef, {
-                    email: usuarioActual.email,
-                    fotoPerfil: fotoActualTemporal,
-                    actualizadoEn: new Date()
-                }, { merge: true });
-
-                mostrarMensaje('¡Perfil guardado con éxito en la base de datos!', 'success');
-            } catch (error) {
-                console.error("Error al actualizar perfil en Firestore:", error);
-                mostrarMensaje('Error al actualizar el perfil en la base de datos.', 'danger');
-            }
-        });
-    }
-
+    /**
+     * Muestra la foto de perfil o activa la inicial si hay error de carga (ej. 429 Too Many Requests)
+     */
     function actualizarVisualizacionFoto(urlFoto, nombreUsuario) {
+        if (!profileImage || !avatarInitial) return;
+
         if (urlFoto && urlFoto.trim() !== '') {
-            if (profileImage) {
-                profileImage.src = urlFoto;
-                profileImage.style.display = 'block';
-            }
-            if (avatarInitial) {
-                avatarInitial.style.display = 'none';
-            }
-        } else {
-            if (profileImage) {
+            // Manejador de error para capturar fallos de red (Rate limit HTTP 429)
+            profileImage.onerror = () => {
+                console.warn("No se pudo cargar la imagen remota (posible límite de peticiones HTTP 429). Mostrando inicial.");
                 profileImage.style.display = 'none';
-                profileImage.src = '';
-            }
-            if (avatarInitial) {
                 avatarInitial.textContent = nombreUsuario ? nombreUsuario.charAt(0).toUpperCase() : 'U';
                 avatarInitial.style.display = 'flex';
-            }
-        }
-    }
+            };
 
-    function mostrarMensaje(texto, tipo) {
-        if (typeof mostrarToast === 'function') {
-            mostrarToast(texto, tipo);
+            profileImage.onload = () => {
+                profileImage.style.display = 'block';
+                avatarInitial.style.display = 'none';
+            };
+
+            profileImage.src = urlFoto;
         } else {
-            alert(texto);
+            profileImage.style.display = 'none';
+            profileImage.src = '';
+            avatarInitial.textContent = nombreUsuario ? nombreUsuario.charAt(0).toUpperCase() : 'U';
+            avatarInitial.style.display = 'flex';
         }
     }
-});
-
-document.addEventListener("DOMContentLoaded", function () {
-  // Seleccionamos todos los contenedores de menú desplegable
-  const dropdowns = document.querySelectorAll(".dropdown");
-
-  dropdowns.forEach(function (dropdown) {
-    const dropBtn = dropdown.querySelector(".dropbtn"); // Ajusta la clase del botón si es distinta
-
-    if (dropBtn) {
-      dropBtn.addEventListener("click", function (e) {
-        // Previene el comportamiento por defecto si es un enlace
-        e.preventDefault();
-        
-        // Alterna la clase 'active' para mostrar/ocultar el contenido
-        dropdown.classList.toggle("active");
-      });
-    }
-  });
-
-  // Cierra el menú si se hace clic fuera de él
-  window.addEventListener("click", function (e) {
-    dropdowns.forEach(function (dropdown) {
-      if (!dropdown.contains(e.target)) {
-        dropdown.classList.remove("active");
-      }
-    });
-  });
 });

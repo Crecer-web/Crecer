@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRECER - Recursos</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Recursos y Apuntes | CRECER</title>
     
     <!-- Iconos y Manifest PWA -->
     <link rel="icon" type="image/png" sizes="32x32" href="img/logo.png">
@@ -17,58 +18,74 @@
 </head>
 <body class="dashboard-body">
 
-<body class="welcome-page">
-
+    <!-- Encabezado de Navegación del Dashboard -->
     <header class="app-header">
-    <div class="header-container">
-        <div class="logo">
-            <a href="inicio.html">CRECER</a>
-        </div>
-        <nav class="nav-menu" id="navMenu" aria-label="Navegación principal">
-            <a href="inicio.html" class="nav-link">Inicio</a>
-            
-            <!-- Menú Desplegable de Módulos Unificado -->
-            <div class="dropdown">
-                <button class="dropdown-btn" id="dropdownBtn" aria-haspopup="true" aria-expanded="false">
-                    Módulos ▼
-                </button>
-                <div class="dropdown-content" id="dropdownContent">
-                    <a href="notas.html">Calificaciones</a>
-                    <a href="perfil.html">Mi Perfil</a>
-                    <a href="#" id="logoutBtn" class="dropdown-logout">Cerrar Sesión</a>
-                </div>
+        <div class="header-container">
+            <!-- Logo -->
+            <div class="logo">
+                <a href="inicio.html">CRECER</a>
             </div>
+            
+            <!-- Contenedor Unificado Alineado Totalmente a la Derecha -->
+            <div class="header-right-group">
+                <!-- Navegación Principal -->
+                <nav class="nav-menu" id="navMenu" aria-label="Navegación principal">
+                    <a href="inicio.html" class="nav-link">Inicio</a>
+                    
+                    <!-- Menú Desplegable de Módulos -->
+                    <div class="dropdown" id="modulesDropdown">
+                        <button class="dropdown-btn" id="dropdownBtn" aria-haspopup="true" aria-expanded="false" type="button">
+                            Módulos ▼
+                        </button>
+                        <div class="dropdown-content" id="dropdownContent">
+                            <a href="notas.html">Calificaciones</a>
+                            <a href="horario.html">Horario</a>
+                            <a href="perfil.html">Mi Perfil</a>
+                            <a href="#" id="logoutBtn" class="dropdown-logout">Cerrar Sesión</a>
+                        </div>
+                    </div>
+                </nav>
 
-            <!-- Botón de Modo Claro / Oscuro Estándar -->
-            <button id="themeToggle" class="theme-toggle" aria-label="Cambiar tema">🌙 Tema</button>
-        </nav>
-    </div>
-</header>
+                <!-- Botón de Conmutación de Tema -->
+                <button id="themeToggle" class="theme-toggle" type="button" aria-label="Cambiar tema">🌙</button>
+
+                <!-- Botón Hamburguesa para Móvil -->
+                <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú de navegación" type="button">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </button>
+            </div>
+        </div>
+    </header>
 
     <!-- Contenedor Principal (Compatible con Sticky Footer) -->
     <main class="app-main-container">
         <div class="main-container">
             
-            <h2>Apuntes y Enlaces Académicos</h2>
+            <div class="page-header">
+                <h2>Apuntes y Enlaces Académicos</h2>
+                <p>Organiza tus herramientas de estudio, enlaces a documentos y material académico.</p>
+            </div>
 
             <section class="form-section">
                 <form id="resourceForm" novalidate>
                     <div class="form-group">
                         <label for="resSubject">Materia *</label>
-                        <input type="text" id="resSubject" placeholder="Ej. Programación Web" required>
+                        <input type="text" id="resSubject" placeholder="Ej. Programación Web" required autocomplete="off">
                     </div>
 
                     <div class="form-group">
                         <label for="resTitle">Título del Recurso *</label>
-                        <input type="text" id="resTitle" placeholder="Ej. Documentación JS ES6" required>
+                        <input type="text" id="resTitle" placeholder="Ej. Documentación JS ES6" required autocomplete="off">
                     </div>
 
                     <div class="form-group">
                         <label for="resUrl">Enlace / URL *</label>
-                        <input type="url" id="resUrl" placeholder="https://..." required>
+                        <input type="url" id="resUrl" placeholder="https://..." required autocomplete="off">
                     </div>
 
-                    <button type="submit" class="btn-submit">Guardar Recurso</button>
+                    <button type="submit" id="btnGuardarRecurso" class="btn-submit">Guardar Recurso</button>
                 </form>
             </section>
 
@@ -81,20 +98,19 @@
         </div>
     </main>
 
-    <!-- Pie de Página Institucional (Sticky Footer) -->
-<footer class="footer">
-    <div class="footer-content">
-        <p>&copy; 2026 <strong>CRECER</strong>. Todos los derechos reservados.</p>
-        <div class="footer-links">
-            <a href="privacidad.html">Privacidad</a>
-            <a href="terminos.html">Términos</a>
-            <a href="soporte.html">Soporte</a>
-        </div>
+    <!-- Contenedor Toast -->
+    <div id="toast-container"></div>
+
+    <!-- Pie de Página Institucional -->
+<!-- Pie de Página Institucional Mínimo -->
+<footer class="app-footer">
+    <div class="footer-container">
+        <p>&copy; 2026 <strong>CRECER</strong> &bull; Plataforma Educativa Integrada</p>
     </div>
 </footer>
 
+    <!-- Scripts de la Aplicación -->
     <script type="module" src="js/global.js"></script>
     <script type="module" src="js/recursos.js"></script>
-    <script type="module" src="js/login.js"></script>
 </body>
 </html>

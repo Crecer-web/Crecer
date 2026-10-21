@@ -1,301 +1,298 @@
 /* ==========================================================================
-   MÓDULO DE RECURSOS Y MATERIALES DE ESTUDIO - CRECER
-   Estilo: Formal, Ejecutivo y Funcional (Dashboard / SaaS)
+   VARIABLES Y CONFIGURACIÓN DE TEMA - PLATAFORMA CRECER
    ========================================================================== */
+:root {
+  --bg-color: #f1f5f9;
+  --card-bg: #ffffff;
+  --border-color: #e2e8f0;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --filter-bg: #f8fafc;
+  --header-bg: #0f172a;
+  --header-text: #ffffff;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 10px 25px -5px rgba(15, 23, 42, 0.08);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+}
 
-/* Estructura general de la página para Sticky Footer */
+:root[data-theme="dark"],
+body[data-theme="dark"] {
+  --bg-color: #090d16;
+  --card-bg: #1e293b;
+  --border-color: #334155;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --filter-bg: #0f172a;
+  --header-bg: #0f172a;
+  --header-text: #ffffff;
+  --accent: #3b82f6;
+  --accent-hover: #2563eb;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 html, body {
   height: 100%;
 }
 
 body.dashboard-body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background-color: var(--bg-color, #f8fafc);
-  color: var(--text-primary, #0f172a);
+  background-color: var(--bg-color);
+  color: var(--text-primary);
   line-height: 1.6;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
   margin: 0;
   padding: 0;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-/* ====================================================================================
-   ENCABEZADO DE NAVEGACIÓN Y LOGO (Diseño Responsive: Escritorio vs Celular)
-   ==================================================================================== */
+/* ==========================================================================
+   1. CABECERA Y NAVEGACIÓN DERECHA UNIFICADA
+   ========================================================================== */
 .app-header {
-    background-color: var(--primary, #0f172a);
-    color: var(--header-text, #ffffff);
-    padding: 1rem 1.5rem;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
-    width: 100%;
-    box-sizing: border-box;
+  background-color: var(--header-bg);
+  color: var(--header-text);
+  padding: 0.85rem 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  width: 100%;
 }
 
 .header-container {
-    display: flex;
-    width: 100%;
-    max-width: 1300px;
-    margin: 0 auto;
-    box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-/* Título / Logo CRECER */
 .logo a {
-    font-size: 1.7rem;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    color: #ffffff;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    text-transform: uppercase;
-    line-height: 1.1;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #ffffff;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
 }
 
-/* Barra de navegación base */
+.header-right-group {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-left: auto;
+}
+
 .nav-menu {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
 }
 
-/* Enlaces de navegación */
 .nav-link {
-    color: #94a3b8;
-    text-decoration: none;
-    font-weight: 500;
-    font-size: 0.95rem;
-    padding: 0.3rem 0;
-    position: relative;
-    transition: color 0.2s ease;
-    background: transparent;
-    border: none;
+  color: #94a3b8;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.92rem;
+  transition: color 0.2s ease;
 }
 
-.nav-link:hover {
-    color: #ffffff;
-}
-
+.nav-link:hover, 
 .nav-link.active {
-    color: #ffffff;
+  color: #ffffff;
 }
 
-/* Línea inferior única para el enlace activo (Sin duplicados) */
-.nav-link.active::after {
-    content: '';
-    position: absolute;
-    bottom: -4px;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background-color: var(--accent-color, #3b82f6);
-    border-radius: 2px;
-}
-
-/* Botón de Modo Tema */
-.theme-toggle {
-    background-color: transparent;
-    color: #cbd5e1;
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    padding: 0.45rem 1rem;
-    border-radius: 50px;
-    font-weight: 500;
-    font-size: 0.88rem;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    transition: all 0.2s ease;
-}
-
-.theme-toggle:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
-    border-color: rgba(255, 255, 255, 0.4);
-}
-
-/* Menú Desplegable (Dropdown) */
+/* Menú Desplegable */
 .dropdown {
-    position: relative;
-    display: inline-block;
+  position: relative;
+  display: inline-block;
 }
 
 .dropdown-btn {
-    background: transparent;
-    border: none;
-    color: #94a3b8;
-    font-family: inherit;
-    font-weight: 500;
-    font-size: 0.95rem;
-    cursor: pointer;
-    padding: 0.3rem 0;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    transition: color 0.2s ease;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  padding: 0.45rem 0.95rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
 }
 
 .dropdown-btn:hover {
-    color: #ffffff;
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .dropdown-content {
-    display: none;
-    position: absolute;
-    background-color: var(--card-bg, #1e293b);
-    min-width: 180px;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-    border: 1px solid var(--border-color, #334155);
-    border-radius: var(--radius-sm, 6px);
-    z-index: 1001;
-    overflow: hidden;
-    padding: 0.4rem 0;
-    margin-top: 0.4rem;
+  display: none;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.5rem);
+  background-color: var(--card-bg);
+  min-width: 200px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  z-index: 1005;
+  overflow: hidden;
+  padding: 0.35rem 0;
+  transition: background-color 0.25s ease, border-color 0.25s ease;
 }
 
 .dropdown-content a {
-    color: var(--text-secondary, #cbd5e1);
-    padding: 0.6rem 1rem;
-    text-decoration: none;
-    display: block;
-    font-size: 0.9rem;
-    transition: background 0.2s, color 0.2s;
+  color: var(--text-primary);
+  padding: 0.7rem 1.2rem;
+  text-decoration: none;
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background 0.18s ease, color 0.18s ease;
 }
 
-.dropdown-content a:hover,
+.dropdown-content a:hover, 
 .dropdown-content a.active {
-    background-color: rgba(37, 99, 235, 0.15);
-    color: #ffffff;
+  background-color: rgba(37, 99, 235, 0.12);
+  color: var(--accent);
 }
 
 .dropdown-divider {
-    height: 1px;
-    background-color: var(--border-color, #334155);
-    margin: 0.2rem 0;
+  height: 1px;
+  background-color: var(--border-color);
+  margin: 0.35rem 0;
 }
 
-.dropdown-content .dropdown-logout {
-    color: #f87171;
+.dropdown-logout {
+  color: #ef4444 !important;
 }
 
-.dropdown-content .dropdown-logout:hover {
-    background-color: rgba(248, 113, 113, 0.1);
-    color: #f87171;
+.dropdown-logout:hover {
+  background-color: rgba(239, 68, 68, 0.12) !important;
 }
 
-.dropdown:hover .dropdown-content {
-    display: block;
+.dropdown:hover .dropdown-content,
+.dropdown.active .dropdown-content {
+  display: block;
 }
 
-
-/* ====================================================================================
-   MEDIA QUERIES (COMPORTAMIENTO RESPONSIVE)
-   ==================================================================================== */
-
-/* VISTA ESCRITORIO (Pantallas medianas y grandes) */
-@media (min-width: 768px) {
-    .app-header {
-        padding: 1.2rem 3rem;
-    }
-    .header-container {
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-    }
-    .nav-menu {
-        margin-left: auto;
-    }
-    /* En escritorio el dropdown se alinea hacia la derecha del botón */
-    .dropdown-content {
-        right: 0;
-        left: auto;
-        transform: none;
-    }
+/* Botón Tema */
+.theme-toggle {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, transform 0.2s ease;
+  padding: 0;
+  flex-shrink: 0;
 }
 
-/* VISTA CELULAR (Pantallas menores a 768px) */
-@media (max-width: 767px) {
-    .app-header {
-        padding: 1.2rem 1rem;
-    }
-    .header-container {
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 1rem;
-    }
-    .nav-menu {
-        justify-content: center;
-        flex-wrap: wrap;
-        gap: 1.2rem;
-    }
-    /* En celular el dropdown se centra perfectamente respecto al botón */
-    .dropdown-content {
-        left: 50%;
-        right: auto;
-        transform: translateX(-50%);
-    }
+.theme-toggle:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
 }
 
-/* ==========================================
-   CONTENEDOR PRINCIPAL (Sticky Footer Compatible)
-   ========================================== */
+.menu-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 30px;
+  height: 21px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 1010;
+}
+
+.menu-toggle .bar {
+  height: 3px;
+  width: 100%;
+  background-color: #ffffff;
+  border-radius: 3px;
+  transition: all 0.3s ease;
+}
+
+/* ==========================================================================
+   2. CONTENEDOR PRINCIPAL
+   ========================================================================== */
 .app-main-container {
   flex: 1;
   width: 100%;
   display: flex;
   justify-content: center;
+  padding: 1.5rem 0;
 }
 
 .main-container { 
   max-width: 1000px; 
   width: 100%;
-  margin: 2.5rem auto; 
-  padding: 0 1.5rem; 
-  box-sizing: border-box;
+  margin: 0 auto; 
+  padding: 0 1.25rem; 
 }
 
-h2 { 
-  color: var(--text-primary, #0f172a); 
-  font-size: 1.6rem;
+.page-header {
+  margin-bottom: 1.25rem;
+}
+
+.page-header h2 { 
+  color: var(--text-primary); 
+  font-size: 1.5rem;
   font-weight: 700;
   letter-spacing: -0.02em;
-  margin-bottom: 1.25rem; 
+  margin: 0 0 0.25rem 0;
+}
+
+.page-header p {
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  margin: 0;
 }
 
 .list-section h3 {
-  color: var(--text-primary, #0f172a);
-  font-size: 1.2rem;
+  color: var(--text-primary);
+  font-size: 1.15rem;
   font-weight: 700;
   letter-spacing: -0.01em;
   margin-bottom: 1rem;
 }
 
-/* ==========================================
-   FORMULARIO DE REGISTRO DE RECURSOS
-   ========================================== */
+/* ==========================================================================
+   3. FORMULARIO DE REGISTRO
+   ========================================================================== */
 .form-section { 
-  background: var(--card-bg, #ffffff); 
-  padding: 1.5rem; 
-  border-radius: var(--radius-md, 10px); 
-  border: 1px solid var(--border-color, #e2e8f0); 
-  margin-bottom: 2rem; 
-  box-shadow: var(--shadow-sm, 0 1px 3px rgba(15, 23, 42, 0.08));
-  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  background: var(--card-bg); 
+  padding: 1.25rem; 
+  border-radius: var(--radius-md); 
+  border: 1px solid var(--border-color); 
+  margin-bottom: 1.75rem; 
+  box-shadow: var(--shadow-sm);
+  transition: background-color 0.25s ease, border-color 0.25s ease;
 }
 
 #resourceForm { 
   display: grid; 
   grid-template-columns: 1.5fr 2fr 2fr auto; 
-  gap: 1rem; 
+  gap: 0.85rem; 
   align-items: end; 
 }
 
@@ -305,125 +302,119 @@ h2 {
 }
 
 .form-group label { 
-  font-size: 0.82rem; 
+  font-size: 0.8rem; 
   font-weight: 600; 
-  color: var(--text-primary, #0f172a);
+  color: var(--text-primary);
   margin-bottom: 0.35rem; 
-  letter-spacing: -0.01em;
 }
 
 #resourceForm input { 
   width: 100%;
-  padding: 0.65rem 0.85rem; 
-  background-color: var(--input-bg, #ffffff);
-  color: var(--text-primary, #0f172a);
-  border: 1px solid var(--border-color, #cbd5e0); 
-  border-radius: var(--radius-sm, 6px); 
+  padding: 0.6rem 0.85rem; 
+  background-color: var(--filter-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color); 
+  border-radius: var(--radius-sm); 
   font-family: inherit;
-  font-size: 0.9rem; 
+  font-size: 0.88rem; 
   outline: none;
-  box-sizing: border-box;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease;
+  transition: border-color 0.2s ease;
 }
 
 #resourceForm input:focus { 
-  border-color: var(--accent, #2563eb);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  border-color: var(--accent);
 }
 
 .btn-submit { 
-  background-color: var(--accent, #2563eb); 
+  background-color: var(--accent); 
   color: #ffffff; 
-  border: 1px solid transparent; 
-  padding: 0.65rem 1.4rem; 
-  border-radius: var(--radius-sm, 6px); 
+  border: none; 
+  padding: 0.6rem 1.25rem; 
+  border-radius: var(--radius-sm); 
   font-family: inherit;
   font-weight: 600; 
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   cursor: pointer; 
   white-space: nowrap;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background-color 0.2s ease;
 }
 
 .btn-submit:hover { 
-  background-color: var(--accent-hover, #1d4ed8); 
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  background-color: var(--accent-hover); 
 }
 
-/* ==========================================
-   GRILLA Y TARJETAS DE RECURSOS
-   ========================================== */
+/* ==========================================================================
+   4. GRILLA DE RECURSOS
+   ========================================================================== */
 .resource-grid { 
   display: grid; 
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
-  gap: 1.25rem; 
+  gap: 1.15rem; 
 }
 
 .resource-card { 
-  background: var(--card-bg, #ffffff); 
-  border: 1px solid var(--border-color, #e2e8f0); 
-  border-radius: var(--radius-md, 10px); 
-  padding: 1.25rem; 
+  background: var(--card-bg); 
+  border: 1px solid var(--border-color); 
+  border-radius: var(--radius-md); 
+  padding: 1.15rem; 
   display: flex; 
   flex-direction: column; 
   justify-content: space-between; 
-  box-shadow: var(--shadow-sm, 0 1px 3px rgba(15, 23, 42, 0.08));
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.3s ease, background-color 0.3s ease;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.25s ease;
 }
 
 .resource-card:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(15, 23, 42, 0.1));
-  border-color: var(--accent, #2563eb);
+  box-shadow: var(--shadow-md);
+  border-color: var(--accent);
 }
 
 .resource-card h4 { 
-  color: var(--text-primary, #0f172a); 
+  color: var(--text-primary); 
   font-size: 1.05rem; 
   font-weight: 700;
-  letter-spacing: -0.01em;
-  margin-bottom: 0.25rem; 
+  margin: 0 0 0.25rem 0; 
+  word-break: break-word;
 }
 
 .resource-card span { 
-  font-size: 0.8rem; 
-  color: var(--accent, #2563eb); 
-  font-weight: 600; 
+  font-size: 0.75rem; 
+  color: var(--accent); 
+  font-weight: 700; 
   display: block; 
-  margin-bottom: 1rem; 
+  margin-bottom: 0.85rem; 
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
 
-/* Botón de Enlace Externo */
 .link-btn { 
   display: inline-block; 
   text-decoration: none; 
-  background-color: var(--filter-bg, #f8fafc); 
-  color: var(--text-primary, #0f172a); 
+  background-color: var(--filter-bg); 
+  color: var(--text-primary); 
   font-weight: 600; 
   padding: 0.55rem 0.9rem; 
-  border-radius: var(--radius-sm, 6px); 
+  border-radius: var(--radius-sm); 
   font-size: 0.85rem; 
-  margin-bottom: 1rem; 
+  margin-bottom: 0.85rem; 
   text-align: center; 
-  border: 1px solid var(--border-color, #cbd5e0);
+  border: 1px solid var(--border-color);
   transition: all 0.2s ease;
 }
 
 .link-btn:hover { 
-  background-color: var(--accent, #2563eb); 
+  background-color: var(--accent); 
   color: #ffffff; 
-  border-color: var(--accent, #2563eb);
+  border-color: var(--accent);
 }
 
-/* Botón de Eliminar Recurso */
 .btn-delete { 
   background: transparent; 
   color: #ef4444; 
   border: 1px solid rgba(239, 68, 68, 0.4); 
   padding: 0.4rem 0.8rem; 
-  border-radius: var(--radius-sm, 6px); 
+  border-radius: var(--radius-sm); 
   font-family: inherit;
   font-size: 0.82rem;
   font-weight: 600;
@@ -438,101 +429,42 @@ h2 {
   border-color: #ef4444;
 }
 
-/* Estado de Carga / Vacío */
 .loading-text { 
-  color: var(--text-muted, #94a3b8); 
+  color: var(--text-secondary); 
   font-style: italic; 
   font-size: 0.9rem;
   padding: 1rem 0;
 }
 
-/* ==========================================
-   PIE DE PÁGINA INSTITUCIONAL (Sticky Footer)
-   ========================================== */
+/* ==========================================================================
+   5. PIE DE PÁGINA
+   ========================================================================== */
 .app-footer {
-  background-color: var(--primary, #0f172a);
-  color: var(--header-text, #ffffff);
-  padding: 1.5rem 3rem;
-  border-top: 1px solid var(--border, #334155);
+  background-color: var(--header-bg);
+  color: #ffffff;
+  padding: 1.25rem 0;
+  border-top: 1px solid var(--border-color);
   width: 100%;
   margin-top: auto;
-  box-sizing: border-box;
 }
 
 .footer-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  max-width: 1300px;
+  max-width: 1200px;
   margin: 0 auto;
-  width: 100%;
 }
 
 .footer-container p {
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   color: #94a3b8;
-  text-align: center;
   margin: 0;
 }
 
 /* ==========================================================================
-   ADAPTACIÓN PARA MODO OSCURO (DARK MODE)
-   ========================================== */
-[data-theme="dark"] .form-section {
-  background-color: var(--card-bg, #1e293b);
-  border-color: var(--border-color, #334155);
-}
-
-[data-theme="dark"] .resource-card {
-  background-color: var(--card-bg, #1e293b);
-  border-color: var(--border-color, #334155);
-}
-
-[data-theme="dark"] .link-btn {
-  background-color: rgba(255, 255, 255, 0.03);
-  border-color: var(--border-color, #334155);
-}
-
-[data-theme="dark"] .link-btn:hover {
-  background-color: var(--accent, #2563eb);
-  border-color: var(--accent, #2563eb);
-}
-
-[data-theme="dark"] .btn-delete {
-  border-color: rgba(239, 68, 68, 0.3);
-  color: #fca5a5;
-}
-
-[data-theme="dark"] .btn-delete:hover {
-  background: #dc2626;
-  color: #ffffff;
-  border-color: #dc2626;
-}
-
-/* ==========================================================================
-   ADAPTABILIDAD RESPONSIVA (MÓVILES Y TABLETS)
-   ========================================== */
-@media (max-width: 860px) {
-  .app-header {
-    padding: 1rem 1.25rem;
-    flex-direction: column;
-    gap: 0.8rem;
-  }
-
-  .header-container {
-    flex-direction: column;
-    gap: 0.8rem;
-  }
-
-  .nav-menu {
-    margin-left: 0;
-    width: 100%;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 1rem;
-  }
-}
-
+   6. RESPONSIVO MÓVIL
+   ========================================================================== */
 @media (max-width: 850px) {
   #resourceForm { 
     grid-template-columns: 1fr 1fr; 
@@ -543,9 +475,55 @@ h2 {
   }
 }
 
+@media (max-width: 768px) {
+  .app-main-container {
+    padding: 1rem 0;
+  }
+
+  .menu-toggle {
+    display: flex;
+  }
+
+  .nav-menu {
+    position: fixed;
+    top: 60px;
+    right: -100%;
+    width: 260px;
+    height: calc(100vh - 60px);
+    background-color: var(--header-bg);
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1.5rem;
+    gap: 1.25rem;
+    box-shadow: -5px 0 15px rgba(0,0,0,0.3);
+    transition: right 0.3s ease;
+    z-index: 999;
+  }
+
+  .nav-menu.active {
+    right: 0;
+  }
+
+  .dropdown, .dropdown-btn {
+    width: 100%;
+  }
+
+  .dropdown-content {
+    position: static;
+    box-shadow: none;
+    border: none;
+    background-color: rgba(255, 255, 255, 0.05);
+    margin-top: 0.5rem;
+    width: 100%;
+  }
+
+  .dropdown-content a {
+    color: #cbd5e1;
+  }
+}
+
 @media (max-width: 580px) {
   .main-container {
-    margin: 1.5rem auto;
     padding: 0 1rem;
   }
 
@@ -561,25 +539,4 @@ h2 {
   .resource-grid {
     grid-template-columns: 1fr;
   }
-
-  .app-footer {
-    padding: 1.25rem;
-  }
-}
-
-/* Color rojo distintivo para la opción de Cerrar Sesión */
-.dropdown-logout {
-    color: #dc2626 !important; /* Rojo profesional */
-    font-weight: 500;
-}
-
-.dropdown-logout:hover {
-    background-color: rgba(220, 38, 38, 0.1) !important; /* Fondo rojizo suave al pasar el mouse */
-    color: #b91c1c !important; /* Rojo un poco más oscuro en hover */
-}
-
-/* Esto permite que se despliegue tanto por hover (PC) como por la clase .active generada por JS (Móvil) */
-.dropdown:hover .dropdown-content,
-.dropdown.active .dropdown-content {
-  display: block;
 }

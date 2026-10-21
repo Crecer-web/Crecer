@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Crear Formulario | CRECER</title>
     
     <!-- Iconos y Manifest PWA -->
@@ -18,37 +19,64 @@
 
 <body class="dashboard-body">
 
-<body class="welcome-page">
-
-    <header class="app-header">
-    <div class="header-container">
-        <div class="logo">
-            <a href="inicio.html">CRECER</a>
+    <!-- Banner de Notificación Flotante (In-App) -->
+    <div id="phoneNotification" class="phone-notification hidden" role="alert">
+        <div class="notification-header">
+            <div class="app-info">
+                <span class="app-icon">🚨</span>
+                <span class="app-name">CRECER AGENDA</span>
+            </div>
+            <span class="notification-time">Ahora</span>
         </div>
-        <nav class="nav-menu" id="navMenu" aria-label="Navegación principal">
-            <a href="inicio.html" class="nav-link">Inicio</a>
-            
-            <!-- Menú Desplegable de Módulos Unificado -->
-            <div class="dropdown">
-                <button class="dropdown-btn" id="dropdownBtn" aria-haspopup="true" aria-expanded="false">
-                    Módulos ▼
-                </button>
-                <div class="dropdown-content" id="dropdownContent">
-                    <a href="notas.html">Calificaciones</a>
-                    <a href="horario.html">Horario</a>
-                    <a href="recursos.html">Recursos</a>
-                    <a href="perfil.html">Mi Perfil</a>
-                    <a href="#" id="logoutBtn" class="dropdown-logout">Cerrar Sesión</a>
-                </div>
+        <div class="notification-body">
+            <h4 id="notifTitle">¡Alerta Guardada!</h4>
+            <p id="notifMessage">Se programó un aviso 24hs antes de tu entrega.</p>
+        </div>
+    </div>
+
+    <!-- Encabezado de la App -->
+    <header class="app-header">
+        <div class="header-container">
+            <div class="logo">
+                <a href="inicio.html">CRECER</a>
             </div>
 
-            <!-- Botón de Modo Claro / Oscuro Estándar -->
-            <button id="themeToggle" class="theme-toggle" aria-label="Cambiar tema">🌙 Tema</button>
-        </nav>
-    </div>
-</header>
+            <!-- Contenedor Unificado Alineado Totalmente a la Derecha -->
+            <div class="header-right-group">
+                <!-- Navegación Principal -->
+                <nav class="nav-menu" id="navMenu" aria-label="Navegación principal">
+                    <a href="inicio.html" class="nav-link">Inicio</a>
+                    
+                    <!-- Menú Desplegable de Módulos Unificado -->
+                    <div class="dropdown" id="modulesDropdown">
+                        <button class="dropdown-btn" id="dropdownBtn" aria-haspopup="true" aria-expanded="false" type="button">
+                            Módulos ▼
+                        </button>
+                        <div class="dropdown-content" id="dropdownContent">
+                            <a href="notas.html">Calificaciones</a>
+                            <a href="horario.html">Horario</a>
+                            <a href="recursos.html">Recursos</a>
+                            <a href="perfil.html">Mi Perfil</a>
+                            <div class="dropdown-divider"></div>
+                            <a href="#" id="logoutBtn" class="dropdown-logout">Cerrar Sesión</a>
+                        </div>
+                    </div>
+                </nav>
 
-    <!-- Contenedor Principal (Empuja el footer hacia abajo) -->
+                <!-- Botón de Conmutación de Tema (Siempre Fijo a la Derecha) -->
+                <button id="themeToggle" class="theme-toggle" type="button" aria-label="Cambiar tema">🌙</button>
+
+                <!-- Botón Hamburguesa para Dispositivos Móviles -->
+                <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú de navegación" type="button">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenedor Principal -->
     <main class="app-main-container">
         <div class="form-wrapper">
             <section class="form-card">
@@ -72,11 +100,11 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="materiaInput">Materia *</label>
-                            <input type="text" id="materiaInput" placeholder="Ej. Matemática, Historia" required>
+                            <input type="text" id="materiaInput" placeholder="Ej. Matemática, Historia" required autocomplete="off">
                         </div>
                         <div class="form-group">
                             <label for="temaInput">Tema / Título *</label>
-                            <input type="text" id="temaInput" placeholder="Ej. Ecuaciones de 2do Grado" required>
+                            <input type="text" id="temaInput" placeholder="Ej. Ecuaciones de 2do Grado" required autocomplete="off">
                         </div>
                     </div>
 
@@ -86,11 +114,16 @@
                         <textarea id="descripcionInput" rows="3" placeholder="Detalles de la entrega, pautas o contenido..."></textarea>
                     </div>
 
-                    <!-- Adjuntar Archivo / Material -->
+                    <!-- Adjuntar Archivo con diseño Dropzone customizado -->
                     <div class="form-group">
                         <label for="materialInput">Material de estudio / Adjuntos</label>
-                        <input type="file" id="materialInput" class="file-input">
-                        <small class="help-text">Puedes adjuntar guías, PDFs o imágenes de apoyo.</small>
+                        <div class="file-dropzone" id="dropzoneContainer">
+                            <input type="file" id="materialInput" class="file-input-hidden">
+                            <div class="file-dropzone-content">
+                                <span class="file-icon">📁</span>
+                                <span class="file-text" id="fileTextLabel">Haz clic para adjuntar guías, PDFs o imágenes de apoyo</span>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Fecha y Hora de entrega -->
@@ -106,7 +139,7 @@
                     </div>
 
                     <div class="form-actions">
-                        <button type="submit" id="btnGuardar" class="btn-primary">Guardar Formulario</button>
+                        <button type="submit" id="btnGuardar" class="btn-primary">💾 Guardar Formulario y Automatizar Alerta</button>
                         <a href="inicio.html" class="btn-secondary">Cancelar</a>
                     </div>
                 </form>
@@ -114,20 +147,15 @@
         </div>
     </main>
 
-    <!-- Pie de Página Institucional (Fijo al fondo y centrado) -->
-<footer class="footer">
-    <div class="footer-content">
-        <p>&copy; 2026 <strong>CRECER</strong>. Todos los derechos reservados.</p>
-        <div class="footer-links">
-            <a href="privacidad.html">Privacidad</a>
-            <a href="terminos.html">Términos</a>
-            <a href="soporte.html">Soporte</a>
-        </div>
+<!-- Pie de Página Institucional Mínimo -->
+<footer class="app-footer">
+    <div class="footer-container">
+        <p>&copy; 2026 <strong>CRECER</strong> &bull; Plataforma Educativa Integrada</p>
     </div>
 </footer>
 
+    <!-- Scripts de la aplicación -->
     <script type="module" src="js/global.js"></script>
     <script type="module" src="js/formularios.js"></script>
-    <script type="module" src="js/login.js"></script>
 </body>
 </html>

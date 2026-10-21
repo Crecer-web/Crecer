@@ -2,15 +2,16 @@ import { auth, db } from './firebase-config.js';
 import { 
     createUserWithEmailAndPassword, 
     signInWithPopup, 
-    GoogleAuthProvider 
+    GoogleAuthProvider,
+    updateProfile
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { observarSesion, mostrarToast } from './global.js';
+import { mostrarToast } from './global.js';
 
 /**
- * Guarda o actualiza la información de perfil en la colección "usuarios" usando el UID como clave.
- * @param {string} uid - Identificador único del usuario de Firebase Auth
- * @param {Object} datos - Objeto con las propiedades del usuario a fusionar
+ * Guarda o actualiza la información del perfil del usuario en la colección "usuarios" de Firestore.
+ * @param {string} uid - Identificador único del usuario de Firebase Auth.
+ * @param {Object} datos - Objeto con los atributos del usuario.
  */
 async function guardarPerfilUsuario(uid, datos) {
     try {
@@ -20,7 +21,7 @@ async function guardarPerfilUsuario(uid, datos) {
             ...datos
         }, { merge: true });
     } catch (error) {
-        console.error("Error al guardar perfil en Firestore:", error);
+        console.error("Error al guardar el perfil en Firestore:", error);
         throw error;
     }
 }
@@ -30,21 +31,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnGoogleAuth = document.getElementById('btnGoogleAuth');
     const btnSubmitRegister = document.getElementById('btnSubmitRegister');
 
-    // 1. Registro con correo electrónico y contraseña
+    // 1. Registro manual con Nombre, Apellido, Correo y Contraseña
     if (registerForm) {
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
+            const nameInput = document.getElementById('registerName');
+            const lastNameInput = document.getElementById('registerLastName');
             const emailInput = document.getElementById('registerEmail');
             const passwordInput = document.getElementById('registerPassword');
-            const ageInput = document.getElementById('registerAge');
 
+            const nombre = nameInput ? nameInput.value.trim() : '';
+            const apellido = lastNameInput ? lastNameInput.value.trim() : '';
             const email = emailInput ? emailInput.value.trim() : '';
             const password = passwordInput ? passwordInput.value.trim() : '';
-            const age = ageInput ? ageInput.value.trim() : '';
 
-            // Validaciones básicas de cliente
-            if (!email || !password) {
+            // Validaciones de formulario
+            if (!nombre || !apellido || !email || !password) {
                 mostrarToast('Por favor, completa todos los campos requeridos.', 'danger');
                 return;
             }
@@ -61,19 +64,27 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
+                // Crear usuario en Firebase Authentication
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
-                // Guardar datos iniciales en la base de datos Firestore asociados al UID
+                // Actualizar el perfil básico del usuario en Auth (displayName)
+                const nombreCompleto = `${nombre} ${apellido}`;
+                await updateProfile(user, {
+                    displayName: nombreCompleto
+                });
+
+                // Guardar en la base de datos Firestore el perfil estructurado
                 await guardarPerfilUsuario(user.uid, {
+                    nombre: nombre,
+                    apellido: apellido,
                     email: email,
-                    edad: age,
                     fotoPerfil: '',
                     creadoEn: new Date().toISOString(),
                     actualizadoEn: new Date().toISOString()
                 });
 
-                mostrarToast('¡Cuenta creada con éxito! Redirigiendo...', 'success');
+                mostrarToast(`¡Bienvenido/a ${nombre}! Tu cuenta ha sido creada.`, 'success');
 
                 setTimeout(() => {
                     window.location.href = 'inicio.html';
@@ -95,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 mostrarToast(msg, 'danger');
 
-                // Restablecer botón en caso de error
+                // Restablecer botón en caso de falla
                 if (btnSubmitRegister) {
                     btnSubmitRegister.disabled = false;
                     btnSubmitRegister.textContent = 'Crear Cuenta';
@@ -104,25 +115,30 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 2. Registro / Inicio de Sesión con Google
+    // 2. Registro o Inicio de Sesión rápido mediante Google
     if (btnGoogleAuth) {
         btnGoogleAuth.addEventListener('click', async () => {
             const provider = new GoogleAuthProvider();
-            
             btnGoogleAuth.disabled = true;
 
             try {
                 const result = await signInWithPopup(auth, provider);
                 const user = result.user;
 
+                // Separar el nombre y apellido si displayName existe
+                const partesNombre = (user.displayName || '').split(' ');
+                const nombre = partesNombre[0] || 'Usuario';
+                const apellido = partesNombre.slice(1).join(' ') || '';
+
                 await guardarPerfilUsuario(user.uid, {
+                    nombre: nombre,
+                    apellido: apellido,
                     email: user.email,
-                    nombre: user.displayName || '',
                     fotoPerfil: user.photoURL || '',
                     actualizadoEn: new Date().toISOString()
                 });
 
-                mostrarToast('¡Bienvenido/a a CRECER!', 'success');
+                mostrarToast(`¡Bienvenido/a ${nombre}!`, 'success');
 
                 setTimeout(() => {
                     window.location.href = 'inicio.html';
@@ -143,28 +159,4 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-});
-
-// Soporte para menús desplegables en móviles o interfaces con componente dropdown
-document.addEventListener("DOMContentLoaded", function () {
-    const dropdowns = document.querySelectorAll(".dropdown");
-
-    dropdowns.forEach(function (dropdown) {
-        const dropBtn = dropdown.querySelector(".dropbtn") || dropdown.querySelector(".dropdown-btn");
-
-        if (dropBtn) {
-            dropBtn.addEventListener("click", function (e) {
-                e.preventDefault();
-                dropdown.classList.toggle("active");
-            });
-        }
-    });
-
-    window.addEventListener("click", function (e) {
-        dropdowns.forEach(function (dropdown) {
-            if (!dropdown.contains(e.target)) {
-                dropdown.classList.remove("active");
-            }
-        });
-    });
 });

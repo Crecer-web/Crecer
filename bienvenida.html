@@ -17,21 +17,20 @@
 </head>
 <body class="welcome-page">
 
-    <!-- Encabezado Principal (Título a la Izquierda / Botones a la Derecha) -->
+    <!-- Encabezado Principal -->
     <header class="header">
         <div class="header-content">
             <div class="logo">
                 <a href="bienvenida.html">CRECER</a>
             </div>
             <nav class="nav-menu" aria-label="Navegación principal">
-                <a href="login.html" class="btn-secondary">Iniciar Sesión</a>
-                <!-- CORREGIDO: Ahora apunta correctamente a register.html -->
-                <a href="register.html" class="btn-primary">Registrarse</a>
+                <a href="login.html" id="navLoginBtn" class="btn-secondary">Iniciar Sesión</a>
+                <a href="register.html" id="navRegisterBtn" class="btn-primary">Registrarse</a>
             </nav>
         </div>
     </header>
 
-    <!-- Contenedor Principal (Evita que el contenido toque las paredes) -->
+    <!-- Contenedor Principal -->
     <main class="main-container">
         
         <!-- Sección Hero / Presentación -->
@@ -41,8 +40,7 @@
             <p>La plataforma integral diseñada para organizar tus tareas, exámenes, horarios y calificaciones en un solo lugar de manera eficiente y segura.</p>
             
             <div class="hero-buttons">
-                <!-- CORREGIDO: El botón principal de empezar ahora lleva al registro -->
-                <a href="register.html" class="btn-hero-primary">Comenzar Ahora</a>
+                <a href="register.html" id="heroStartBtn" class="btn-hero-primary">Comenzar Ahora</a>
                 <a href="#caracteristicas" class="btn-hero-secondary">Saber Más</a>
             </div>
         </section>
@@ -56,21 +54,19 @@
 
             <div class="features-grid">
                 <article class="feature-card">
-                    <div class="feature-icon-wrapper">
-                        <!-- Icono decorativo o SVG opcional -->
-                    </div>
+                    <div class="feature-icon-wrapper">📝</div>
                     <h3>Gestión de Formularios</h3>
                     <p>Crea registros detallados de tus Tareas y Exámenes, adjuntando material de estudio y fechas límites de entrega sin complicaciones.</p>
                 </article>
 
                 <article class="feature-card">
-                    <div class="feature-icon-wrapper"></div>
+                    <div class="feature-icon-wrapper">📊</div>
                     <h3>Seguimiento de Notas</h3>
                     <p>Lleva el control absoluto de tus calificaciones por materia y visualiza tu promedio general en tiempo real con analíticas claras.</p>
                 </article>
 
                 <article class="feature-card">
-                    <div class="feature-icon-wrapper"></div>
+                    <div class="feature-icon-wrapper">📅</div>
                     <h3>Horario y Recursos</h3>
                     <p>Organiza tu agenda semanal de clases y mantén tu biblioteca personal de documentos y enlaces siempre al alcance de tu mano.</p>
                 </article>
@@ -79,19 +75,14 @@
 
     </main>
 
-    <!-- Pie de Página Institucional (Fijo abajo, texto centrado, enlaces a la derecha) -->
-<footer class="footer">
-    <div class="footer-content">
-        <p>&copy; 2026 <strong>CRECER</strong>. Todos los derechos reservados.</p>
-        <div class="footer-links">
-            <a href="privacidad.html">Privacidad</a>
-            <a href="terminos.html">Términos</a>
-            <a href="soporte.html">Soporte</a>
-        </div>
+<!-- Pie de Página Institucional Mínimo -->
+<footer class="app-footer">
+    <div class="footer-container">
+        <p>&copy; 2026 <strong>CRECER</strong> &bull; Plataforma Educativa Integrada</p>
     </div>
 </footer>
 
-    <script type="module" src="js/global.js"></script>
-    <script type="module" src="js/login.js"></script>
+    <!-- Carga única del script de bienvenida (Module) -->
+    <script type="module" src="js/bienvenida.js"></script>
 </body>
 </html>

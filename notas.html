@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Notas y Promedios | CRECER</title>
     
     <!-- Iconos y Manifest PWA -->
@@ -17,80 +18,109 @@
 </head>
 <body class="dashboard-body">
 
-<body class="welcome-page">
-
+    <!-- Encabezado de Navegación Institucional -->
     <header class="app-header">
-    <div class="header-container">
-        <div class="logo">
-            <a href="inicio.html">CRECER</a>
-        </div>
-        <nav class="nav-menu" id="navMenu" aria-label="Navegación principal">
-            <a href="inicio.html" class="nav-link">Inicio</a>
-            
-            <!-- Menú Desplegable de Módulos Unificado -->
-            <div class="dropdown">
-                <button class="dropdown-btn" id="dropdownBtn" aria-haspopup="true" aria-expanded="false">
-                    Módulos ▼
-                </button>
-                <div class="dropdown-content" id="dropdownContent">
-                    <a href="recursos.html">Recursos</a>
-                    <a href="perfil.html">Mi Perfil</a>
-                    <a href="#" id="logoutBtn" class="dropdown-logout">Cerrar Sesión</a>
-                </div>
+        <div class="header-container">
+            <div class="logo">
+                <a href="inicio.html">CRECER</a>
             </div>
 
-            <!-- Botón de Modo Claro / Oscuro Estándar -->
-            <button id="themeToggle" class="theme-toggle" aria-label="Cambiar tema">🌙 Tema</button>
-        </nav>
-    </div>
-</header>
+            <!-- Contenedor Unificado Alineado a la Derecha -->
+            <div class="header-right-group">
+                <!-- Navegación Principal -->
+                <nav class="nav-menu" id="navMenu" aria-label="Navegación principal">
+                    <a href="inicio.html" class="nav-link">Inicio</a>
+                    
+                    <!-- Menú Desplegable de Módulos Unificado -->
+                    <div class="dropdown" id="modulesDropdown">
+                        <button class="dropdown-btn" id="dropdownBtn" aria-haspopup="true" aria-expanded="false" type="button">
+                            Módulos ▼
+                        </button>
+                        <div class="dropdown-content" id="dropdownContent">
+                            <a href="horario.html">Horario</a>
+                            <a href="recursos.html">Recursos</a>
+                            <a href="perfil.html">Mi Perfil</a>
+                            <a href="#" id="logoutBtn" class="dropdown-logout">Cerrar Sesión</a>
+                        </div>
+                    </div>
+                </nav>
 
-    <!-- Contenedor Principal (Compatible con Sticky Footer) -->
+                <!-- Botón de Conmutación de Tema (Funcional al primer clic) -->
+                <button id="themeToggle" class="theme-toggle" type="button" aria-label="Cambiar tema">🌙</button>
+
+                <!-- Botón Hamburguesa para Dispositivos Móviles -->
+                <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú de navegación" type="button">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenedor Principal -->
     <main class="app-main-container">
         <div class="main-container">
             
-            <!-- Resumen de Promedio General -->
+            <!-- Resumen de Promedio General Avanzado -->
             <section class="promedio-hero">
                 <div class="promedio-card">
-                    <h2>Promedio General</h2>
-                    <div class="promedio-val" id="promedioGeneral">--</div>
-                    <p id="promedioEstado">Registra tus calificaciones para calcular tu desempeño.</p>
+                    <div class="promedio-card-header">
+                        <h2>Panel de Rendimiento Académico</h2>
+                        <span class="badge-periodo">Año Lectivo 2026</span>
+                    </div>
+                    <div class="promedio-body-content">
+                        <div class="promedio-val-wrapper">
+                            <div class="promedio-val" id="promedioGeneral">--</div>
+                            <span class="promedio-scale">/ 10.0</span>
+                        </div>
+                        <p id="promedioEstado">Registra tus calificaciones en el sistema para calcular de forma automática tu desempeño general y estadísticas de aprobación.</p>
+                    </div>
                 </div>
             </section>
 
             <div class="notas-layout">
-                <!-- Formulario para agregar calificación -->
+                <!-- Formulario Extendido para agregar calificación -->
                 <section class="form-card-notas">
-                    <h3>Agregar Calificación</h3>
+                    <h3>Registrar Nueva Calificación</h3>
+                    <p class="form-subtitle">Ingresa los datos detallados de tu examen o trabajo práctico.</p>
                     <form id="notaForm" novalidate>
                         <div class="form-group">
-                            <label for="materiaNotaInput">Materia *</label>
-                            <input type="text" id="materiaNotaInput" placeholder="Ej. Matemática, Lengua" required>
+                            <label for="materiaNotaInput">Materia o Espacio Curricular *</label>
+                            <input type="text" id="materiaNotaInput" placeholder="Ej. Matemática, Programación" required autocomplete="off">
                         </div>
 
                         <div class="form-group">
-                            <label for="evaluacionInput">Evaluación / Instancia *</label>
-                            <input type="text" id="evaluacionInput" placeholder="Ej. Parcial 1, Trabajo Práctico" required>
+                            <label for="evaluacionInput">Instancia Evaluativa / Trimestre *</label>
+                            <input type="text" id="evaluacionInput" placeholder="Ej. Parcial 1, Trabajo Práctico Integrador" required autocomplete="off">
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="calificacionInput">Nota (1 - 10) *</label>
+                                <label for="calificacionInput">Calificación (1 - 10) *</label>
                                 <input type="number" id="calificacionInput" step="0.1" min="1" max="10" placeholder="Ej. 8.5" required>
                             </div>
                             <div class="form-group">
-                                <label for="fechaNotaInput">Fecha</label>
+                                <label for="fechaNotaInput">Fecha de Evaluación</label>
                                 <input type="date" id="fechaNotaInput">
                             </div>
                         </div>
 
-                        <button type="submit" id="btnGuardarNota" class="btn-primary">Registrar Nota</button>
+                        <div class="form-group">
+                            <label for="observacionesInput">Observaciones o Comentarios (Opcional)</label>
+                            <input type="text" id="observacionesInput" placeholder="Ej. Recuperatorio, tema unidades 1 al 3" autocomplete="off">
+                        </div>
+
+                        <button type="submit" id="btnGuardarNota" class="btn-primary">💾 Registrar Calificación</button>
                     </form>
                 </section>
 
-                <!-- Lista de Calificaciones Cargadas -->
+                <!-- Historial Ampliado de Calificaciones Cargadas -->
                 <section class="list-section-notas">
-                    <h3>Historial de Notas</h3>
+                    <div class="list-header-flex">
+                        <h3>Historial Académico Detallado</h3>
+                        <span class="badge-total-items" id="totalNotasBadge">0 registros</span>
+                    </div>
                     <div id="notasGrid" class="notas-grid">
                         <!-- Se renderiza dinámicamente -->
                     </div>
@@ -100,20 +130,15 @@
         </div>
     </main>
 
-    <!-- Pie de Página Institucional (Sticky Footer) -->
-<footer class="footer">
-    <div class="footer-content">
-        <p>&copy; 2026 <strong>CRECER</strong>. Todos los derechos reservados.</p>
-        <div class="footer-links">
-            <a href="privacidad.html">Privacidad</a>
-            <a href="terminos.html">Términos</a>
-            <a href="soporte.html">Soporte</a>
-        </div>
+<!-- Pie de Página Institucional Mínimo -->
+<footer class="app-footer">
+    <div class="footer-container">
+        <p>&copy; 2026 <strong>CRECER</strong> &bull; Plataforma Educativa Integrada</p>
     </div>
 </footer>
 
+    <!-- Scripts de la Aplicación -->
     <script type="module" src="js/global.js"></script>
     <script type="module" src="js/notas.js"></script>
-    <script type="module" src="js/login.js"></script>
 </body>
 </html>

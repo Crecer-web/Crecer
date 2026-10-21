@@ -7,7 +7,7 @@
   --accent: #2563eb;         /* Royal Blue */
   --accent-hover: #1d4ed8;
   
-  --bg-main: #f8fafc;        /* Off-white */
+  --bg-main: #f8fafc;
   --bg-color: #f8fafc;
   --card-bg: #ffffff;
   
@@ -64,9 +64,7 @@
   --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
 }
 
-/* ==========================================================================
-   RESET GLOBAL Y ESTILOS BASE (Con Layout Flex sticky footer)
-   ========================================================================== */
+/* Reset Global y Estilos Base */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -87,13 +85,13 @@ body {
   flex-direction: column;
   -webkit-font-smoothing: antialiased;
   transition: background-color 0.3s ease, color 0.3s ease;
-  overflow-x: hidden; /* Evita scrolls horizontales no deseados */
+  overflow-x: hidden;
 }
 
 /* ==========================================================================
-   HEADER Y NAVEGACIÓN PROFESIONAL (CORREGIDO PARA DESPLEGABLES)
+   HEADER Y NAVEGACIÓN
    ========================================================================== */
-.header {
+.header, .app-header {
   background-color: var(--header-bg);
   color: var(--header-text);
   padding: 0.85rem 2.5rem;
@@ -102,11 +100,10 @@ body {
   align-items: center;
   position: sticky;
   top: 0;
-  z-index: 9999; /* Z-index extremadamente alto para que flote sobre todo el cuerpo */
+  z-index: 1000;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
   gap: 1.5rem;
   width: 100%;
-  overflow: visible !important; /* CRUCIAL: Permite que el menú salga de los límites del header */
 }
 
 .brand-container, .logo {
@@ -127,22 +124,10 @@ body {
   gap: 0.5rem;
 }
 
-.acronym-badge {
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  background-color: rgba(255, 255, 255, 0.12);
-  padding: 0.2rem 0.55rem;
-  border-radius: var(--radius-sm);
-  color: #e2e8f0;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-}
-
 .nav, .nav-menu {
   display: flex;
   align-items: center;
   gap: 1.5rem;
-  overflow: visible !important; /* CRUCIAL: Evita cortes en contenedores internos */
 }
 
 .nav a, .nav-link, .nav-menu a {
@@ -165,15 +150,8 @@ body {
   border-bottom-color: var(--accent);
 }
 
-.nav-auth {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex-shrink: 0;
-}
-
-/* Botón de Conmutación de Modo Oscuro */
-.theme-toggle {
+/* Conmutador de Modo Oscuro */
+.theme-toggle, .btn-theme-nav {
   background: transparent;
   border: 1px solid var(--border-color);
   color: var(--header-text);
@@ -188,18 +166,17 @@ body {
   transition: all 0.2s ease;
 }
 
-.theme-toggle:hover {
+.theme-toggle:hover, .btn-theme-nav:hover {
   background-color: rgba(255, 255, 255, 0.1);
   border-color: #ffffff;
 }
 
 /* ==========================================================================
-   MENÚ DESPLEGABLE (DROPDOWN) - TOTALMENTE VISIBLE Y CENTRADO
+   MENÚ DESPLEGABLE (DROPDOWN)
    ========================================================================== */
 .dropdown {
   position: relative;
   display: inline-block;
-  overflow: visible !important;
 }
 
 .dropdown-btn {
@@ -226,25 +203,24 @@ body {
   display: none;
   position: absolute;
   right: 0;
-  top: calc(100% + 0.6rem); /* Se ubica de forma limpia por debajo del botón */
+  top: calc(100% + 0.6rem);
   background-color: var(--card-bg);
   min-width: 200px;
   box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.3), var(--shadow-lg);
   border-radius: var(--radius-md);
   border: 1px solid var(--border-color);
   overflow: hidden;
-  z-index: 10000; /* Prioridad máxima por encima de cualquier elemento <main> o cuerpo */
-  animation: fadeIn 0.2s ease;
+  z-index: 1005;
 }
 
 .dropdown-content a {
   color: var(--text-primary);
   padding: 0.75rem 1rem;
   text-decoration: none;
-  display: flex;                  /* Cambiado a flex para control total del centrado */
+  display: flex;
   align-items: center;
-  justify-content: center;        /* Centra el texto horizontalmente */
-  text-align: center;             /* Asegura la alineación simétrica del texto */
+  justify-content: center;
+  text-align: center;
   font-size: 0.88rem;
   font-weight: 500;
   border-bottom: 1px solid var(--border-color);
@@ -260,188 +236,269 @@ body {
   color: var(--accent);
 }
 
-/* Control de visibilidad mediante hover (PC) o clase .active (Móvil/JS) */
 .dropdown:hover .dropdown-content,
 .dropdown.active .dropdown-content,
 .dropdown-content.show {
   display: block;
 }
 
-/* Color rojo distintivo para la opción de Cerrar Sesión */
 .dropdown-logout {
-  color: #dc2626 !important; /* Rojo profesional */
+  color: #dc2626 !important;
   font-weight: 500;
 }
 
 .dropdown-logout:hover {
-  background-color: rgba(220, 38, 38, 0.1) !important; /* Fondo rojizo suave al pasar el mouse */
-  color: #b91c1c !important; /* Rojo un poco más oscuro en hover */
+  background-color: rgba(220, 38, 38, 0.1) !important;
+  color: #b91c1c !important;
 }
 
 /* ==========================================================================
-   ESTILOS PARA EL LOGO Y MARCA DE LA AGENDA
+   MODAL DE CONFIRMACIÓN PERSONALIZADO (REEMPLAZO DE confirm())
    ========================================================================== */
-.brand-logo {
+.custom-confirm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(5px);
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
+  z-index: 10000;
+  padding: 1rem;
+  box-sizing: border-box;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
 }
 
-.logo-img {
-  width: 42px;
-  height: 42px;
-  object-fit: contain;
-  border-radius: 10px;
-  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
-  transition: transform 0.2s ease;
+.custom-confirm-overlay.show {
+  opacity: 1;
 }
 
-.logo-img:hover {
-  transform: scale(1.05);
+.custom-confirm-card {
+  background: var(--card-bg, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 400px;
+  padding: 1.5rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+  transform: translateY(10px) scale(0.95);
+  transition: transform 0.2s ease-in-out;
 }
 
-.brand-title {
-  font-size: 1.25rem;
+.custom-confirm-overlay.show .custom-confirm-card {
+  transform: translateY(0) scale(1);
+}
+
+.custom-confirm-card h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
   font-weight: 700;
-  letter-spacing: 0.05em;
+  color: var(--text-primary, #0f172a);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.custom-confirm-card p {
+  margin: 0 0 1.5rem 0;
+  font-size: 0.92rem;
+  color: var(--text-secondary, #64748b);
+  line-height: 1.5;
+}
+
+.custom-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.btn-confirm-cancel {
+  background-color: transparent;
+  border: 1px solid var(--border-color, #cbd5e1);
+  color: var(--text-primary, #0f172a);
+  padding: 0.55rem 1.1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-confirm-cancel:hover {
+  background-color: var(--filter-bg, #f1f5f9);
+}
+
+.btn-confirm-accept {
+  background-color: #ef4444;
+  color: #ffffff;
+  border: none;
+  padding: 0.55rem 1.1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-confirm-accept:hover {
+  background-color: #dc2626;
+}
+
+/* Modo Oscuro para Modal de Confirmación */
+[data-theme="dark"] .custom-confirm-card {
+  background-color: #1e293b;
+  border-color: #334155;
   color: #f8fafc;
 }
 
-/* ==========================================================================
-   BOTONES FORMALES Y COMPONENTES
-   ========================================================================== */
-.btn, .btn-primary, .btn-secondary, .btn-submit, .btn-logout {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.6rem 1.25rem;
-  font-size: 0.88rem;
-  font-weight: 600;
-  border-radius: var(--radius-sm);
-  text-decoration: none;
-  cursor: pointer;
-  border: 1px solid transparent;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+[data-theme="dark"] .custom-confirm-card p {
+  color: #94a3b8;
 }
 
-.btn-primary, .btn-submit {
-  background-color: var(--accent);
-  color: #ffffff;
+[data-theme="dark"] .btn-confirm-cancel {
+  border-color: #475569;
+  color: #f8fafc;
 }
 
-.btn-primary:hover, .btn-submit:hover {
-  background-color: var(--accent-hover);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-}
-
-.btn-secondary, .btn-logout {
-  background-color: transparent;
-  color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.25);
-}
-
-.btn-secondary:hover, .btn-logout:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  border-color: #ffffff;
-}
-
-a.link-action {
-  color: var(--accent);
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 0.9rem;
-  transition: color 0.2s ease;
-}
-
-a.link-action:hover {
-  text-decoration: underline;
-  color: var(--accent-hover);
-}
-
-/* Estilos globales para Controles de Formulario */
-input, select, textarea {
-  background-color: var(--input-bg);
-  color: var(--text-primary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  padding: 0.65rem 0.85rem;
-  font-family: var(--font-main);
-  font-size: 0.9rem;
-  outline: none;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease, color 0.3s ease;
-}
-
-input:focus, select:focus, textarea:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+[data-theme="dark"] .btn-confirm-cancel:hover {
+  background-color: #334155;
 }
 
 /* ==========================================================================
-   SISTEMA DE NOTIFICACIONES (TOASTS)
+   SISTEMA DE NOTIFICACIONES Y ALERTAS (TOASTS)
    ========================================================================== */
 #toast-container {
   position: fixed;
-  bottom: 24px;
-  right: 24px;
+  bottom: 1.5rem;
+  right: 1.5rem;
   z-index: 99999;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0.75rem;
+  max-width: 380px;
+  width: calc(100% - 3rem);
   pointer-events: none;
 }
 
 .toast {
   pointer-events: auto;
-  min-width: 280px;
-  max-width: 400px;
-  padding: 0.9rem 1.25rem;
-  border-radius: var(--radius-md);
-  color: #ffffff;
-  font-weight: 500;
-  font-size: 0.9rem;
-  box-shadow: var(--shadow-lg);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
-  animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  gap: 0.85rem;
+  padding: 0.9rem 1.1rem;
+  border-radius: var(--radius-md, 10px);
+  background: var(--card-bg, #ffffff);
+  color: var(--text-primary, #0f172a);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.4;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.15), 0 8px 10px -6px rgba(15, 23, 42, 0.1);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-left: 5px solid #2563eb;
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  transform: translateY(1rem) scale(0.95);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.toast.toast-success { background-color: #10b981; }
-.toast.toast-danger  { background-color: #ef4444; }
-.toast.toast-info    { background-color: #3b82f6; }
-
-/* Animaciones */
-@keyframes slideIn {
-  from { transform: translateX(100%); opacity: 0; }
-  to   { transform: translateX(0); opacity: 1; }
+.toast.show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
 }
 
-@keyframes fadeOut {
-  from { transform: translateX(0); opacity: 1; }
-  to   { transform: translateX(100%); opacity: 0; }
+.toast-success {
+  border-left-color: #10b981;
+  background: linear-gradient(to right, rgba(16, 185, 129, 0.08), var(--card-bg, #ffffff));
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-6px); }
-  to   { opacity: 1; transform: translateY(0); }
+.toast-danger,
+.toast-error {
+  border-left-color: #ef4444;
+  background: linear-gradient(to right, rgba(239, 68, 68, 0.08), var(--card-bg, #ffffff));
+}
+
+.toast-warning {
+  border-left-color: #f59e0b;
+  background: linear-gradient(to right, rgba(245, 158, 11, 0.08), var(--card-bg, #ffffff));
+}
+
+.toast-info {
+  border-left-color: #3b82f6;
+  background: linear-gradient(to right, rgba(59, 130, 246, 0.08), var(--card-bg, #ffffff));
+}
+
+.toast-close {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary, #64748b);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0.2rem;
+  line-height: 1;
+  border-radius: 4px;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.toast-close:hover {
+  color: var(--text-primary, #0f172a);
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Modo Oscuro para Toasts */
+[data-theme="dark"] .toast {
+  background-color: #1e293b;
+  color: #f8fafc;
+  border-color: #334155;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .toast-success {
+  background: linear-gradient(to right, rgba(16, 185, 129, 0.15), #1e293b);
+}
+
+[data-theme="dark"] .toast-danger,
+[data-theme="dark"] .toast-error {
+  background: linear-gradient(to right, rgba(239, 68, 68, 0.15), #1e293b);
+}
+
+[data-theme="dark"] .toast-warning {
+  background: linear-gradient(to right, rgba(245, 158, 11, 0.15), #1e293b);
+}
+
+[data-theme="dark"] .toast-info {
+  background: linear-gradient(to right, rgba(59, 130, 246, 0.15), #1e293b);
+}
+
+@media (max-width: 640px) {
+  #toast-container {
+    bottom: 1rem;
+    right: 1rem;
+    left: 1rem;
+    width: auto;
+    max-width: none;
+  }
 }
 
 /* ==========================================================================
-   ESTILOS GLOBALES DEL PIE DE PÁGINA (FOOTER)
+   PIE DE PÁGINA (FOOTER)
    ========================================================================== */
-.footer {
+.footer, .app-footer {
   width: 100%;
   background-color: #0f172a;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   padding: 20px 0;
-  margin-top: auto; /* Empuja el footer al final si el contenedor usa flexbox */
+  margin-top: auto;
   color: #94a3b8;
   font-size: 0.9rem;
 }
 
-.footer-content {
+.footer-content, .footer-container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px;
@@ -452,12 +509,8 @@ input:focus, select:focus, textarea:focus {
   gap: 15px;
 }
 
-.footer-content p {
+.footer-content p, .footer-container p {
   margin: 0;
-}
-
-.footer-content strong {
-  color: #f8fafc;
 }
 
 .footer-links {
@@ -468,7 +521,7 @@ input:focus, select:focus, textarea:focus {
 .footer-links a {
   color: #94a3b8;
   text-decoration: none;
-  transition: color 0.2s ease, text-decoration 0.2s ease;
+  transition: color 0.2s ease;
 }
 
 .footer-links a:hover {
@@ -477,64 +530,76 @@ input:focus, select:focus, textarea:focus {
 }
 
 /* ==========================================================================
-   ADAPTABILIDAD RESPONSIVA (MOBILE & TABLET)
+   PIE DE PÁGINA INSTITUCIONAL UNIFICADO - CRECER
    ========================================================================== */
-@media (max-width: 768px) {
-  .header {
-    padding: 0.8rem 1.25rem;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    overflow: visible !important;
-  }
-
-  .nav, .nav-menu {
-    width: 100%;
-    order: 3;
-    overflow-x: auto;
-    overflow-y: visible !important;
-    padding-bottom: 0.4rem;
-    gap: 1.2rem;
-    white-space: nowrap;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .nav-auth {
-    order: 2;
-  }
-
-  .btn, .btn-primary, .btn-secondary, .btn-submit, .btn-logout {
-    padding: 0.5rem 0.85rem;
-    font-size: 0.82rem;
-  }
-
-  /* Rejillas dinámicas de formularios en móviles */
-  #taskForm, 
-  #examForm, 
-  #gradeForm, 
-  #scheduleForm, 
-  #resourceForm,
-  .filter-section {
-    grid-template-columns: 1fr !important;
-  }
-
-  #toast-container {
-    left: 16px;
-    right: 16px;
-    bottom: 16px;
-  }
-
-  .toast {
-    min-width: 100%;
-  }
+.app-footer {
+  width: 100%;
+  background-color: var(--header-bg, #0f172a);
+  color: #94a3b8;
+  padding: 1rem 0;
+  border-top: 1px solid var(--border-color, #334155);
+  margin-top: auto;
 }
 
+.footer-container {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.footer-logo {
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+  font-size: 0.95rem;
+}
+
+.footer-container p {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.footer-links {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.footer-links a {
+  color: #94a3b8;
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.footer-links a:hover {
+  color: #ffffff;
+}
+
+/* Adaptación para pantallas pequeñas */
 @media (max-width: 600px) {
-  .footer-content {
+  .footer-container {
     flex-direction: column;
+    justify-content: center;
     text-align: center;
+    gap: 0.5rem;
   }
 
-  .footer-links {
-    justify-content: center;
+  .footer-brand {
+    flex-direction: column;
+    gap: 0.2rem;
   }
 }

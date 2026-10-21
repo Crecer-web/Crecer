@@ -1,62 +1,17 @@
 // ==========================================
-// MÓDULO GLOBAL Y UTILIDADES
+// MÓDULO GLOBAL Y UTILIDADES - CRECER
 // ==========================================
 import { auth } from './firebase-config.js';
 import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-/**
- * Observa el estado de autenticación del usuario actual.
- * @param {Function} callback - Función que recibe al usuario autenticado o null.
- */
+// Observador de autenticación
 export function observarSesion(callback) {
-    onAuthStateChanged(auth, (user) => {
+    return onAuthStateChanged(auth, (user) => {
         callback(user);
     });
 }
 
-/**
- * Función global para mostrar notificaciones Toast en pantalla.
- * @param {string} mensaje - Texto a mostrar.
- * @param {string} tipo - Tipo de notificación ('success', 'danger', 'info').
- */
-export function mostrarToast(mensaje, tipo = 'success') {
-    let container = document.getElementById('toast-container');
-    if (!container) {
-        container = document.createElement('div');
-        container.id = 'toast-container';
-        container.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px;';
-        document.body.appendChild(container);
-    }
-
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${tipo}`;
-    toast.textContent = mensaje;
-    toast.style.cssText = `
-        padding: 12px 20px;
-        border-radius: 8px;
-        color: #fff;
-        font-size: 0.9rem;
-        font-weight: 500;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        transition: opacity 0.3s ease;
-        background-color: ${tipo === 'success' ? '#10b981' : tipo === 'danger' ? '#ef4444' : '#3b82f6'};
-    `;
-
-    container.appendChild(toast);
-
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        setTimeout(() => {
-            if (toast.parentNode) {
-                toast.remove();
-            }
-        }, 300);
-    }, 3000);
-}
-
-/**
- * Función centralizada para cerrar la sesión activa del usuario.
- */
+// Cierre de sesión de Firebase
 export async function cerrarSesion() {
     try {
         await signOut(auth);
@@ -68,19 +23,141 @@ export async function cerrarSesion() {
 }
 
 /**
- * Actualiza la etiqueta y el icono dentro del botón de selección de tema.
- * @param {HTMLElement} btn - Botón del DOM
- * @param {string} theme - Tema activo ('dark' o 'light')
+ * Reemplazo asíncrono estilizado para confirm() nativo del navegador
+ * @param {string} mensaje - Pregunta o advertencia a mostrar
+ * @param {string} titulo - Título de la alerta
+ * @returns {Promise<boolean>} Devuelve true si el usuario hace clic en Aceptar
  */
+export function mostrarConfirmacion(mensaje, titulo = '¿Estás seguro?') {
+    return new Promise((resolve) => {
+        // Eliminar modal previo si existe
+        const modalExistente = document.getElementById('customConfirmModal');
+        if (modalExistente) modalExistente.remove();
+
+        const overlay = document.createElement('div');
+        overlay.id = 'customConfirmModal';
+        overlay.className = 'custom-confirm-overlay';
+
+        overlay.innerHTML = `
+            <div class="custom-confirm-card" role="dialog" aria-modal="true">
+                <h4>⚠️ ${sanearTextoGlobal(titulo)}</h4>
+                <p>${sanearTextoGlobal(mensaje)}</p>
+                <div class="custom-confirm-actions">
+                    <button type="button" class="btn-confirm-cancel" id="btnConfirmCancel">Cancelar</button>
+                    <button type="button" class="btn-confirm-accept" id="btnConfirmAccept">Aceptar</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        // Animación de entrada
+        requestAnimationFrame(() => {
+            overlay.classList.add('show');
+        });
+
+        const btnCancel = overlay.querySelector('#btnConfirmCancel');
+        const btnAccept = overlay.querySelector('#btnConfirmAccept');
+
+        const cerrarModal = (resultado) => {
+            document.removeEventListener('keydown', manejarTeclas);
+            overlay.classList.remove('show');
+            overlay.addEventListener('transitionend', () => {
+                if (overlay.parentElement) {
+                    overlay.remove();
+                }
+                resolve(resultado);
+            }, { once: true });
+        };
+
+        const manejarTeclas = (e) => {
+            if (e.key === 'Escape') cerrarModal(false);
+            if (e.key === 'Enter') cerrarModal(true);
+        };
+
+        document.addEventListener('keydown', manejarTeclas);
+        btnCancel.addEventListener('click', () => cerrarModal(false));
+        btnAccept.addEventListener('click', () => cerrarModal(true));
+
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) cerrarModal(false);
+        });
+    });
+}
+
+/**
+ * Sistema de Notificaciones Flotantes (Toast)
+ * @param {string} mensaje 
+ * @param {string} tipo - 'success', 'danger', 'error', 'warning', 'info'
+ * @param {number} duracion - Tiempo en milisegundos
+ */
+export function mostrarToast(mensaje, tipo = 'info', duracion = 3500) {
+    let container = document.getElementById('toast-container');
+    
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        document.body.appendChild(container);
+    }
+
+    const iconos = {
+        success: '✅',
+        danger: '⚠️',
+        error: '❌',
+        warning: '🔔',
+        info: 'ℹ️'
+    };
+
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${tipo}`;
+    toast.innerHTML = `
+        <span style="font-size: 1.1rem; display: inline-flex; align-items: center;">${iconos[tipo] || 'ℹ️'}</span>
+        <span style="flex: 1;">${sanearTextoGlobal(mensaje)}</span>
+        <button type="button" class="toast-close" aria-label="Cerrar">&times;</button>
+    `;
+
+    container.appendChild(toast);
+
+    requestAnimationFrame(() => {
+        toast.classList.add('show');
+    });
+
+    toast.querySelector('.toast-close').addEventListener('click', () => {
+        ocultarToast(toast);
+    });
+
+    setTimeout(() => {
+        ocultarToast(toast);
+    }, duracion);
+}
+
+function ocultarToast(toast) {
+    toast.classList.remove('show');
+    toast.addEventListener('transitionend', () => {
+        if (toast.parentElement) {
+            toast.remove();
+        }
+    });
+}
+
+function sanearTextoGlobal(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
 function actualizarTextoBotonTema(btn, theme) {
     if (!btn) return;
     btn.innerHTML = theme === 'dark' ? '☀️ Modo Claro' : '🌙 Modo Oscuro';
 }
 
-// Inicialización de event listeners cuando el DOM esté completamente cargado
+// Inicialización de Interfaz y Eventos Globales
 document.addEventListener('DOMContentLoaded', () => {
-
-    // 1. Inicialización y Persistencia del Modo Oscuro (Soporta data-theme en <html> y clase dark-mode en <body>)
+    // 1. Gestión de Tema Modo Claro / Oscuro
     const currentTheme = localStorage.getItem('crecer-theme') || localStorage.getItem('theme') || 'light';
     
     if (currentTheme === 'dark') {
@@ -91,23 +168,12 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.classList.remove('dark-mode');
     }
 
-    // 2. Insertar contenedor de Toasts si no existe en el DOM
-    if (!document.getElementById('toast-container')) {
-        const container = document.createElement('div');
-        container.id = 'toast-container';
-        container.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px;';
-        document.body.appendChild(container);
-    }
-
-    // 3. Configurar el botón de cambio de tema
     const themeBtn = document.getElementById('themeToggle');
     if (themeBtn) {
         actualizarTextoBotonTema(themeBtn, currentTheme);
         
         themeBtn.addEventListener('click', () => {
-            const isDarkAttr = document.documentElement.getAttribute('data-theme') === 'dark';
-            const isDarkClass = document.body.classList.contains('dark-mode');
-            const isDark = isDarkAttr || isDarkClass;
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark' || document.body.classList.contains('dark-mode');
 
             if (isDark) {
                 document.documentElement.removeAttribute('data-theme');
@@ -125,37 +191,27 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 4. Menú navegable responsive (Menú principal)
-    const navToggle = document.getElementById('navToggle');
-    const navMenu = document.getElementById('navMenu');
-    if (navToggle && navMenu) {
-        navToggle.addEventListener('click', () => {
-            navMenu.classList.toggle('active');
-        });
-    }
-
-    // 5. Configurar el menú desplegable (Soporta múltiples estructuras: .dropdown, #dropdownBtn/#dropdownContent, etc.)
+    // 2. Control del Menú Desplegable (Dropdowns)
     const dropdowns = document.querySelectorAll(".dropdown");
 
-    dropdowns.forEach(function (dropdown) {
-        const dropBtn = dropdown.querySelector(".dropdown-btn") || dropdown.querySelector(".dropbtn") || document.getElementById('dropdownBtn');
+    dropdowns.forEach((dropdown) => {
+        const dropBtn = dropdown.querySelector(".dropdown-btn") || dropdown.querySelector(".dropbtn");
 
         if (dropBtn) {
-            dropBtn.addEventListener("click", function (e) {
+            dropBtn.addEventListener("click", (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 
-                // Cierra otros dropdowns abiertos
                 dropdowns.forEach(d => {
                     if (d !== dropdown) {
                         d.classList.remove("active");
-                        const content = d.querySelector('.dropdown-content') || document.getElementById('dropdownContent');
+                        const content = d.querySelector('.dropdown-content');
                         if (content) content.classList.remove('show');
                     }
                 });
 
                 dropdown.classList.toggle("active");
-                const dropdownContent = dropdown.querySelector('.dropdown-content') || document.getElementById('dropdownContent');
+                const dropdownContent = dropdown.querySelector('.dropdown-content');
                 if (dropdownContent) {
                     dropdownContent.classList.toggle('show');
                 }
@@ -163,12 +219,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Cierra cualquier dropdown al hacer clic fuera
-    window.addEventListener("click", function (e) {
-        dropdowns.forEach(function (dropdown) {
+    window.addEventListener("click", (e) => {
+        dropdowns.forEach((dropdown) => {
             if (!dropdown.contains(e.target)) {
                 dropdown.classList.remove("active");
-                const dropdownContent = dropdown.querySelector('.dropdown-content') || document.getElementById('dropdownContent');
+                const dropdownContent = dropdown.querySelector('.dropdown-content');
                 if (dropdownContent) {
                     dropdownContent.classList.remove('show');
                 }
@@ -176,20 +231,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 6. Configurar el botón de Cierre de Sesión (Soporta IDs 'btnCerrarSesion', 'logoutBtn' y 'btnLogout')
+    // 3. Manejo Unificado de Cierre de Sesión
     const ejecutarCierreSesion = async (e) => {
         if (e) e.preventDefault();
-        try {
-            await cerrarSesion();
-        } catch (error) {
-            console.error("Error al cerrar sesión mediante función principal:", error);
-            try {
-                await signOut(auth);
-                window.location.href = 'login.html';
-            } catch (err) {
-                console.error("Error definitivo al cerrar sesión:", err);
-            }
-        }
+        await cerrarSesion();
     };
 
     ['btnCerrarSesion', 'logoutBtn', 'btnLogout'].forEach(id => {
@@ -199,14 +244,3 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
-
-// ==========================================
-// REGISTRO DE PWA (SERVICE WORKER)
-// ==========================================
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-            .then((reg) => console.log('PWA lista e instalable:', reg.scope))
-            .catch((err) => console.error('Error al registrar Service Worker:', err));
-    });
-}

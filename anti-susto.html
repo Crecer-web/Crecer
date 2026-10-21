@@ -1,0 +1,76 @@
+<<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda Estudiantil - Carga de Tareas</title>
+    <!-- Rutas corregidas hacia la carpeta /css/ -->
+    <link rel="stylesheet" href="css/anti-susto.css">
+</head>
+<body>
+
+    <!-- NOTIFICACIÓN FLOTANTE TIPO TELÉFONO (IN-APP) -->
+    <div id="phoneNotification" class="phone-notification hidden" role="alert">
+        <div class="notification-header">
+            <div class="app-info">
+                <span class="app-icon">🚨</span>
+                <span class="app-name">AGENDA ESTUDIANTIL</span>
+            </div>
+            <span class="notification-time">Ahora</span>
+        </div>
+        <div class="notification-body">
+            <h4 id="notifTitle">¡Alerta Anti-Susto!</h4>
+            <p id="notifMessage">Tenés un trabajo cerca.</p>
+        </div>
+    </div>
+
+    <div class="anti-susto-container">
+        <header class="anti-susto-header">
+            <h1>📝 Carga Unificada de Tareas</h1>
+            <p>Todo lo que cargues se guarda en la base de datos y te avisará 24 hs antes al celular.</p>
+        </header>
+
+        <!-- BANNER DE PERMISOS -->
+        <section class="permission-banner" id="permissionBanner">
+            <p>📲 Activá las notificaciones para recibir alertas 24hs antes aunque la app esté cerrada.</p>
+            <button id="btnEnableNotifications" class="btn-enable">Activar Alertas al Celular</button>
+        </section>
+
+        <!-- FORMULARIO PRINCIPAL -->
+        <section class="form-card">
+            <h2>Agregar Tarea / Examen</h2>
+            <form id="formCargaTarea">
+                <div class="form-group">
+                    <label for="materia">Materia / Asignatura</label>
+                    <input type="text" id="materia" placeholder="Ej: Análisis Matemático" required autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                    <label for="titulo">Detalles o Título de la Entrega</label>
+                    <input type="text" id="titulo" placeholder="Ej: Parcial de Derivadas o TP N°2" required autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                    <label for="fechaEntrega">Fecha y Hora Límite</label>
+                    <input type="datetime-local" id="fechaEntrega" required>
+                </div>
+
+                <button type="submit" class="btn-submit">💾 Guardar Tarea</button>
+            </form>
+        </section>
+
+        <!-- TAREAS DESDE LA BASE DE DATOS -->
+        <section class="form-card">
+            <h2>Próximas Entregas (Sincronizadas)</h2>
+            <ul id="taskList" class="task-list">
+                <!-- Se cargan dinámicamente -->
+            </ul>
+        </section>
+    </div>
+
+    <!-- Cliente de Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Ruta corregida hacia la carpeta /js/ -->
+    <script src="js/anti-susto.js"></script>
+</body>
+</html>

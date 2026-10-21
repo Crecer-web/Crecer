@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <!-- Configuración de Codificación y Adaptabilidad Móvil -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -40,16 +39,16 @@
                 <form id="loginForm" class="auth-form" novalidate>
                     <div class="form-group">
                         <label for="loginEmail">Correo Electrónico</label>
-                        <input type="email" id="loginEmail" placeholder="estudiante@ejemplo.com" required>
+                        <input type="email" id="loginEmail" placeholder="estudiante@ejemplo.com" required autocomplete="email">
                     </div>
 
                     <div class="form-group">
                         <label for="loginPassword">Contraseña</label>
-                        <input type="password" id="loginPassword" placeholder="••••••••" required>
+                        <input type="password" id="loginPassword" placeholder="••••••••" required autocomplete="current-password">
                         
-                        <!-- Enlace de recuperación optimizado y alineado -->
-                        <div class="form-actions-right" style="text-align: right; margin-top: 8px;">
-                            <a href="#" id="linkOlvidoPassword" class="forgot-link" style="font-size: 0.85rem; color: #4f46e5; text-decoration: none;">¿Olvidaste tu contraseña?</a>
+                        <!-- Enlace de recuperación actualizado hacia recuperar.html -->
+                        <div class="form-actions-right">
+                            <a href="recuperar.html" id="linkOlvidoPassword" class="forgot-link">¿Olvidaste tu contraseña?</a>
                         </div>
                     </div>
 
@@ -61,7 +60,7 @@
                     <span>O continúa con</span>
                 </div>
 
-                <!-- Botón de Google optimizado -->
+                <!-- Botón de Google -->
                 <button type="button" id="btnGoogleAuth" class="btn-google">
                     <svg class="google-icon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
                         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -73,7 +72,7 @@
                 </button>
 
                 <!-- Enlace de registro inferior -->
-                <div class="auth-footer auth-redirect-text" style="margin-top: 20px; text-align: center;">
+                <div class="auth-redirect-text">
                     <p>¿No tienes una cuenta? <a href="register.html">Regístrate aquí</a></p>
                 </div>
 

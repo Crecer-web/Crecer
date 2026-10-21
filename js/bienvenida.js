@@ -1,55 +1,61 @@
 import { observarSesion } from './global.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-    const authActionBtn = document.getElementById('authActionBtn');
-    const registerActionBtn = document.getElementById('registerActionBtn'); // Si tienes un botón secundario específico de registro
+    const navLoginBtn = document.getElementById('navLoginBtn');
+    const navRegisterBtn = document.getElementById('navRegisterBtn');
+    const heroStartBtn = document.getElementById('heroStartBtn');
 
+    // Control dinámico de botones según el estado de la sesión
     observarSesion((user) => {
-        if (authActionBtn) {
-            if (user) {
-                authActionBtn.textContent = 'Ir a mis Tareas 📋';
-                authActionBtn.href = 'tareas.html';
-            } else {
-                authActionBtn.textContent = 'Iniciar Sesión 🚀';
-                authActionBtn.href = 'login.html';
+        if (user) {
+            // Usuario Autenticado: Redirigir a inicio.html
+            if (navLoginBtn) {
+                navLoginBtn.textContent = 'Ir a la Agenda 📋';
+                navLoginBtn.href = 'inicio.html';
             }
-        }
-
-        // Aseguramos que el botón de registro abra el login directo en la pestaña de registro
-        if (registerActionBtn) {
-            if (user) {
-                registerActionBtn.href = 'tareas.html';
-            } else {
-                registerActionBtn.href = 'login.html?mode=register';
+            if (navRegisterBtn) {
+                navRegisterBtn.style.display = 'none'; // Ocultamos el botón de registro sobrante
+            }
+            if (heroStartBtn) {
+                heroStartBtn.textContent = 'Ingresar a mi Cuenta 🚀';
+                heroStartBtn.href = 'inicio.html';
+            }
+        } else {
+            // Usuario Visitante: Mantener accesos de login/registro
+            if (navLoginBtn) {
+                navLoginBtn.textContent = 'Iniciar Sesión';
+                navLoginBtn.href = 'login.html';
+            }
+            if (navRegisterBtn) {
+                navRegisterBtn.style.display = 'inline-flex';
+                navRegisterBtn.href = 'register.html';
+            }
+            if (heroStartBtn) {
+                heroStartBtn.textContent = 'Comenzar Ahora';
+                heroStartBtn.href = 'register.html';
             }
         }
     });
-});
 
-document.addEventListener("DOMContentLoaded", function () {
-  // Seleccionamos todos los contenedores de menú desplegable
-  const dropdowns = document.querySelectorAll(".dropdown");
+    // Menús desplegables (Dropdowns)
+    const dropdowns = document.querySelectorAll(".dropdown");
 
-  dropdowns.forEach(function (dropdown) {
-    const dropBtn = dropdown.querySelector(".dropbtn"); // Ajusta la clase del botón si es distinta
+    dropdowns.forEach((dropdown) => {
+        const dropBtn = dropdown.querySelector(".dropbtn");
 
-    if (dropBtn) {
-      dropBtn.addEventListener("click", function (e) {
-        // Previene el comportamiento por defecto si es un enlace
-        e.preventDefault();
-        
-        // Alterna la clase 'active' para mostrar/ocultar el contenido
-        dropdown.classList.toggle("active");
-      });
-    }
-  });
-
-  // Cierra el menú si se hace clic fuera de él
-  window.addEventListener("click", function (e) {
-    dropdowns.forEach(function (dropdown) {
-      if (!dropdown.contains(e.target)) {
-        dropdown.classList.remove("active");
-      }
+        if (dropBtn) {
+            dropBtn.addEventListener("click", (e) => {
+                e.preventDefault();
+                dropdown.classList.toggle("active");
+            });
+        }
     });
-  });
+
+    window.addEventListener("click", (e) => {
+        dropdowns.forEach((dropdown) => {
+            if (!dropdown.contains(e.target)) {
+                dropdown.classList.remove("active");
+            }
+        });
+    });
 });

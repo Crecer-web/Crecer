@@ -2,7 +2,8 @@ import { auth, db } from './firebase-config.js';
 import { 
     signInWithEmailAndPassword, 
     signInWithPopup, 
-    GoogleAuthProvider 
+    GoogleAuthProvider,
+    sendPasswordResetEmail 
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { mostrarToast } from './global.js';
@@ -21,39 +22,6 @@ async function guardarPerfilUsuario(uid, datos) {
         }, { merge: true });
     } catch (error) {
         console.error("Error al guardar perfil en Firestore:", error);
-    }
-}
-
-/**
- * Llama a la Vercel Serverless Function (/api/send-email) para enviar el correo con Brevo.
- * @param {string} emailDestino - Correo del usuario a recuperar
- * @param {string} tokenRecuperacion - Token o identificador generado
- */
-async function enviarCorreoRecuperacionBrevo(emailDestino, tokenRecuperacion) {
-    try {
-        const response = await fetch('/api/send-email', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                email: emailDestino,
-                tokenRecuperacion: tokenRecuperacion
-            })
-        });
-
-        const data = await response.json();
-
-        if (response.ok && data.status === 'success') {
-            mostrarToast('Te enviamos un correo para restablecer tu contraseña.', 'success');
-        } else {
-            console.error("Error al enviar desde el backend:", data);
-            mostrarToast(data.message || 'No se pudo enviar el correo de recuperación.', 'danger');
-        }
-
-    } catch (error) {
-        console.error("Error de conexión con la Serverless Function:", error);
-        mostrarToast('Error de conexión con el servidor. Inténtalo más tarde.', 'danger');
     }
 }
 
@@ -163,45 +131,41 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 3. Solicitud de recuperación de contraseña con Brevo
+    // 3. Solicitud de recuperación de contraseña con auxilio si el campo está vacío
     if (linkOlvido) {
-        linkOlvido.addEventListener('click', (e) => {
+        linkOlvido.addEventListener('click', async (e) => {
             e.preventDefault();
             const emailInput = document.getElementById('loginEmail');
-            const email = emailInput ? emailInput.value.trim() : '';
+            let email = emailInput ? emailInput.value.trim() : '';
 
+            // Si el campo de correo está vacío, se solicita mediante un prompt rápido
             if (!email) {
-                mostrarToast('Escribe tu correo en el campo superior antes de presionar este enlace.', 'danger');
-                if (emailInput) emailInput.focus();
-                return;
+                email = prompt('Por favor, ingresa tu correo electrónico para enviar el enlace de recuperación:');
+                if (email) {
+                    email = email.trim();
+                    if (emailInput) emailInput.value = email;
+                } else {
+                    return; // El usuario canceló la entrada
+                }
             }
 
-            const tokenSimulado = Math.random().toString(36).substring(2) + Date.now().toString(36);
-            enviarCorreoRecuperacionBrevo(email, tokenSimulado);
+            try {
+                await sendPasswordResetEmail(auth, email);
+                mostrarToast('Te enviamos un correo para restablecer tu contraseña. Revisa tu bandeja de entrada o spam.', 'success');
+            } catch (error) {
+                console.error("Error de recuperación Firebase:", error);
+                let msgError = 'No se pudo enviar el correo de recuperación.';
+                
+                if (error.code === 'auth/user-not-found') {
+                    msgError = 'No existe una cuenta registrada con este correo.';
+                } else if (error.code === 'auth/invalid-email') {
+                    msgError = 'El correo ingresado no es válido.';
+                } else if (error.code === 'auth/too-many-requests') {
+                    msgError = 'Has realizado demasiados intentos. Por favor espera unos minutos.';
+                }
+
+                mostrarToast(msgError, 'danger');
+            }
         });
     }
-});
-
-// Soporte para menús desplegables
-document.addEventListener("DOMContentLoaded", function () {
-    const dropdowns = document.querySelectorAll(".dropdown");
-
-    dropdowns.forEach(function (dropdown) {
-        const dropBtn = dropdown.querySelector(".dropbtn") || dropdown.querySelector(".dropdown-btn");
-
-        if (dropBtn) {
-            dropBtn.addEventListener("click", function (e) {
-                e.preventDefault();
-                dropdown.classList.toggle("active");
-            });
-        }
-    });
-
-    window.addEventListener("click", function (e) {
-        dropdowns.forEach(function (dropdown) {
-            if (!dropdown.contains(e.target)) {
-                dropdown.classList.remove("active");
-            }
-        });
-    });
 });
