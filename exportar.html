@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Respaldo y Reportes - CRECER</title>
+    
+    <!-- Script síncrono para prevenir parpadeos del tema -->
+    <script>
+        (function() {
+            const temaGuardado = localStorage.getItem('theme') || 'light';
+            if (temaGuardado === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+            }
+        })();
+    </script>
+
+    <!-- Iconos y Manifest PWA -->
+    <link rel="icon" type="image/png" sizes="32x32" href="img/logo.png">
+    <link rel="apple-touch-icon" href="img/logo.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    
+    <!-- Hojas de Estilos -->
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/exportar.css">
+</head>
+<body class="dashboard-body">
+
+    <!-- Encabezado de Navegación del Dashboard -->
+    <header class="app-header">
+        <div class="header-container">
+            <!-- Logo a la Izquierda -->
+            <div class="logo">
+                <a href="inicio.html">CRECER</a>
+            </div>
+            
+            <!-- Contenedor Derecho Unificado -->
+            <div class="header-right-group">
+                <!-- Navegación Principal -->
+                <nav class="nav-menu" id="navMenu" aria-label="Navegación principal">
+                    <a href="inicio.html" class="nav-link">Inicio</a>
+                    
+                    <!-- Menú Desplegable de Módulos -->
+                    <div class="dropdown" id="modulesDropdown">
+                        <button class="dropdown-btn" id="dropdownBtn" aria-haspopup="true" aria-expanded="false" type="button">
+                            Módulos ▼
+                        </button>
+                        <div class="dropdown-content" id="dropdownContent">
+                            <a href="notas.html">Calificaciones</a>
+                            <a href="horario.html">Horario</a>
+                            <a href="recursos.html">Recursos</a>
+                            <a href="perfil.html">Mi Perfil</a>
+                            <div class="dropdown-divider"></div>
+                            <a href="#" id="logoutBtn" class="dropdown-logout">Cerrar Sesión</a>
+                        </div>
+                    </div>
+                </nav>
+
+                <!-- Botón de Conmutación de Tema -->
+                <button id="themeToggle" class="theme-toggle" type="button" aria-label="Cambiar tema">🌙</button>
+
+                <!-- Botón Hamburguesa para Móvil -->
+                <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú de navegación" type="button">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenedor Principal -->
+    <main class="app-main-container">
+        <div class="main-container">
+            
+            <div class="page-header">
+                <h2>Centro de Respaldo y Reportes</h2>
+                <p>Genera reportes limpios ordenados alfabéticamente en formato CSV o PDF con tus tareas, exámenes, notas y horarios escolares.</p>
+            </div>
+
+            <!-- Grilla de Opciones de Exportación -->
+            <div class="export-grid">
+                
+                <!-- Tarjeta 1: Tareas y Pendientes -->
+                <article class="export-card">
+                    <div class="card-icon">📝</div>
+                    <div class="card-content">
+                        <h3>Tareas y Exámenes Pendientes</h3>
+                        <p>Listado completo de tus entregas y evaluaciones ordenadas alfabéticamente por materia.</p>
+                    </div>
+                    <div class="card-actions">
+                        <button type="button" class="btn-export btn-csv" id="btnExportTareasCSV">
+                            <span>📄</span> Guardar CSV
+                        </button>
+                        <button type="button" class="btn-export btn-pdf" id="btnExportTareasPDF">
+                            <span>🖨️</span> Ver PDF / Imprimir
+                        </button>
+                    </div>
+                </article>
+
+                <!-- Tarjeta 2: Calificaciones -->
+                <article class="export-card">
+                    <div class="card-icon">🎓</div>
+                    <div class="card-content">
+                        <h3>Boletín de Calificaciones</h3>
+                        <p>Informe detallado con tus notas ordenadas de la A a la Z y promedio general de rendimiento.</p>
+                    </div>
+                    <div class="card-actions">
+                        <button type="button" class="btn-export btn-csv" id="btnExportNotasCSV">
+                            <span>📄</span> Guardar CSV
+                        </button>
+                        <button type="button" class="btn-export btn-pdf" id="btnExportNotasPDF">
+                            <span>🖨️</span> Ver PDF / Imprimir
+                        </button>
+                    </div>
+                </article>
+
+                <!-- Tarjeta 3: Horarios de Clases -->
+                <article class="export-card">
+                    <div class="card-icon">📅</div>
+                    <div class="card-content">
+                        <h3>Horario Escolar Semanal</h3>
+                        <p>Exporta la grilla completa de clases y asignaturas organizadas de lunes a viernes.</p>
+                    </div>
+                    <div class="card-actions">
+                        <button type="button" class="btn-export btn-csv" id="btnExportHorarioCSV">
+                            <span>📄</span> Guardar CSV
+                        </button>
+                        <button type="button" class="btn-export btn-pdf" id="btnExportHorarioPDF">
+                            <span>🖨️</span> Ver PDF / Imprimir
+                        </button>
+                    </div>
+                </article>
+
+                <!-- Tarjeta 4: Reporte Completo Unificado -->
+                <article class="export-card featured-card">
+                    <div class="card-icon">📦</div>
+                    <div class="card-content">
+                        <h3>Respaldo Integral Académico</h3>
+                        <p>Consolida toda tu información académica en un único reporte ordenado alfabéticamente para presentar o guardar.</p>
+                    </div>
+                    <div class="card-actions">
+                        <button type="button" class="btn-export btn-primary-export" id="btnExportIntegralPDF">
+                            <span>🖨️</span> Generar Informe Completo (PDF / Impresión)
+                        </button>
+                    </div>
+                </article>
+
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Contenedor Toast -->
+    <div id="toast-container"></div>
+
+    <footer class="auth-footer-simple">
+        <p>&copy; 2026 <strong>CRECER</strong> &bull; Plataforma Institucional de Gestión Académica</p>
+    </footer>
+
+    <!-- Scripts de la Aplicación -->
+    <script type="module" src="js/global.js"></script>
+    <script type="module" src="js/exportar.js"></script>
+</body>
+</html>

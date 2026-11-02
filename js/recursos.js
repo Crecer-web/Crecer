@@ -19,35 +19,20 @@ let currentUser = null;
 /**
  * Conmutación e inicialización estricta del Tema
  */
-function aplicarTema(tema) {
-    const esOscuro = tema === 'dark';
+function aplicarTemaDirecto(tema) {
+    const themeToggle = document.getElementById('themeToggle');
 
-    if (esOscuro) {
+    if (tema === 'dark') {
         document.documentElement.setAttribute('data-theme', 'dark');
         document.body.setAttribute('data-theme', 'dark');
         localStorage.setItem('theme', 'dark');
+        if (themeToggle) themeToggle.textContent = '☀️';
     } else {
         document.documentElement.removeAttribute('data-theme');
         document.body.removeAttribute('data-theme');
         localStorage.setItem('theme', 'light');
+        if (themeToggle) themeToggle.textContent = '🌙';
     }
-
-    actualizarIconoTema(tema);
-}
-
-function actualizarIconoTema(tema) {
-    const themeToggle = document.getElementById('themeToggle');
-    if (themeToggle) {
-        themeToggle.textContent = tema === 'dark' ? '☀️' : '🌙';
-    }
-}
-
-function toggleTema() {
-    const temaActual = localStorage.getItem('theme') || 
-                      (document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
-
-    const nuevoTema = temaActual === 'dark' ? 'light' : 'dark';
-    aplicarTema(nuevoTema);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -60,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const prefiereDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const temaInicial = temaGuardado ? temaGuardado : (prefiereDark ? 'dark' : 'light');
     
-    aplicarTema(temaInicial);
+    aplicarTemaDirecto(temaInicial);
 
     // Conmutación directa con 1 solo clic removiendo duplicados
     if (themeToggle) {
@@ -71,7 +56,12 @@ document.addEventListener('DOMContentLoaded', () => {
         themeToggle.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            toggleTema();
+
+            const esOscuroActual = document.documentElement.getAttribute('data-theme') === 'dark' || 
+                                   document.body.getAttribute('data-theme') === 'dark';
+            
+            const nuevoTema = esOscuroActual ? 'light' : 'dark';
+            aplicarTemaDirecto(nuevoTema);
         });
     }
 
@@ -79,6 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (menuToggle && navMenu) {
         menuToggle.addEventListener('click', (e) => {
             e.preventDefault();
+            e.stopPropagation();
             navMenu.classList.toggle('active');
         });
     }
@@ -90,11 +81,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (dropdownBtn && dropdown) {
         dropdownBtn.addEventListener("click", (e) => {
             e.preventDefault();
+            e.stopPropagation();
             dropdown.classList.toggle("active");
         });
 
         window.addEventListener("click", (e) => {
-            if (!dropdown.contains(e.target)) {
+            if (dropdown && !dropdown.contains(e.target)) {
                 dropdown.classList.remove("active");
             }
         });
@@ -209,7 +201,7 @@ async function cargarRecursos() {
         document.querySelectorAll('.btn-delete').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 const id = e.currentTarget.getAttribute('data-id');
-                if (confirm('¿Deseas enviar este recurso a la papelera de reciclaje?')) {
+                if (window.confirm('¿Deseas enviar este recurso a la papelera de reciclaje?')) {
                     try {
                         const docRef = doc(db, "recursos", id);
                         await updateDoc(docRef, {

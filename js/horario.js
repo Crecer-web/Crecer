@@ -24,45 +24,55 @@ const bloquesHorarios = [
 
 const diasSemana = ["lunes", "martes", "miercoles", "jueves", "viernes"];
 
-// Función para aplicar y persistir el Tema Claro / Oscuro
-function aplicarTema(tema) {
+// ==========================================
+// GESTIÓN ROBUSTA DE TEMA (CLARO / OSCURO)
+// ==========================================
+function inicializarTema() {
+    const themeToggle = document.getElementById('themeToggle');
+    
+    // Obtener tema guardado previamente o usar el del sistema
+    const temaGuardado = localStorage.getItem('theme');
+    const prefiereDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const temaInicial = temaGuardado ? temaGuardado : (prefiereDark ? 'dark' : 'light');
+
+    aplicarTemaDirecto(temaInicial);
+
+    if (themeToggle) {
+        // Remover listeners anteriores clonando el nodo para evitar duplicidad de eventos
+        const nuevoToggle = themeToggle.cloneNode(true);
+        themeToggle.parentNode.replaceChild(nuevoToggle, themeToggle);
+
+        nuevoToggle.addEventListener('click', () => {
+            const esOscuroActual = document.documentElement.getAttribute('data-theme') === 'dark' || 
+                                   document.body.getAttribute('data-theme') === 'dark';
+            
+            const nuevoTema = esOscuroActual ? 'light' : 'dark';
+            aplicarTemaDirecto(nuevoTema);
+        });
+    }
+}
+
+function aplicarTemaDirecto(tema) {
+    const themeToggle = document.getElementById('themeToggle');
+
     if (tema === 'dark') {
         document.documentElement.setAttribute('data-theme', 'dark');
         document.body.setAttribute('data-theme', 'dark');
         localStorage.setItem('theme', 'dark');
+        if (themeToggle) themeToggle.textContent = '☀️';
     } else {
         document.documentElement.removeAttribute('data-theme');
         document.body.removeAttribute('data-theme');
         localStorage.setItem('theme', 'light');
-    }
-
-    const themeToggle = document.getElementById('themeToggle');
-    if (themeToggle) {
-        themeToggle.textContent = tema === 'dark' ? '☀️' : '🌙';
+        if (themeToggle) themeToggle.textContent = '🌙';
     }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Referencias DOM
-    const themeToggle = document.getElementById('themeToggle');
+    inicializarTema();
+
     const menuToggle = document.getElementById('menuToggle');
     const navMenu = document.getElementById('navMenu');
-
-    // Cargar preferencia del tema guardado o del sistema
-    const temaGuardado = localStorage.getItem('theme');
-    const prefiereDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const temaInicial = temaGuardado ? temaGuardado : (prefiereDark ? 'dark' : 'light');
-    
-    aplicarTema(temaInicial);
-
-    // Event Listener del Botón de Conmutación de Tema
-    if (themeToggle) {
-        themeToggle.addEventListener('click', () => {
-            const esDark = document.body.getAttribute('data-theme') === 'dark' || 
-                           document.documentElement.getAttribute('data-theme') === 'dark';
-            aplicarTema(esDark ? 'light' : 'dark');
-        });
-    }
 
     // Menú hamburguesa móvil
     if (menuToggle && navMenu) {
@@ -77,7 +87,6 @@ observarSesion((user) => {
     if (user) {
         currentUser = user;
         
-        // Seleccionar automáticamente el día actual en celulares
         const diasNombres = ["domingo", "lunes", "martes", "miercoles", "jueves", "viernes", "sabado"];
         const hoyNombre = diasNombres[new Date().getDay()];
         if (diasSemana.includes(hoyNombre)) {
@@ -91,7 +100,6 @@ observarSesion((user) => {
     }
 });
 
-// Configurar comportamiento de pestañas para la vista celular
 function configurarPestanasMobile() {
     const tabs = document.querySelectorAll('.tab-btn');
     tabs.forEach(tab => {
@@ -111,7 +119,6 @@ function configurarPestanasMobile() {
     });
 }
 
-// Cargar Clases directamente desde la base de datos Firestore
 async function cargarHorario() {
     if (!currentUser) return;
 
@@ -132,7 +139,6 @@ async function cargarHorario() {
     }
 }
 
-// Convierte "HH:MM" a minutos totales (ej: "07:40" -> 460)
 function horaAMinutos(horaStr) {
     if (!horaStr) return 0;
     const partes = horaStr.split(':');
@@ -141,14 +147,12 @@ function horaAMinutos(horaStr) {
     return h * 60 + m;
 }
 
-// Renderizar la Grilla Semanal Dinámicamente
 function renderizarGrillaSemanal() {
     const tableBody = document.getElementById('horarioTableBody');
     if (!tableBody) return;
 
     const esMobile = window.innerWidth <= 640;
 
-    // Control de columnas visibles en el encabezado
     diasSemana.forEach(dia => {
         const ths = document.querySelectorAll(`.day-${dia}`);
         ths.forEach(th => {
@@ -166,7 +170,6 @@ function renderizarGrillaSemanal() {
     bloquesHorarios.forEach((horaBloque) => {
         const tr = document.createElement('tr');
 
-        // Celda de la Hora (Columna izquierda)
         const tdHora = document.createElement('td');
         tdHora.className = 'time-col';
         tdHora.textContent = horaBloque;
@@ -175,7 +178,6 @@ function renderizarGrillaSemanal() {
         const minutosBloqueInicio = horaAMinutos(horaBloque);
         const minutosBloqueFin = minutosBloqueInicio + 60;
 
-        // Celdas para cada Día (Lunes a Viernes)
         diasSemana.forEach((dia) => {
             const tdDia = document.createElement('td');
             tdDia.className = `col-day day-${dia}`;
@@ -184,7 +186,6 @@ function renderizarGrillaSemanal() {
                 tdDia.classList.add('mobile-visible');
             }
 
-            // Filtrar clases que inicien dentro del rango de este bloque de 1 hora
             const clasesDelBloque = misClases.filter(c => {
                 if (!c.dia || !c.horaInicio) return false;
                 
@@ -215,7 +216,6 @@ function renderizarGrillaSemanal() {
     });
 }
 
-// Abrir el Modal con los Detalles de la Clase seleccionada
 function abrirModalDetalles(clase) {
     claseSeleccionadaId = clase.id;
     document.getElementById('modalSubjectName').textContent = clase.materia;
@@ -233,7 +233,6 @@ function abrirModalDetalles(clase) {
     document.getElementById('classDetailModal').style.display = 'flex';
 }
 
-// Cerrar Modal
 const btnCloseModal = document.getElementById('btnCloseModal');
 if (btnCloseModal) {
     btnCloseModal.addEventListener('click', () => {
@@ -241,7 +240,6 @@ if (btnCloseModal) {
     });
 }
 
-// Eliminar registro de Firestore
 const btnDeleteClass = document.getElementById('btnDeleteClass');
 if (btnDeleteClass) {
     btnDeleteClass.addEventListener('click', async () => {
@@ -269,7 +267,6 @@ if (btnDeleteClass) {
     });
 }
 
-// Calcular la Próxima Clase del Día Actual
 function calcularProximaClase() {
     const nextSubject = document.getElementById('nextClassSubject');
     const nextDetails = document.getElementById('nextClassDetails');
@@ -310,7 +307,6 @@ function calcularProximaClase() {
     }
 }
 
-// Guardar nueva Clase
 const horarioForm = document.getElementById('horarioForm');
 if (horarioForm) {
     horarioForm.addEventListener('submit', async (e) => {

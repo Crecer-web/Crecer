@@ -4,8 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Formulario</title>
+    <title>CRECER &bull; Carga y Edición de Tareas y Exámenes</title>
     
+    <!-- Script síncrono crítico para prevenir parpadeos del tema -->
+    <script>
+        (function() {
+            const temaGuardado = localStorage.getItem('theme') || 'light';
+            if (temaGuardado === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+            }
+        })();
+    </script>
+
     <!-- Iconos y Manifest PWA -->
     <link rel="icon" type="image/png" sizes="32x32" href="img/logo.png">
     <link rel="apple-touch-icon" href="img/logo.png">
@@ -20,7 +32,7 @@
 <body class="dashboard-body">
 
     <!-- Banner de Notificación Flotante (In-App) -->
-    <div id="phoneNotification" class="phone-notification hidden" role="alert">
+    <div id="phoneNotification" class="phone-notification hidden" role="alert" aria-live="assertive">
         <div class="notification-header">
             <div class="app-info">
                 <span class="app-icon">🚨</span>
@@ -35,7 +47,7 @@
     </div>
 
     <!-- Encabezado de la App -->
-    <header class="app-header">
+    <header class="app-header" role="banner">
         <div class="header-container">
             <div class="logo">
                 <a href="inicio.html">CRECER</a>
@@ -56,6 +68,7 @@
                             <a href="notas.html">Calificaciones</a>
                             <a href="horario.html">Horario</a>
                             <a href="recursos.html">Recursos</a>
+                            <a href="exportar.html">Respaldo</a>
                             <a href="perfil.html">Mi Perfil</a>
                             <div class="dropdown-divider"></div>
                             <a href="#" id="logoutBtn" class="dropdown-logout">Cerrar Sesión</a>
@@ -63,7 +76,7 @@
                     </div>
                 </nav>
 
-                <!-- Botón de Conmutación de Tema (Siempre Fijo a la Derecha) -->
+                <!-- Botón de Conmutación de Tema Global -->
                 <button id="themeToggle" class="theme-toggle" type="button" aria-label="Cambiar tema">🌙</button>
 
                 <!-- Botón Hamburguesa para Dispositivos Móviles -->
@@ -77,15 +90,18 @@
     </header>
 
     <!-- Contenedor Principal -->
-    <main class="app-main-container">
+    <main class="app-main-container" role="main">
         <div class="form-wrapper">
             <section class="form-card">
                 <div class="form-card-header">
-                    <h1>Cargar Nuevo Formulario</h1>
-                    <p class="subtitle">Registra una nueva Tarea o Examen detallando sus pautas y material de apoyo.</p>
+                    <h1 id="formTituloPrincipal">Cargar Nuevo Formulario</h1>
+                    <p class="subtitle" id="formSubtitulo">Registra una nueva Tarea o Examen detallando sus pautas y material de apoyo.</p>
                 </div>
 
                 <form id="formularioForm" class="dashboard-form" novalidate>
+                    <!-- Campo oculto para identificar ID en modo edición -->
+                    <input type="hidden" id="taskIdInput">
+
                     <!-- Tipo: Tarea o Examen -->
                     <div class="form-group">
                         <label for="tipoFormulario">Tipo de Formulario *</label>
@@ -118,7 +134,7 @@
                     <div class="form-group">
                         <label for="materialInput">Material de estudio / Adjuntos</label>
                         <div class="file-dropzone" id="dropzoneContainer">
-                            <input type="file" id="materialInput" class="file-input-hidden">
+                            <input type="file" id="materialInput" class="file-input-hidden" aria-label="Adjuntar archivo">
                             <div class="file-dropzone-content">
                                 <span class="file-icon">📁</span>
                                 <span class="file-text" id="fileTextLabel">Haz clic para adjuntar guías, PDFs o imágenes de apoyo</span>
@@ -147,9 +163,15 @@
         </div>
     </main>
 
-<footer class="auth-footer-simple">
-    <p>&copy; 2026 <strong>CRECER</strong> &bull; Plataforma Institucional de Gestión Académica</p>
-</footer>
+    <!-- Contenedor Toast -->
+    <div id="toast-container"></div>
+
+    <!-- Pie de Página Institucional -->
+    <footer class="app-footer" role="contentinfo">
+        <div class="footer-container">
+            <p>&copy; 2026 <strong>CRECER</strong> &bull; Plataforma Institucional de Gestión Académica</p>
+        </div>
+    </footer>
 
     <!-- Scripts de la aplicación -->
     <script type="module" src="js/global.js"></script>

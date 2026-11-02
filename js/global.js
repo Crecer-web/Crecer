@@ -1,5 +1,5 @@
 // ==========================================
-// MÓDULO GLOBAL Y UTILIDADES - CRECER
+// MÓDULO GLOBAL Y UTILIDADES - CRECER (Versión Definitiva)
 // ==========================================
 import { auth } from './firebase-config.js';
 import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -147,46 +147,53 @@ function sanearTextoGlobal(str) {
 }
 
 /**
- * Aplica el tema de manera segura sobre la etiqueta principal
+ * Aplica el tema sincronizado sobre html y body
  */
 function aplicarTema(tema) {
+    const themeBtn = document.getElementById('themeToggle');
+
     if (tema === 'dark') {
         document.documentElement.setAttribute('data-theme', 'dark');
+        document.body.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
+        localStorage.setItem('crecer-theme', 'dark');
+        if (themeBtn) themeBtn.textContent = '☀️';
     } else {
         document.documentElement.removeAttribute('data-theme');
+        document.body.removeAttribute('data-theme');
+        localStorage.setItem('theme', 'light');
+        localStorage.setItem('crecer-theme', 'light');
+        if (themeBtn) themeBtn.textContent = '🌙';
     }
 }
 
-function actualizarIconoTema(btn, tema) {
-    if (!btn) return;
-    btn.textContent = tema === 'dark' ? '☀️' : '🌙';
-}
-
-// Aplicar tema de forma inmediata apenas se ejecuta el script
-const temaInicial = localStorage.getItem('theme') || 'light';
+// Aplicar tema de manera inmediata al cargar el script
+const temaInicial = localStorage.getItem('theme') || 
+                   (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 aplicarTema(temaInicial);
 
-// Eventos tras la carga completa del DOM
+// Eventos del DOM
 document.addEventListener('DOMContentLoaded', () => {
-    const themeBtn = document.getElementById('themeToggle');
-    const temaActual = localStorage.getItem('theme') || 'light';
+    let themeBtn = document.getElementById('themeToggle');
 
-    aplicarTema(temaActual);
     if (themeBtn) {
-        actualizarIconoTema(themeBtn, temaActual);
-        
-        themeBtn.addEventListener('click', () => {
-            const esDarkActual = document.documentElement.getAttribute('data-theme') === 'dark';
+        const nuevoBtn = themeBtn.cloneNode(true);
+        themeBtn.parentNode.replaceChild(nuevoBtn, themeBtn);
+        themeBtn = nuevoBtn;
+
+        themeBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const esDarkActual = document.documentElement.getAttribute('data-theme') === 'dark' || 
+                                 document.body.getAttribute('data-theme') === 'dark';
             const nuevoTema = esDarkActual ? 'light' : 'dark';
             
             aplicarTema(nuevoTema);
-            localStorage.setItem('theme', nuevoTema);
-            localStorage.setItem('crecer-theme', nuevoTema);
-            actualizarIconoTema(themeBtn, nuevoTema);
         });
     }
 
-    // Control del Menú Desplegable (Dropdowns)
+    // Control de Menús Desplegables
     const dropdowns = document.querySelectorAll(".dropdown");
 
     dropdowns.forEach((dropdown) => {
@@ -200,16 +207,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 dropdowns.forEach(d => {
                     if (d !== dropdown) {
                         d.classList.remove("active");
-                        const content = d.querySelector('.dropdown-content');
-                        if (content) content.classList.remove('show');
                     }
                 });
 
                 dropdown.classList.toggle("active");
-                const dropdownContent = dropdown.querySelector('.dropdown-content');
-                if (dropdownContent) {
-                    dropdownContent.classList.toggle('show');
-                }
             });
         }
     });
@@ -218,10 +219,6 @@ document.addEventListener('DOMContentLoaded', () => {
         dropdowns.forEach((dropdown) => {
             if (!dropdown.contains(e.target)) {
                 dropdown.classList.remove("active");
-                const dropdownContent = dropdown.querySelector('.dropdown-content');
-                if (dropdownContent) {
-                    dropdownContent.classList.remove('show');
-                }
             }
         });
     });

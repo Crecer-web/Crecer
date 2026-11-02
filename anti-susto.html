@@ -1,76 +1,133 @@
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agenda Estudiantil - Carga de Tareas</title>
-    <!-- Rutas corregidas hacia la carpeta /css/ -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>CRECER - Sistema de Alertas Anti-Susto</title>
+    
+    <!-- Iconos y Manifest PWA -->
+    <link rel="icon" type="image/png" sizes="32x32" href="img/logo.png">
+    <link rel="apple-touch-icon" href="img/logo.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+
+    <!-- Script síncrono crítico para evitar parpadeo en modo oscuro -->
+    <script>
+        (function() {
+            const tema = localStorage.getItem('theme') || 'light';
+            if (tema === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
+    <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/anti-susto.css">
 </head>
-<body>
+<body class="dashboard-body">
+
+    <!-- ENCABEZADO INSTITUCIONAL UNIFICADO -->
+    <header class="app-header">
+        <div class="header-container">
+            <div class="logo">
+                <a href="inicio.html">CRECER</a>
+            </div>
+            <div class="header-right-group">
+                <nav class="nav-menu" id="navMenu" aria-label="Navegación principal">
+                    <a href="inicio.html" class="nav-link">Inicio</a>
+                    <a href="anti-susto.html" class="active nav-link">Anti-Susto</a>
+                </nav>
+                <button id="themeToggle" class="theme-toggle" type="button" aria-label="Cambiar tema">🌙</button>
+                <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú" type="button">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </button>
+            </div>
+        </div>
+    </header>
 
     <!-- NOTIFICACIÓN FLOTANTE TIPO TELÉFONO (IN-APP) -->
     <div id="phoneNotification" class="phone-notification hidden" role="alert">
         <div class="notification-header">
             <div class="app-info">
                 <span class="app-icon">🚨</span>
-                <span class="app-name">AGENDA ESTUDIANTIL</span>
+                <span class="app-name">CRECER &bull; ALERTA ANTI-SUSTO</span>
             </div>
             <span class="notification-time">Ahora</span>
         </div>
         <div class="notification-body">
-            <h4 id="notifTitle">¡Alerta Anti-Susto!</h4>
-            <p id="notifMessage">Tenés un trabajo cerca.</p>
+            <h4 id="notifTitle">Aviso Institucional</h4>
+            <p id="notifMessage">Tienes una entrega pendiente próxima.</p>
         </div>
     </div>
 
-    <div class="anti-susto-container">
-        <header class="anti-susto-header">
-            <h1>📝 Carga Unificada de Tareas</h1>
-            <p>Todo lo que cargues se guarda en la base de datos y te avisará 24 hs antes al celular.</p>
-        </header>
+    <!-- CONTENEDOR PRINCIPAL -->
+    <main class="app-main-container">
+        <div class="anti-susto-container">
+            <header class="anti-susto-header">
+                <h1>📝 Sistema Anti-Susto</h1>
+                <p>Gestiona tus entregas institucionales y recibe recordatorios automáticos 24 horas antes del vencimiento.</p>
+            </header>
 
-        <!-- BANNER DE PERMISOS -->
-        <section class="permission-banner" id="permissionBanner">
-            <p>📲 Activá las notificaciones para recibir alertas 24hs antes aunque la app esté cerrada.</p>
-            <button id="btnEnableNotifications" class="btn-enable">Activar Alertas al Celular</button>
-        </section>
-
-        <!-- FORMULARIO PRINCIPAL -->
-        <section class="form-card">
-            <h2>Agregar Tarea / Examen</h2>
-            <form id="formCargaTarea">
-                <div class="form-group">
-                    <label for="materia">Materia / Asignatura</label>
-                    <input type="text" id="materia" placeholder="Ej: Análisis Matemático" required autocomplete="off">
+            <!-- BANNER DE PERMISOS -->
+            <section class="permission-banner" id="permissionBanner">
+                <div class="permission-content">
+                    <span class="permission-icon">🔔</span>
+                    <div>
+                        <h4>Activa las Alertas de Notificación</h4>
+                        <p>Recibe avisos oficiales en tu dispositivo móvil 24 horas antes de cada entrega, incluso con la aplicación en segundo plano.</p>
+                    </div>
                 </div>
+                <button id="btnEnableNotifications" class="btn-enable" type="button">Habilitar Alertas al Celular</button>
+            </section>
 
-                <div class="form-group">
-                    <label for="titulo">Detalles o Título de la Entrega</label>
-                    <input type="text" id="titulo" placeholder="Ej: Parcial de Derivadas o TP N°2" required autocomplete="off">
-                </div>
+            <!-- FORMULARIO PRINCIPAL -->
+            <section class="form-card">
+                <h2>Registrar Tarea o Examen</h2>
+                <form id="formCargaTarea" novalidate>
+                    <div class="form-group">
+                        <label for="materia">Materia / Asignatura *</label>
+                        <input type="text" id="materia" placeholder="Ej: Análisis Matemático" required autocomplete="off">
+                    </div>
 
-                <div class="form-group">
-                    <label for="fechaEntrega">Fecha y Hora Límite</label>
-                    <input type="datetime-local" id="fechaEntrega" required>
-                </div>
+                    <div class="form-group">
+                        <label for="titulo">Detalles o Título de la Entrega *</label>
+                        <input type="text" id="titulo" placeholder="Ej: Parcial de Derivadas o TP N°2" required autocomplete="off">
+                    </div>
 
-                <button type="submit" class="btn-submit">💾 Guardar Tarea</button>
-            </form>
-        </section>
+                    <div class="form-group">
+                        <label for="fechaEntrega">Fecha y Hora Límite *</label>
+                        <input type="datetime-local" id="fechaEntrega" required>
+                    </div>
 
-        <!-- TAREAS DESDE LA BASE DE DATOS -->
-        <section class="form-card">
-            <h2>Próximas Entregas (Sincronizadas)</h2>
-            <ul id="taskList" class="task-list">
-                <!-- Se cargan dinámicamente -->
-            </ul>
-        </section>
-    </div>
+                    <button type="submit" id="btnSubmitTarea" class="btn-submit">💾 Guardar Tarea y Automatizar Alerta</button>
+                </form>
+            </section>
+
+            <!-- TAREAS DESDE LA BASE DE DATOS -->
+            <section class="form-card">
+                <h2>Próximas Entregas (Sincronizadas)</h2>
+                <ul id="taskList" class="task-list">
+                    <!-- Se cargan dinámicamente -->
+                </ul>
+            </section>
+        </div>
+    </main>
+
+    <!-- PIE DE PÁGINA INSTITUCIONAL -->
+    <footer class="app-footer">
+        <div class="footer-container">
+            <p>&copy; 2026 <strong>CRECER</strong> &bull; Plataforma Institucional de Gestión Académica</p>
+        </div>
+    </footer>
+
+    <!-- Contenedor para Notificaciones Toast Globales -->
+    <div id="toast-container"></div>
 
     <!-- Cliente de Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Ruta corregida hacia la carpeta /js/ -->
+    <!-- Script modular independiente -->
     <script src="js/anti-susto.js"></script>
 </body>
 </html>

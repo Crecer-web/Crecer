@@ -7,7 +7,6 @@ import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
 
-// Configuración del proyecto de Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyBvzStzUNt0kjfyL5mNBzIqI1PbdzypOTI",
   authDomain: "crecer-web.firebaseapp.com",
@@ -18,15 +17,18 @@ const firebaseConfig = {
   measurementId: "G-5SR5DK594M"
 };
 
-// Inicializar la aplicación principal
 const app = initializeApp(firebaseConfig);
 
-// Inicializar instancias de los servicios
 const db = getFirestore(app);
 const auth = getAuth(app);
-const messaging = getMessaging(app);
+let messaging = null;
 
-// Clave VAPID pública de Firebase
+try {
+  messaging = getMessaging(app);
+} catch (e) {
+  console.warn("Firebase Messaging no está disponible en este entorno.");
+}
+
 const vapidKey = "TU_VAPID_KEY_DE_FIREBASE";
 
 export { 

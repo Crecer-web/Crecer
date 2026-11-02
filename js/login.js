@@ -1,17 +1,37 @@
+/* =================================================================
+   LÓGICA DE INICIO DE SESIÓN - PLATAFORMA CRECER
+   ================================================================= */
+
 import { auth, db } from './firebase-config.js';
 import { 
     signInWithEmailAndPassword, 
     signInWithPopup, 
-    GoogleAuthProvider,
-    sendPasswordResetEmail 
+    GoogleAuthProvider 
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { mostrarToast } from './global.js';
 
 /**
+ * Aplica el tema de forma sincronizada en la vista de inicio de sesión
+ */
+function aplicarTemaDirecto(tema) {
+    const themeToggle = document.getElementById('themeToggle');
+
+    if (tema === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.body.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
+        if (themeToggle) themeToggle.textContent = '☀️';
+    } else {
+        document.documentElement.removeAttribute('data-theme');
+        document.body.removeAttribute('data-theme');
+        localStorage.setItem('theme', 'light');
+        if (themeToggle) themeToggle.textContent = '🌙';
+    }
+}
+
+/**
  * Guarda o actualiza los datos del usuario en Firestore al iniciar sesión.
- * @param {string} uid - ID del usuario autenticado
- * @param {Object} datos - Objeto con los campos a fusionar en la base de datos
  */
 async function guardarPerfilUsuario(uid, datos) {
     try {
@@ -26,10 +46,34 @@ async function guardarPerfilUsuario(uid, datos) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    let themeToggle = document.getElementById('themeToggle');
     const loginForm = document.getElementById('loginForm');
     const btnGoogleAuth = document.getElementById('btnGoogleAuth');
     const btnSubmitLogin = document.getElementById('btnSubmitLogin');
-    const linkOlvido = document.getElementById('linkOlvidoPassword');
+
+    // Inicialización del tema
+    const temaGuardado = localStorage.getItem('theme');
+    const prefiereDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const temaInicial = temaGuardado ? temaGuardado : (prefiereDark ? 'dark' : 'light');
+    
+    aplicarTemaDirecto(temaInicial);
+
+    if (themeToggle) {
+        const nuevoBtn = themeToggle.cloneNode(true);
+        themeToggle.parentNode.replaceChild(nuevoBtn, themeToggle);
+        themeToggle = nuevoBtn;
+
+        themeToggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const esOscuroActual = document.documentElement.getAttribute('data-theme') === 'dark' || 
+                                   document.body.getAttribute('data-theme') === 'dark';
+            
+            const nuevoTema = esOscuroActual ? 'light' : 'dark';
+            aplicarTemaDirecto(nuevoTema);
+        });
+    }
 
     // 1. Iniciar sesión con Correo y Contraseña
     if (loginForm) {
@@ -56,7 +100,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
-                // Actualizar último acceso en Firestore
                 await guardarPerfilUsuario(user.uid, {
                     email: user.email,
                     ultimoAcceso: new Date().toISOString()
@@ -127,44 +170,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 mostrarToast(errorMsg, 'danger');
                 btnGoogleAuth.disabled = false;
-            }
-        });
-    }
-
-    // 3. Solicitud de recuperación de contraseña con auxilio si el campo está vacío
-    if (linkOlvido) {
-        linkOlvido.addEventListener('click', async (e) => {
-            e.preventDefault();
-            const emailInput = document.getElementById('loginEmail');
-            let email = emailInput ? emailInput.value.trim() : '';
-
-            // Si el campo de correo está vacío, se solicita mediante un prompt rápido
-            if (!email) {
-                email = prompt('Por favor, ingresa tu correo electrónico para enviar el enlace de recuperación:');
-                if (email) {
-                    email = email.trim();
-                    if (emailInput) emailInput.value = email;
-                } else {
-                    return; // El usuario canceló la entrada
-                }
-            }
-
-            try {
-                await sendPasswordResetEmail(auth, email);
-                mostrarToast('Te enviamos un correo para restablecer tu contraseña. Revisa tu bandeja de entrada o spam.', 'success');
-            } catch (error) {
-                console.error("Error de recuperación Firebase:", error);
-                let msgError = 'No se pudo enviar el correo de recuperación.';
-                
-                if (error.code === 'auth/user-not-found') {
-                    msgError = 'No existe una cuenta registrada con este correo.';
-                } else if (error.code === 'auth/invalid-email') {
-                    msgError = 'El correo ingresado no es válido.';
-                } else if (error.code === 'auth/too-many-requests') {
-                    msgError = 'Has realizado demasiados intentos. Por favor espera unos minutos.';
-                }
-
-                mostrarToast(msgError, 'danger');
             }
         });
     }

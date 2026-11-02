@@ -80,35 +80,20 @@ function comprimirImagen(file, maxWidth = 250, maxHeight = 250) {
     });
 }
 
-function aplicarTema(tema) {
-    const esOscuro = tema === 'dark';
+function aplicarTemaDirecto(tema) {
+    const themeToggle = document.getElementById('themeToggle');
 
-    if (esOscuro) {
+    if (tema === 'dark') {
         document.documentElement.setAttribute('data-theme', 'dark');
         document.body.setAttribute('data-theme', 'dark');
         localStorage.setItem('theme', 'dark');
+        if (themeToggle) themeToggle.textContent = '☀️';
     } else {
         document.documentElement.removeAttribute('data-theme');
         document.body.removeAttribute('data-theme');
         localStorage.setItem('theme', 'light');
+        if (themeToggle) themeToggle.textContent = '🌙';
     }
-
-    actualizarIconoTema(tema);
-}
-
-function actualizarIconoTema(tema) {
-    const themeToggle = document.getElementById('themeToggle');
-    if (themeToggle) {
-        themeToggle.textContent = tema === 'dark' ? '☀️' : '🌙';
-    }
-}
-
-function toggleTema() {
-    const temaActual = localStorage.getItem('theme') || 
-                      (document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
-
-    const nuevoTema = temaActual === 'dark' ? 'light' : 'dark';
-    aplicarTema(nuevoTema);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -144,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const temaGuardado = localStorage.getItem('theme');
     const prefiereDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const temaInicial = temaGuardado ? temaGuardado : (prefiereDark ? 'dark' : 'light');
-    aplicarTema(temaInicial);
+    aplicarTemaDirecto(temaInicial);
 
     // Event Listener único para el botón de conmutación de tema
     if (themeToggle) {
@@ -155,7 +140,12 @@ document.addEventListener('DOMContentLoaded', () => {
         themeToggle.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            toggleTema();
+
+            const esOscuroActual = document.documentElement.getAttribute('data-theme') === 'dark' || 
+                                   document.body.getAttribute('data-theme') === 'dark';
+            
+            const nuevoTema = esOscuroActual ? 'light' : 'dark';
+            aplicarTemaDirecto(nuevoTema);
         });
     }
 
@@ -163,6 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (menuToggle && navMenu) {
         menuToggle.addEventListener('click', (e) => {
             e.preventDefault();
+            e.stopPropagation();
             navMenu.classList.toggle('active');
         });
     }
@@ -174,11 +165,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (dropdownBtn && dropdown) {
         dropdownBtn.addEventListener("click", (e) => {
             e.preventDefault();
+            e.stopPropagation();
             dropdown.classList.toggle("active");
         });
 
         window.addEventListener("click", (e) => {
-            if (!dropdown.contains(e.target)) {
+            if (dropdown && !dropdown.contains(e.target)) {
                 dropdown.classList.remove("active");
             }
         });
@@ -355,15 +347,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     /**
-     * Muestra la foto de perfil o activa la inicial si hay error de carga (ej. 429 Too Many Requests)
+     * Muestra la foto de perfil o activa la inicial si hay error de carga
      */
     function actualizarVisualizacionFoto(urlFoto, nombreUsuario) {
         if (!profileImage || !avatarInitial) return;
 
         if (urlFoto && urlFoto.trim() !== '') {
-            // Manejador de error para capturar fallos de red (Rate limit HTTP 429)
             profileImage.onerror = () => {
-                console.warn("No se pudo cargar la imagen remota (posible límite de peticiones HTTP 429). Mostrando inicial.");
+                console.warn("No se pudo cargar la imagen remota. Mostrando inicial.");
                 profileImage.style.display = 'none';
                 avatarInitial.textContent = nombreUsuario ? nombreUsuario.charAt(0).toUpperCase() : 'U';
                 avatarInitial.style.display = 'flex';

@@ -1,209 +1,312 @@
+/* =================================================================
+   PANEL PRINCIPAL DE INICIO - PLATAFORMA CRECER (Velocidad Optimizada)
+   ================================================================= */
+
 import { db } from './firebase-config.js';
 import { 
     collection, 
     getDocs, 
-    doc, 
-    updateDoc,
     query, 
-    where 
+    where, 
+    doc, 
+    updateDoc 
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { observarSesion, mostrarToast } from './global.js';
+import { abrirArchivoAdjunto } from './archivos.js';
 
 let currentUser = null;
-let todosLosFormularios = [];
-let filtroTipo = 'Todos';
-
-// Registrar el Service Worker para notificaciones automáticas en segundo plano
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js').catch((err) => {
-        console.error('Error al registrar el Service Worker:', err);
-    });
-}
+let todasLasTareas = [];
+let filtroActual = 'Todos';
+let textoBusqueda = '';
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Referencias DOM para menú móvil y tema
-    const themeToggle = document.getElementById('themeToggle');
     const menuToggle = document.getElementById('menuToggle');
     const navMenu = document.getElementById('navMenu');
 
-    // Manejo del icono de Tema (Luna 🌙 en Modo Claro, Sol ☀️ en Modo Oscuro)
-    const sincronizarTemaUI = () => {
-        const esDark = document.body.getAttribute('data-theme') === 'dark';
-        if (themeToggle) {
-            themeToggle.textContent = esDark ? '☀️' : '🌙';
-        }
+    // Control de la mini ventana Modal de Confirmación
+    const modal = document.getElementById('modalConfirmacion');
+    const btnCerrarModal = document.getElementById('btnCerrarModal');
+    const btnCancelarModal = document.getElementById('btnCancelarModal');
+    const btnAceptarModal = document.getElementById('btnAceptarModal');
+    const modalMensajeTexto = document.getElementById('modalMensajeTexto');
+
+    let accionPendiente = null;
+
+    const abrirModalConfirmacion = (mensaje, callback) => {
+        if (modalMensajeTexto) modalMensajeTexto.textContent = mensaje;
+        accionPendiente = callback;
+        if (modal) modal.classList.remove('hidden');
     };
 
-    // Inicialización del tema según preferencia guardada
-    const temaGuardado = localStorage.getItem('theme');
-    if (temaGuardado === 'dark' || (!temaGuardado && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        document.body.setAttribute('data-theme', 'dark');
-    } else {
-        document.body.removeAttribute('data-theme');
-    }
-    sincronizarTemaUI();
+    const cerrarModalConfirmacion = () => {
+        accionPendiente = null;
+        if (modal) modal.classList.add('hidden');
+    };
 
-    // Event Listener del Botón de Tema (Conmutación y actualización inmediata de Emoji)
-    if (themeToggle) {
-        themeToggle.addEventListener('click', () => {
-            const actualEsDark = document.body.getAttribute('data-theme') === 'dark';
-            if (actualEsDark) {
-                document.body.removeAttribute('data-theme');
-                localStorage.setItem('theme', 'light');
-            } else {
-                document.body.setAttribute('data-theme', 'dark');
-                localStorage.setItem('theme', 'dark');
+    if (btnCerrarModal) btnCerrarModal.addEventListener('click', cerrarModalConfirmacion);
+    if (btnCancelarModal) btnCancelarModal.addEventListener('click', cerrarModalConfirmacion);
+    if (btnAceptarModal) {
+        btnAceptarModal.addEventListener('click', async () => {
+            if (typeof accionPendiente === 'function') {
+                await accionPendiente();
             }
-            sincronizarTemaUI();
+            cerrarModalConfirmacion();
         });
     }
 
-    // Menú hamburguesa móvil
     if (menuToggle && navMenu) {
-        menuToggle.addEventListener('click', () => {
+        menuToggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             navMenu.classList.toggle('active');
         });
     }
 
-    // Filtros de búsqueda
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-        searchInput.addEventListener('input', renderizarVista);
-    }
+    const dropdown = document.querySelector(".dropdown");
+    const dropdownBtn = document.getElementById("dropdownBtn");
 
-    const filterBtns = document.querySelectorAll('.btn-filter');
-    filterBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            filterBtns.forEach(b => b.classList.remove('active'));
-            e.target.classList.add('active');
-            filtroTipo = e.target.getAttribute('data-filter') || 'Todos';
-            renderizarVista();
+    if (dropdownBtn && dropdown) {
+        dropdownBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropdown.classList.toggle("active");
         });
-    });
-});
 
-// Control de Sesión
-observarSesion((user) => {
-    if (user) {
-        currentUser = user;
-        cargarDatos();
-    } else {
-        window.location.href = 'login.html';
+        window.addEventListener("click", (e) => {
+            if (!dropdown.contains(e.target)) {
+                dropdown.classList.remove("active");
+            }
+        });
     }
+
+    observarSesion((user) => {
+        if (user) {
+            currentUser = user;
+            cargarTareasFirestore();
+            inicializarFiltrosYBusqueda();
+        } else {
+            window.location.href = 'login.html';
+        }
+    });
+
+    window.crecerAbrirModalEliminar = abrirModalConfirmacion;
 });
 
-async function cargarDatos() {
+async function cargarTareasFirestore() {
     if (!currentUser) return;
 
     try {
         const q = query(collection(db, "formularios"), where("userId", "==", currentUser.uid));
-        const querySnapshot = await getDocs(q);
+        const snapshot = await getDocs(q);
 
-        todosLosFormularios = [];
-        querySnapshot.forEach((docSnap) => {
-            const data = docSnap.data();
-            todosLosFormularios.push({ 
-                id: docSnap.id, 
-                ...data,
-                enPapelera: data.enPapelera === true || data.eliminado === true 
-            });
+        todasLasTareas = [];
+        snapshot.forEach(documento => {
+            const data = documento.data();
+            if (!data.eliminado && !data.enPapelera) {
+                todasLasTareas.push({
+                    id: documento.id,
+                    ...data
+                });
+            }
         });
 
-        renderizarVista();
-    } catch (error) {
-        console.error("Error al cargar datos:", error);
-        mostrarToast('Error al sincronizar datos', 'danger');
+        todasLasTareas.sort((a, b) => (a.materia || '').localeCompare(b.materia || ''));
+
+        renderizarTareas();
+        actualizarMetricas();
+
+    } catch (err) {
+        console.error("Error al cargar tareas de Firestore:", err);
+        mostrarToast('Error al obtener tus tareas guardadas.', 'danger');
     }
 }
 
-function renderizarVista() {
-    const searchVal = document.getElementById('searchInput')?.value.toLowerCase().trim() || '';
-    const cardsGrid = document.getElementById('cardsGrid');
+function renderizarTareas() {
+    const grid = document.getElementById('cardsGrid');
+    if (!grid) return;
 
-    let pendientesCount = 0;
-    let completadasCount = 0;
+    grid.innerHTML = '';
 
-    const cardsFragment = document.createDocumentFragment();
+    const tareasFiltradas = todasLasTareas.filter(item => {
+        const materia = (item.materia || '').toLowerCase();
+        const tema = (item.tema || '').toLowerCase();
+        const descripcion = (item.descripcion || '').toLowerCase();
+        const queryText = textoBusqueda.toLowerCase();
 
-    if (cardsGrid) cardsGrid.innerHTML = '';
-
-    todosLosFormularios.forEach((item) => {
-        // Ignorar elementos que estén en la papelera
-        if (item.enPapelera) return;
-
-        if (item.completada) {
-            completadasCount++;
-        } else {
-            pendientesCount++;
-        }
-
-        const cumpleFiltroTipo = (filtroTipo === 'Todos') || (item.tipo === filtroTipo);
-        const materiaTexto = item.materia ? item.materia.toLowerCase() : '';
-        const temaTexto = item.tema ? item.tema.toLowerCase() : '';
-        const cumpleBusqueda = materiaTexto.includes(searchVal) || temaTexto.includes(searchVal);
-
-        if (cumpleFiltroTipo && cumpleBusqueda && cardsGrid) {
-            cardsFragment.appendChild(crearTarjetaActiva(item));
-        }
+        const coincideTexto = materia.includes(queryText) || tema.includes(queryText) || descripcion.includes(queryText);
+        
+        if (filtroActual === 'Todos') return coincideTexto;
+        return coincideTexto && (item.tipo || 'Tarea').toLowerCase() === filtroActual.toLowerCase();
     });
 
-    if (cardsGrid) {
-        if (cardsFragment.children.length === 0) {
-            cardsGrid.innerHTML = `<p style="color: var(--text-muted, #94a3b8); grid-column: 1 / -1; text-align: center; padding: 2rem 0;">No tenés entregas que coincidan con el filtro.</p>`;
-        } else {
-            cardsGrid.appendChild(cardsFragment);
-        }
+    if (tareasFiltradas.length === 0) {
+        grid.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 3rem 1rem; color: var(--text-secondary);">
+                <p style="font-size: 1.1rem; font-weight: 600;">No se encontraron tareas o materias guardadas.</p>
+                <p style="font-size: 0.88rem; margin-top: 0.5rem;">Crea una nueva tarea haciendo clic en el botón superior.</p>
+            </div>
+        `;
+        return;
     }
 
-    const cantPendientesEl = document.getElementById('cantPendientes');
-    const cantCompletadasEl = document.getElementById('cantCompletadas');
+    const fragmento = document.createDocumentFragment();
 
-    if (cantPendientesEl) cantPendientesEl.textContent = pendientesCount;
-    if (cantCompletadasEl) cantCompletadasEl.textContent = completadasCount;
-}
+    tareasFiltradas.forEach(tarea => {
+        const card = document.createElement('article');
+        card.className = `item-card ${tarea.completada ? 'completed' : ''}`;
+        
+        const tipoBadge = tarea.tipo || 'Tarea';
+        const badgeClass = tipoBadge.toLowerCase() === 'examen' ? 'badge-examen' : 'badge-tarea';
+        const fechaMostrar = tarea.fechaEntrega || tarea.fecha || 'Sin fecha';
+        const horaMostrar = tarea.horaEntrega ? `a las ${tarea.horaEntrega}` : '';
+        const temaMostrar = tarea.tema || tarea.titulo || 'Sin tema especificativo';
+        const descripcionMostrar = tarea.descripcion || '';
 
-function crearTarjetaActiva(item) {
-    const card = document.createElement('div');
-    card.className = `item-card ${item.completada ? 'completed' : ''}`;
-    const tipoBadgeClass = item.tipo === 'Examen' ? 'badge-examen' : 'badge-tarea';
-
-    card.innerHTML = `
-        <div class="card-header">
-            <span class="badge ${tipoBadgeClass}">${item.tipo || 'General'}</span>
-            <span class="card-materia">${item.materia || 'Sin materia'}</span>
-        </div>
-        <h3>${item.tema || 'Sin tema'}</h3>
-        <p class="card-desc">${item.descripcion || 'Sin descripción'}</p>
-        ${item.adjuntoNombre ? `<div class="card-attachment">📎 ${item.adjuntoNombre}</div>` : ''}
-        <div class="card-dates">📅 Entrega: ${item.fechaEntrega || '--/--/----'} ${item.horaEntrega || ''} hs</div>
-        <div class="card-actions">
-            <button type="button" class="btn-status">${item.completada ? '✅ Completada' : '⏳ Pendiente'}</button>
-            <button type="button" class="btn-trash" title="Enviar a Papelera">🗑️</button>
-        </div>
-    `;
-
-    card.querySelector('.btn-status').addEventListener('click', async () => {
-        try {
-            await updateDoc(doc(db, "formularios", item.id), { completada: !item.completada });
-            cargarDatos();
-        } catch (error) {
-            mostrarToast('Error al cambiar estado', 'danger');
+        let adjuntoHTML = '';
+        if (tarea.adjuntoUrl) {
+            adjuntoHTML = `
+                <div class="card-attachment" style="margin-top: 0.5rem;">
+                    <button type="button" class="btn-abrir-archivo" data-url="${tarea.adjuntoUrl}" data-nombre="${tarea.adjuntoNombre || 'archivo'}" style="background: none; border: none; color: var(--accent); font-weight: 600; text-decoration: underline; cursor: pointer; padding: 0; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 0.3rem;">
+                        📎 ${sanearHTML(tarea.adjuntoNombre || 'Ver archivo adjunto')} ↗
+                    </button>
+                </div>`;
+        } else if (tarea.adjuntoNombre) {
+            adjuntoHTML = `
+                <div class="card-attachment" style="margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.85rem;">
+                    📄 Adjunto: <strong>${sanearHTML(tarea.adjuntoNombre)}</strong>
+                </div>`;
         }
-    });
 
-    card.querySelector('.btn-trash').addEventListener('click', async () => {
-        try {
-            await updateDoc(doc(db, "formularios", item.id), { 
-                enPapelera: true,
-                eliminado: true,
-                eliminadoEn: new Date().toISOString()
+        // Estructura con los tres botones (Completada, Editar, Eliminar) uno al lado del otro
+        card.innerHTML = `
+            <div class="card-body-content">
+                <div class="card-header">
+                    <span class="badge ${badgeClass}">${sanearHTML(tipoBadge)}</span>
+                    <span class="card-dates">📅 ${sanearHTML(fechaMostrar)} ${sanearHTML(horaMostrar)}</span>
+                </div>
+                <h3 style="margin-bottom: 0.2rem;">📚 ${sanearHTML(tarea.materia || 'Materia sin nombre')}</h3>
+                <p class="card-desc" style="font-size: 0.95rem; margin-bottom: 0.4rem;">
+                    <strong>Tema:</strong> ${sanearHTML(temaMostrar)}
+                </p>
+                ${descripcionMostrar ? `<p class="card-desc" style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 0.6rem;">${sanearHTML(descripcionMostrar)}</p>` : ''}
+                ${adjuntoHTML}
+            </div>
+            
+            <div class="card-actions">
+                <button type="button" class="btn-status" data-id="${tarea.id}">
+                    ${tarea.completada ? '↩️ Pendiente' : '✅ Completada'}
+                </button>
+                <a href="formularios.html?id=${tarea.id}" class="btn-edit-card" title="Editar tarea">
+                    ✏️ Editar
+                </a>
+                <button type="button" class="btn-trash" data-id="${tarea.id}" title="Enviar a la papelera">
+                    🗑️ Eliminar
+                </button>
+            </div>
+        `;
+
+        card.querySelector('.btn-status').addEventListener('click', () => cambiarEstadoTarea(tarea.id, !tarea.completada));
+        
+        card.querySelector('.btn-trash').addEventListener('click', () => {
+            window.crecerAbrirModalEliminar(`¿Estás seguro de enviar "${temaMostrar}" a la papelera?`, async () => {
+                await enviarAPapelera(tarea.id);
             });
-            mostrarToast('Elemento enviado a la papelera', 'success');
-            cargarDatos();
-        } catch (error) {
-            mostrarToast('Error al mover a la papelera', 'danger');
+        });
+        
+        const btnAbrir = card.querySelector('.btn-abrir-archivo');
+        if (btnAbrir) {
+            btnAbrir.addEventListener('click', (e) => {
+                const urlBase64 = e.currentTarget.getAttribute('data-url');
+                const nombre = e.currentTarget.getAttribute('data-nombre');
+                abrirArchivoAdjunto(urlBase64, nombre);
+            });
         }
+
+        fragmento.appendChild(card);
     });
 
-    return card;
+    grid.appendChild(fragmento);
+}
+
+function actualizarMetricas() {
+    let pendientes = 0;
+    let completadas = 0;
+
+    todasLasTareas.forEach(t => {
+        if (t.completada) completadas++;
+        else pendientes++;
+    });
+
+    const elPendientes = document.getElementById('cantPendientes');
+    const elCompletadas = document.getElementById('cantCompletadas');
+
+    if (elPendientes) elPendientes.textContent = pendientes;
+    if (elCompletadas) elCompletadas.textContent = completadas;
+}
+
+function inicializarFiltrosYBusqueda() {
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            textoBusqueda = e.target.value;
+            renderizarTareas();
+        });
+    }
+
+    const filterButtons = document.querySelectorAll('.btn-filter');
+    filterButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            filterButtons.forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+            filtroActual = e.target.getAttribute('data-filter');
+            renderizarTareas();
+        });
+    });
+}
+
+async function cambiarEstadoTarea(id, nuevoEstado) {
+    try {
+        const tareaRef = doc(db, "formularios", id);
+        await updateDoc(tareaRef, { completada: nuevoEstado });
+        
+        const index = todasLasTareas.findIndex(t => t.id === id);
+        if (index !== -1) {
+            todasLasTareas[index].completada = nuevoEstado;
+        }
+
+        renderizarTareas();
+        actualizarMetricas();
+        mostrarToast(nuevoEstado ? '¡Tarea marcada como completada!' : 'Tarea marcada como pendiente', 'success');
+    } catch (err) {
+        console.error("Error al actualizar estado:", err);
+        mostrarToast('No se pudo actualizar el estado de la tarea.', 'danger');
+    }
+}
+
+async function enviarAPapelera(id) {
+    try {
+        const tareaRef = doc(db, "formularios", id);
+        await updateDoc(tareaRef, { 
+            enPapelera: true,
+            eliminadoEn: new Date().toISOString()
+        });
+
+        todasLasTareas = todasLasTareas.filter(t => t.id !== id);
+        renderizarTareas();
+        actualizarMetricas();
+        mostrarToast('Tarea enviada a la papelera con éxito', 'success');
+    } catch (err) {
+        console.error("Error al mover a papelera:", err);
+        mostrarToast('Error al eliminar la tarea.', 'danger');
+    }
+}
+
+function sanearHTML(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
 }

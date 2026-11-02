@@ -4,8 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Iniciar Sesión</title>
+    <title>Iniciar Sesión - CRECER</title>
     
+    <!-- Script síncrono para prevenir parpadeos del tema -->
+    <script>
+        (function() {
+            const temaGuardado = localStorage.getItem('theme') || 'light';
+            if (temaGuardado === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+            }
+        })();
+    </script>
+
     <!-- Iconos y Manifest PWA -->
     <link rel="icon" type="image/png" sizes="32x32" href="img/logo.png">
     <link rel="apple-touch-icon" href="img/logo.png">
@@ -18,6 +30,9 @@
 </head>
 
 <body class="auth-body">
+
+    <!-- Botón de Conmutación de Tema Flotante Superior -->
+    <button id="themeToggle" class="theme-toggle-auth" type="button" aria-label="Cambiar tema">🌙</button>
 
     <main class="auth-main-container">
         <div class="login-container">
@@ -46,8 +61,8 @@
                         <label for="loginPassword">Contraseña</label>
                         <input type="password" id="loginPassword" placeholder="••••••••" required autocomplete="current-password">
                         
-                        <!-- Enlace de recuperación actualizado hacia recuperar.html -->
-                        <div class="form-actions-right">
+                        <!-- Enlace de recuperación conectado a recuperar.html -->
+                        <div class="form-actions-center">
                             <a href="recuperar.html" id="linkOlvidoPassword" class="forgot-link">¿Olvidaste tu contraseña?</a>
                         </div>
                     </div>

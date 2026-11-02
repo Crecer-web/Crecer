@@ -4,8 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Inicio</title>
+    <title>Inicio - CRECER</title>
     
+    <!-- Script síncrono crítico para prevenir parpadeos del tema -->
+    <script>
+        (function() {
+            const temaGuardado = localStorage.getItem('theme') || 'light';
+            if (temaGuardado === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+            }
+        })();
+    </script>
+
     <!-- Iconos y Manifest PWA -->
     <link rel="icon" type="image/png" sizes="32x32" href="img/logo.png">
     <link rel="apple-touch-icon" href="img/logo.png">
@@ -41,13 +53,15 @@
                             <a href="notas.html">Calificaciones</a>
                             <a href="horario.html">Horario</a>
                             <a href="recursos.html">Recursos</a>
+                            <a href="exportar.html">Respaldo</a>
                             <a href="perfil.html">Mi Perfil</a>
+                            <div class="dropdown-divider"></div>
                             <a href="#" id="logoutBtn" class="dropdown-logout">Cerrar Sesión</a>
                         </div>
                     </div>
                 </nav>
 
-                <!-- Botón de Conmutación de Tema (Siempre Fijo a la Derecha) -->
+                <!-- Botón de Conmutación de Tema -->
                 <button id="themeToggle" class="theme-toggle" type="button" aria-label="Cambiar tema">🌙</button>
 
                 <!-- Botón Hamburguesa para Dispositivos Móviles -->
@@ -83,7 +97,7 @@
             <!-- Barra de Control: Búsqueda y Filtros -->
             <section class="control-bar">
                 <div class="search-and-actions">
-                    <input type="text" id="searchInput" placeholder="Buscar por materia o tema..." class="search-input" autocomplete="off">
+                    <input type="text" id="searchInput" placeholder="Buscar por materia, tema o descripción..." class="search-input" autocomplete="off">
                     <a href="formularios.html" class="btn-action btn-primary-action">➕ Nueva Tarea</a>
                     <a href="papelera.html" class="btn-action btn-trash-nav">🗑️ Papelera</a>
                 </div>
@@ -106,9 +120,29 @@
         </div>
     </main>
 
-<footer class="auth-footer-simple">
-    <p>&copy; 2026 <strong>CRECER</strong> &bull; Plataforma Institucional de Gestión Académica</p>
-</footer>
+    <!-- MINI VENTANA MODAL DE CONFIRMACIÓN PARA ELIMINAR TAREA -->
+    <div id="modalConfirmacion" class="modal-overlay hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>⚠️ Confirmar Eliminación</h3>
+                <button type="button" id="btnCerrarModal" class="btn-close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="modalMensajeTexto">¿Estás seguro de eliminar esta tarea?</p>
+            </div>
+            <div class="modal-actions">
+                <button type="button" id="btnCancelarModal" class="btn-secondary">Cancelar</button>
+                <button type="button" id="btnAceptarModal" class="btn-danger">Sí, eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor Toast -->
+    <div id="toast-container"></div>
+
+    <footer class="auth-footer-simple">
+        <p>&copy; 2026 <strong>CRECER</strong> &bull; Plataforma Institucional de Gestión Académica</p>
+    </footer>
 
     <!-- Scripts de la aplicación -->
     <script type="module" src="js/global.js"></script>

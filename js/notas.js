@@ -5,19 +5,42 @@ import {
     getDocs, 
     deleteDoc, 
     doc, 
+    updateDoc,
     query, 
     where 
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { observarSesion, mostrarToast } from './global.js';
+import { observarSesion, mostrarToast, mostrarConfirmacion } from './global.js';
 
 let currentUser = null;
 let misNotas = [];
 
-/**
- * Función robusta para aplicar y persistir el tema visual de forma inmediata.
- * @param {string} tema - Puede ser 'dark' o 'light'.
- */
-function aplicarTema(tema) {
+// ==========================================
+// GESTIÓN DE TEMA (CLARO / OSCURO)
+// ==========================================
+function inicializarTema() {
+    const themeToggle = document.getElementById('themeToggle');
+    
+    const temaGuardado = localStorage.getItem('theme');
+    const prefiereDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const temaInicial = temaGuardado ? temaGuardado : (prefiereDark ? 'dark' : 'light');
+
+    aplicarTemaDirecto(temaInicial);
+
+    if (themeToggle) {
+        const nuevoToggle = themeToggle.cloneNode(true);
+        themeToggle.parentNode.replaceChild(nuevoToggle, themeToggle);
+
+        nuevoToggle.addEventListener('click', () => {
+            const esOscuroActual = document.documentElement.getAttribute('data-theme') === 'dark' || 
+                                   document.body.getAttribute('data-theme') === 'dark';
+            
+            const nuevoTema = esOscuroActual ? 'light' : 'dark';
+            aplicarTemaDirecto(nuevoTema);
+        });
+    }
+}
+
+function aplicarTemaDirecto(tema) {
     const themeToggle = document.getElementById('themeToggle');
 
     if (tema === 'dark') {
@@ -33,43 +56,12 @@ function aplicarTema(tema) {
     }
 }
 
-/**
- * Inicialización de eventos principales al cargar el DOM del documento.
- */
 document.addEventListener('DOMContentLoaded', () => {
-    const themeToggle = document.getElementById('themeToggle');
+    inicializarTema();
+
     const menuToggle = document.getElementById('menuToggle');
     const navMenu = document.getElementById('navMenu');
 
-    // 1. Cargar preferencia inicial del tema desde localStorage o sistema operativo
-    const temaGuardado = localStorage.getItem('theme');
-    const prefiereDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const temaInicial = temaGuardado ? temaGuardado : (prefiereDark ? 'dark' : 'light');
-    
-    aplicarTema(temaInicial);
-
-    // 2. Conmutador de Tema infalible al primer clic sin desfases
-    if (themeToggle) {
-        // Removemos eventos previos clonando el nodo para evitar listeners duplicados
-        const nuevoToggle = themeToggle.cloneNode(true);
-        themeToggle.parentNode.replaceChild(nuevoToggle, themeToggle);
-
-        nuevoToggle.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-
-            // Evaluamos el estado actual directamente desde el atributo del DOM o el almacenamiento
-            const esActualmenteDark = document.documentElement.getAttribute('data-theme') === 'dark' || 
-                                      document.body.getAttribute('data-theme') === 'dark' ||
-                                      localStorage.getItem('theme') === 'dark';
-
-            // Alternamos al opuesto exacto de inmediato
-            const nuevoTema = esActualmenteDark ? 'light' : 'dark';
-            aplicarTema(nuevoTema);
-        });
-    }
-
-    // 3. Menú hamburguesa responsivo para dispositivos móviles
     if (menuToggle && navMenu) {
         menuToggle.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -77,7 +69,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 4. Control del Menú Desplegable (Dropdown de Módulos)
     const dropdown = document.querySelector(".dropdown");
     const dropdownBtn = document.getElementById("dropdownBtn");
 
@@ -88,18 +79,32 @@ document.addEventListener('DOMContentLoaded', () => {
             dropdown.classList.toggle("active");
         });
 
-        // Cerrar menú desplegable al hacer clic fuera del mismo
         window.addEventListener("click", (e) => {
             if (dropdown && !dropdown.contains(e.target)) {
                 dropdown.classList.remove("active");
             }
         });
     }
+
+    // Eventos del Modal
+    const modal = document.getElementById('modalEditarNota');
+    const btnCerrarModal = document.getElementById('btnCerrarModal');
+    const btnCancelarEdit = document.getElementById('btnCancelarEdit');
+
+    const cerrarModal = () => {
+        if (modal) modal.classList.add('hidden');
+    };
+
+    if (btnCerrarModal) btnCerrarModal.addEventListener('click', cerrarModal);
+    if (btnCancelarEdit) btnCancelarEdit.addEventListener('click', cerrarModal);
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) cerrarModal();
+        });
+    }
 });
 
-/**
- * Protección de ruta y ciclo de vida mediante el observador de sesión institucional.
- */
+// Control de Sesión
 observarSesion((user) => {
     if (user) {
         currentUser = user;
@@ -110,7 +115,7 @@ observarSesion((user) => {
 });
 
 /**
- * Cargar calificaciones desde Firestore de forma asíncrona y segura para el usuario actual.
+ * Cargar calificaciones desde Firestore
  */
 async function cargarNotas() {
     if (!currentUser) return;
@@ -124,7 +129,7 @@ async function cargarNotas() {
             misNotas.push({ id: docSnap.id, ...docSnap.data() });
         });
 
-        renderizarNotas();
+        renderizarMateriasAgrupadas();
     } catch (error) {
         console.error("Error al cargar notas de la base de datos:", error);
         mostrarToast('Error al sincronizar calificaciones con la base de datos', 'danger');
@@ -132,93 +137,232 @@ async function cargarNotas() {
 }
 
 /**
- * Renderizar tarjetas dinámicas, contadores institucionales y cálculo formal de promedios generales.
+ * Normaliza textos para evitar duplicados por acentos o mayúsculas.
  */
-function renderizarNotas() {
-    const notasGrid = document.getElementById('notasGrid');
+function normalizarTextoMateria(texto) {
+    if (!texto) return '';
+    return texto
+        .trim()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+}
+
+/**
+ * Agrupa las notas por nombre de materia, calcula promedios y renderiza las tarjetas.
+ */
+function renderizarMateriasAgrupadas() {
+    const materiasGrid = document.getElementById('materiasGrid');
     const promedioGeneralEl = document.getElementById('promedioGeneral');
     const promedioEstadoEl = document.getElementById('promedioEstado');
     const totalNotasBadge = document.getElementById('totalNotasBadge');
 
-    if (!notasGrid) return;
-    notasGrid.innerHTML = '';
-
-    if (totalNotasBadge) {
-        totalNotasBadge.textContent = `${misNotas.length} ${misNotas.length === 1 ? 'registro' : 'registros'}`;
-    }
+    if (!materiasGrid) return;
+    materiasGrid.innerHTML = '';
 
     if (misNotas.length === 0) {
-        notasGrid.innerHTML = '<p class="empty-msg">Aún no has registrado calificaciones en el sistema académico.</p>';
+        materiasGrid.innerHTML = '<p class="empty-msg">Aún no has registrado calificaciones en el sistema académico.</p>';
+        if (totalNotasBadge) totalNotasBadge.textContent = '0 materias';
         if (promedioGeneralEl) promedioGeneralEl.textContent = '--';
         if (promedioEstadoEl) {
-            promedioEstadoEl.textContent = 'Registra tus calificaciones para calcular de forma automática tu desempeño general y estadísticas de aprobación.';
+            promedioEstadoEl.textContent = 'Registra tus calificaciones para calcular de forma automática el promedio individual de cada materia y tu rendimiento global.';
         }
         return;
     }
 
-    let sumaTotal = 0;
+    const agrupadoPorMateria = {};
 
-    misNotas.forEach((item) => {
-        const notaNumerica = parseFloat(item.calificacion) || 0;
-        sumaTotal += notaNumerica;
+    misNotas.forEach(nota => {
+        const materiaNombreOriginal = (nota.materia || 'Sin Materia').trim();
+        const claveMateria = normalizarTextoMateria(materiaNombreOriginal);
 
-        const card = document.createElement('div');
-        card.className = 'nota-card';
-        card.innerHTML = `
-            <div class="nota-header">
-                <span class="nota-materia" title="${sanearTexto(item.materia)}">${sanearTexto(item.materia)}</span>
-                <span class="nota-badge ${notaNumerica >= 6 ? 'aprobado' : 'reprobado'}">${item.calificacion}</span>
+        if (!agrupadoPorMateria[claveMateria]) {
+            agrupadoPorMateria[claveMateria] = {
+                nombreOriginal: materiaNombreOriginal,
+                evaluaciones: []
+            };
+        }
+        agrupadoPorMateria[claveMateria].evaluaciones.push(nota);
+    });
+
+    const llavesMaterias = Object.keys(agrupadoPorMateria);
+    if (totalNotasBadge) {
+        totalNotasBadge.textContent = `${llavesMaterias.length} ${llavesMaterias.length === 1 ? 'materia' : 'materias'}`;
+    }
+
+    let sumaTotalTodasLasNotas = 0;
+    let cantidadTotalEvaluaciones = misNotas.length;
+
+    llavesMaterias.sort().forEach(clave => {
+        const materiaObj = agrupadoPorMateria[clave];
+        const evaluaciones = materiaObj.evaluaciones;
+
+        let sumaMateria = 0;
+        evaluaciones.forEach(ev => {
+            const numVal = parseFloat(ev.calificacion) || 0;
+            sumaMateria += numVal;
+            sumaTotalTodasLasNotas += numVal;
+        });
+
+        const promedioMateria = (sumaMateria / evaluaciones.length).toFixed(2);
+        const esAprobado = parseFloat(promedioMateria) >= 6;
+
+        const cardMateria = document.createElement('article');
+        cardMateria.className = 'materia-card';
+
+        let evaluacionesHTML = '';
+        evaluaciones.forEach(ev => {
+            evaluacionesHTML += `
+                <div class="evaluacion-item">
+                    <div class="evaluacion-info">
+                        <span class="evaluacion-nombre">${sanearTexto(ev.evaluacion)}</span>
+                        <span class="evaluacion-meta">📅 ${sanearTexto(ev.fecha || 'Sin fecha')} ${ev.observacion ? `&bull; <i>${sanearTexto(ev.observacion)}</i>` : ''}</span>
+                    </div>
+                    <div class="evaluacion-nota-group">
+                        <span class="evaluacion-nota">${parseFloat(ev.calificacion).toFixed(1)}</span>
+                        <button class="btn-edit-eval" data-id="${ev.id}" title="Editar nota" type="button">✏️</button>
+                        <button class="btn-delete-eval" data-id="${ev.id}" title="Eliminar nota" type="button">🗑️</button>
+                    </div>
+                </div>
+            `;
+        });
+
+        cardMateria.innerHTML = `
+            <div class="materia-card-header">
+                <div class="materia-titulo-group">
+                    <h4>📚 ${sanearTexto(materiaObj.nombreOriginal)}</h4>
+                </div>
+                <div class="materia-promedio-badge ${esAprobado ? 'aprobado' : 'reprobado'}">
+                    Promedio: ${promedioMateria}
+                </div>
             </div>
-            <h4>${sanearTexto(item.evaluacion)}</h4>
-            ${item.observacion ? `<p class="nota-observacion">"${sanearTexto(item.observacion)}"</p>` : ''}
-            <small class="nota-fecha">📅 ${sanearTexto(item.fecha || 'Sin fecha asignada')}</small>
-            <button class="btn-delete-nota" data-id="${item.id}" title="Eliminar nota" type="button">🗑️</button>
+            <div class="evaluaciones-list">
+                ${evaluacionesHTML}
+            </div>
         `;
 
-        // Evento para eliminar nota con confirmación previa e interacción fluida
-        const deleteBtn = card.querySelector('.btn-delete-nota');
-        if (deleteBtn) {
-            deleteBtn.addEventListener('click', async () => {
-                const confirmado = confirm(`¿Estás seguro de eliminar la calificación de ${item.materia}?`);
+        // Eventos para Editar
+        cardMateria.querySelectorAll('.btn-edit-eval').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idNota = e.currentTarget.getAttribute('data-id');
+                abrirModalEdicion(idNota);
+            });
+        });
+
+        // Eventos para Eliminar
+        cardMateria.querySelectorAll('.btn-delete-eval').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const idNota = e.currentTarget.getAttribute('data-id');
+                
+                let confirmado = false;
+                if (typeof mostrarConfirmacion === 'function') {
+                    confirmado = await mostrarConfirmacion(`¿Deseas eliminar esta nota?`, 'Eliminar Nota');
+                } else {
+                    confirmado = window.confirm(`¿Estás seguro de eliminar esta nota?`);
+                }
+
                 if (confirmado) {
                     try {
-                        await deleteDoc(doc(db, "notas", item.id));
-                        mostrarToast('Calificación eliminada correctamente', 'info');
+                        await deleteDoc(doc(db, "notas", idNota));
+                        mostrarToast('Nota eliminada correctamente', 'info');
                         await cargarNotas();
                     } catch (err) {
-                        console.error("Error al eliminar el documento de nota:", err);
-                        mostrarToast('Error al procesar la eliminación en el servidor', 'danger');
+                        console.error("Error al eliminar la nota:", err);
+                        mostrarToast('Error al procesar la eliminación', 'danger');
                     }
                 }
             });
-        }
+        });
 
-        notasGrid.appendChild(card);
+        materiasGrid.appendChild(cardMateria);
     });
 
-    // Cálculo formal y preciso del Promedio General Académico
-    const promedio = (sumaTotal / misNotas.length).toFixed(2);
-    if (promedioGeneralEl) promedioGeneralEl.textContent = promedio;
+    const promedioGeneral = (sumaTotalTodasLasNotas / cantidadTotalEvaluaciones).toFixed(2);
+    if (promedioGeneralEl) promedioGeneralEl.textContent = promedioGeneral;
 
     if (promedioEstadoEl) {
-        const promedioNum = parseFloat(promedio);
+        const promedioNum = parseFloat(promedioGeneral);
         if (promedioNum >= 8.5) {
-            promedioEstadoEl.textContent = '🌟 ¡Excelente rendimiento académico de nivel sobresaliente!';
+            promedioEstadoEl.textContent = '🌟 ¡Excelente rendimiento académico general en tus materias!';
         } else if (promedioNum >= 7) {
-            promedioEstadoEl.textContent = '👍 Muy buen desempeño académico, continúa con este ritmo constante de estudio.';
+            promedioEstadoEl.textContent = '👍 Muy buen desempeño académico, continúas con un promedio sólido.';
         } else if (promedioNum >= 6) {
-            promedioEstadoEl.textContent = '⚠️ Rendimiento regular aprobado. Se sugiere reforzar conceptos clave en las materias.';
+            promedioEstadoEl.textContent = '⚠️ Rendimiento regular aprobado. Mantén atención constante a los parciales.';
         } else {
-            promedioEstadoEl.textContent = '❌ Calificación por debajo del promedio mínimo aprobatorio. Requiere atención y tutoría inmediata.';
+            promedioEstadoEl.textContent = '❌ Promedio general por debajo de 6. Se recomienda revisar las materias reprobadas.';
         }
     }
 }
 
 /**
- * Gestión del formulario para el envío y registro de una nueva nota en Firestore con validaciones completas.
+ * Abre la mini ventana modal y rellena los datos correspondientes
  */
-const notaForm = document.getElementById('notaForm');
+function abrirModalEdicion(idNota) {
+    const nota = misNotas.find(n => n.id === idNota);
+    if (!nota) return;
 
+    document.getElementById('editNotaId').value = nota.id;
+    document.getElementById('editMateriaInput').value = nota.materia || '';
+    document.getElementById('editEvaluacionInput').value = nota.evaluacion || '';
+    document.getElementById('editCalificacionInput').value = nota.calificacion || '';
+    document.getElementById('editFechaInput').value = nota.fecha || '';
+    document.getElementById('editObservacionesInput').value = nota.observacion || '';
+
+    const modal = document.getElementById('modalEditarNota');
+    if (modal) modal.classList.remove('hidden');
+}
+
+// Guardar cambios desde el Modal de Edición
+const editNotaForm = document.getElementById('editNotaForm');
+if (editNotaForm) {
+    editNotaForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const idNota = document.getElementById('editNotaId').value;
+        const materia = document.getElementById('editMateriaInput').value.trim();
+        const evaluacion = document.getElementById('editEvaluacionInput').value.trim();
+        const calificacion = parseFloat(document.getElementById('editCalificacionInput').value);
+        const fecha = document.getElementById('editFechaInput').value;
+        const observacion = document.getElementById('editObservacionesInput').value.trim();
+
+        if (!materia || !evaluacion || isNaN(calificacion)) {
+            mostrarToast('Por favor, completa los campos obligatorios.', 'danger');
+            return;
+        }
+
+        if (calificacion < 1 || calificacion > 10) {
+            mostrarToast('La calificación debe estar entre 1 y 10.', 'danger');
+            return;
+        }
+
+        const btnGuardar = document.getElementById('btnGuardarEditNota');
+        if (btnGuardar) btnGuardar.disabled = true;
+
+        try {
+            const notaRef = doc(db, "notas", idNota);
+            await updateDoc(notaRef, {
+                materia,
+                evaluacion,
+                calificacion,
+                fecha,
+                observacion,
+                actualizadoEn: new Date().toISOString()
+            });
+
+            mostrarToast('Calificación actualizada con éxito', 'success');
+            document.getElementById('modalEditarNota').classList.add('hidden');
+            await cargarNotas();
+        } catch (error) {
+            console.error("Error al actualizar la nota:", error);
+            mostrarToast('Error al actualizar la calificación', 'danger');
+        } finally {
+            if (btnGuardar) btnGuardar.disabled = false;
+        }
+    });
+}
+
+// Registro de Nuevas Calificaciones
+const notaForm = document.getElementById('notaForm');
 if (notaForm) {
     notaForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -266,8 +410,12 @@ if (notaForm) {
                 creadoEn: new Date().toISOString()
             });
 
-            mostrarToast('Calificación registrada con éxito en el sistema', 'success');
-            notaForm.reset();
+            mostrarToast(`Calificación agregada a "${materia}"`, 'success');
+            
+            if (evaluacionInput) evaluacionInput.value = '';
+            if (calificacionInput) calificacionInput.value = '';
+            if (observacionesInput) observacionesInput.value = '';
+
             await cargarNotas();
         } catch (error) {
             console.error("Error al registrar la nueva nota en Firestore:", error);
@@ -278,9 +426,6 @@ if (notaForm) {
     });
 }
 
-/**
- * Función de seguridad para sanear cadenas de texto y evitar inyecciones HTML en la interfaz.
- */
 function sanearTexto(texto) {
     if (!texto) return '';
     return String(texto)

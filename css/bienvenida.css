@@ -16,7 +16,7 @@
   --text-muted: #94a3b8;
   --header-text: #ffffff;
   
-  /* Bordes, Bordes Redondeados y Sombras */
+  /* Bordes y Sombras */
   --border: #e2e8f0;
   --border-color: #e2e8f0;
   --radius-sm: 6px;
@@ -78,7 +78,7 @@ body {
 .header { 
   background-color: var(--primary); 
   color: var(--header-text); 
-  padding: 1.2rem 3rem; 
+  padding: 1.2rem 2rem; 
   display: flex; 
   justify-content: space-between; 
   align-items: center; 
@@ -87,6 +87,7 @@ body {
   z-index: 1000;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
   width: 100%;
+  transition: background-color 0.3s ease;
 }
 
 .header-content {
@@ -151,12 +152,13 @@ body {
 }
 
 .hero h1 { 
-  font-size: 2.8rem; 
+  font-size: clamp(2rem, 4vw, 2.8rem); 
   font-weight: 800;
   letter-spacing: -0.03em;
   color: var(--text-primary); 
   line-height: 1.2;
   margin-bottom: 1.2rem; 
+  transition: color 0.3s ease;
 }
 
 .hero h1 span {
@@ -164,12 +166,13 @@ body {
 }
 
 .hero p { 
-  font-size: 1.125rem; 
+  font-size: clamp(0.95rem, 1.5vw, 1.125rem); 
   color: var(--text-secondary); 
   max-width: 720px; 
   margin: 0 auto 2.2rem auto; 
   line-height: 1.65; 
   font-weight: 400;
+  transition: color 0.3s ease;
 }
 
 .hero-buttons {
@@ -190,21 +193,23 @@ body {
 }
 
 .section-title h2 {
-  font-size: 2rem;
+  font-size: clamp(1.6rem, 3vw, 2rem);
   font-weight: 700;
   color: var(--text-primary);
   letter-spacing: -0.02em;
   margin-bottom: 0.5rem;
+  transition: color 0.3s ease;
 }
 
 .section-title p {
   color: var(--text-secondary);
-  font-size: 1.05rem;
+  font-size: 1.01rem;
+  transition: color 0.3s ease;
 }
 
 .features-grid { 
   display: grid; 
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
   gap: 1.8rem; 
   text-align: left; 
 }
@@ -215,7 +220,7 @@ body {
   border-radius: var(--radius-md); 
   padding: 2.2rem 1.8rem; 
   box-shadow: var(--shadow); 
-  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s ease;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s ease, background-color 0.3s ease;
   display: flex;
   flex-direction: column;
 }
@@ -244,12 +249,14 @@ body {
   font-size: 1.15rem; 
   font-weight: 700;
   letter-spacing: -0.01em;
+  transition: color 0.3s ease;
 }
 
 .feature-card p { 
   color: var(--text-secondary); 
   font-size: 0.94rem; 
   line-height: 1.6; 
+  transition: color 0.3s ease;
 }
 
 /* ==========================================
@@ -264,6 +271,9 @@ body {
   font-weight: 600;
   font-size: 0.9rem;
   transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-primary:hover { 
@@ -281,6 +291,9 @@ body {
   font-weight: 600;
   font-size: 0.9rem;
   transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-secondary:hover { 
@@ -295,6 +308,8 @@ body {
   font-size: 1rem; 
   font-weight: 600;
   display: inline-flex; 
+  align-items: center;
+  justify-content: center;
   border-radius: var(--radius-md); 
   text-decoration: none;
   box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
@@ -315,6 +330,8 @@ body {
   font-size: 1rem;
   font-weight: 600;
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: var(--radius-md);
   text-decoration: none;
   transition: all 0.25s ease;
@@ -328,151 +345,85 @@ body {
 }
 
 /* ==========================================
-   FOOTER
+   PIE DE PÁGINA PROFESIONAL Y RESPONSIVO
    ========================================== */
-.footer {
-  background-color: var(--primary);
-  color: var(--header-text);
-  padding: 1.5rem 3rem;
-  border-top: 1px solid var(--border);
-  width: 100%;
-  margin-top: auto;
+.app-footer {
+    background-color: var(--primary);
+    color: #94a3b8;
+    text-align: center;
+    padding: 1.4rem 2rem;
+    margin-top: auto;
+    width: 100%;
+    border-top: 1px solid var(--border);
+    box-sizing: border-box;
+    transition: background-color 0.3s ease;
 }
 
-.footer-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  max-width: 1300px;
-  margin: 0 auto;
-  width: 100%;
+.footer-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    max-width: 1300px;
+    margin: 0 auto;
 }
 
-.footer-content p {
-  font-size: 0.9rem;
-  color: #94a3b8;
-  margin: 0 auto;
-  text-align: center;
-  flex: 1;
+.app-footer p {
+    margin: 0;
+    font-size: 0.88rem;
+    color: #cbd5e1;
+    font-weight: 400;
+    letter-spacing: 0.01em;
 }
 
-.footer-links {
-  display: flex;
-  gap: 1.5rem;
-  margin-left: auto;
+.app-footer strong {
+    color: #ffffff;
+    font-weight: 600;
 }
 
-.footer-links a {
-  color: #94a3b8;
-  text-decoration: none;
-  font-size: 0.9rem;
-  transition: color 0.2s ease;
-}
-
-.footer-links a:hover {
-  color: #ffffff;
+.footer-subtitle {
+    font-size: 0.78rem;
+    color: #94a3b8;
 }
 
 /* ==========================================
-   RESPONSIVO
+   ADAPTABILIDAD MÓVIL EXTREMA (1000% RESPONSIVE)
    ========================================== */
 @media (max-width: 768px) {
   .header { 
     padding: 1rem 1.25rem; 
   }
 
-  .hero h1 {
-    font-size: 1.8rem;
+  .main-container {
+    margin: 2rem auto;
+    padding: 0 1rem;
   }
 
-  .hero p {
-    font-size: 0.98rem;
+  .hero {
+    margin-bottom: 3rem;
   }
 
   .hero-buttons {
     flex-direction: column;
     width: 100%;
+    gap: 0.75rem;
   }
 
   .btn-hero-primary, .btn-hero-secondary {
     width: 100%;
-    justify-content: center;
   }
 
   .features-grid {
     grid-template-columns: 1fr;
+    gap: 1.25rem;
   }
 
-  .footer-content {
-    flex-direction: column;
-    gap: 1rem;
-    text-align: center;
+  .feature-card {
+    padding: 1.6rem 1.25rem;
   }
 
-  .footer-content p {
-    margin: 0;
+  .app-footer {
+    padding: 1.1rem 1rem;
   }
-
-  .footer-links {
-    margin-left: 0;
-    justify-content: center;
-  }
-}
-
-/* ==========================================================================
-   PIE DE PÁGINA PROFESIONAL Y RESPONSIVO - CRECER
-   ========================================================================== */
-
-.app-footer, 
-.auth-footer-simple {
-    background-color: var(--header-bg, #0f172a);
-    color: #94a3b8;
-    text-align: center;
-    padding: 1.15rem 1.5rem;
-    margin-top: auto;
-    width: 100%;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    box-sizing: border-box;
-}
-
-.app-footer .footer-container, 
-.auth-footer-simple {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    max-width: 1550px;
-    margin: 0 auto;
-}
-
-.app-footer p, 
-.auth-footer-simple p {
-    margin: 0;
-    font-size: 0.85rem;
-    color: #94a3b8;
-    font-weight: 400;
-    letter-spacing: 0.01em;
-    line-height: 1.5;
-    text-align: center;
-}
-
-.app-footer strong, 
-.auth-footer-simple strong {
-    color: #f8fafc;
-    font-weight: 600;
-}
-
-/* ==========================================
-   ADAPTABILIDAD MÓVIL (RESPONSIVE)
-   ========================================== */
-@media (max-width: 768px) {
-    .app-footer, 
-    .auth-footer-simple {
-        padding: 1rem 1rem;
-    }
-
-    .app-footer p, 
-    .auth-footer-simple p {
-        font-size: 0.78rem;
-        line-height: 1.4;
-    }
 }

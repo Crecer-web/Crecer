@@ -14,104 +14,122 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { observarSesion, mostrarToast } from './global.js';   
 
-/**
- * Aplica el tema dado de forma estricta, unificada y sincronizada
- * @param {string} tema - 'dark' o 'light'
- */
-function aplicarTema(tema) {
-    const esOscuro = tema === 'dark';
+function aplicarTemaDirecto(tema) {
+    const themeToggle = document.getElementById('themeToggle');
 
-    if (esOscuro) {
+    if (tema === 'dark') {
         document.documentElement.setAttribute('data-theme', 'dark');
         document.body.setAttribute('data-theme', 'dark');
         localStorage.setItem('theme', 'dark');
+        if (themeToggle) themeToggle.textContent = '☀️';
     } else {
         document.documentElement.removeAttribute('data-theme');
         document.body.removeAttribute('data-theme');
         localStorage.setItem('theme', 'light');
+        if (themeToggle) themeToggle.textContent = '🌙';
     }
-
-    const themeToggle = document.getElementById('themeToggle');
-    if (themeToggle) {
-        themeToggle.textContent = esOscuro ? '☀️' : '🌙';
-    }
-}
-
-/**
- * Conmutación directa e instantánea garantizada con 1 solo clic
- */
-function toggleTema() {
-    // Leemos el tema actual directamente de localStorage
-    const temaActual = localStorage.getItem('theme') || 
-                      (document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
-
-    const nuevoTema = temaActual === 'dark' ? 'light' : 'dark';
-    aplicarTema(nuevoTema);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     const trashGrid = document.getElementById('trashGrid');
-    let themeToggle = document.getElementById('themeToggle');
+    const themeToggle = document.getElementById('themeToggle');
     const menuToggle = document.getElementById('menuToggle');
     const navMenu = document.getElementById('navMenu');
+    const btnVaciarPapelera = document.getElementById('btnVaciarPapelera');
 
-    // 1. Cargar e inicializar tema al montar el DOM
+    // Variables de control para el Modal
+    const modal = document.getElementById('modalConfirmacion');
+    const btnCerrarModal = document.getElementById('btnCerrarModal');
+    const btnCancelarModal = document.getElementById('btnCancelarModal');
+    const btnAceptarModal = document.getElementById('btnAceptarModal');
+    const modalMensajeTexto = document.getElementById('modalMensajeTexto');
+
+    let accionPendiente = null;
+
+    const abrirModal = (mensaje, callback) => {
+        if (modalMensajeTexto) modalMensajeTexto.textContent = mensaje;
+        accionPendiente = callback;
+        if (modal) modal.classList.remove('hidden');
+    };
+
+    const cerrarModal = () => {
+        accionPendiente = null;
+        if (modal) modal.classList.add('hidden');
+    };
+
+    if (btnCerrarModal) btnCerrarModal.addEventListener('click', cerrarModal);
+    if (btnCancelarModal) btnCancelarModal.addEventListener('click', cerrarModal);
+    if (btnAceptarModal) {
+        btnAceptarModal.addEventListener('click', async () => {
+            if (typeof accionPendiente === 'function') {
+                await accionPendiente();
+            }
+            cerrarModal();
+        });
+    }
+
     const temaGuardado = localStorage.getItem('theme');
     const prefiereDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const temaInicial = temaGuardado ? temaGuardado : (prefiereDark ? 'dark' : 'light');
     
-    aplicarTema(temaInicial);
+    aplicarTemaDirecto(temaInicial);
 
-    // 2. Limpieza de listeners previos y asignación directa de 1 clic
     if (themeToggle) {
-        // Clonamos el nodo para remover cualquier event listener heredado de global.js
-        const nuevoBtn = themeToggle.cloneNode(true);
-        themeToggle.parentNode.replaceChild(nuevoBtn, themeToggle);
-        themeToggle = nuevoBtn;
+        const nuevoToggle = themeToggle.cloneNode(true);
+        themeToggle.parentNode.replaceChild(nuevoToggle, themeToggle);
 
-        themeToggle.addEventListener('click', (e) => {
+        nuevoToggle.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            toggleTema();
+            const esOscuroActual = document.documentElement.getAttribute('data-theme') === 'dark' || 
+                                   document.body.getAttribute('data-theme') === 'dark';
+            aplicarTemaDirecto(esOscuroActual ? 'light' : 'dark');
         });
     }
 
-    // 3. Menú hamburguesa para vista móvil
     if (menuToggle && navMenu) {
-        menuToggle.onclick = (e) => {
+        menuToggle.addEventListener('click', (e) => {
             e.preventDefault();
+            e.stopPropagation();
             navMenu.classList.toggle('active');
-        };
+        });
     }
 
-    // 4. Menú desplegable (Dropdown de módulos)
     const dropdown = document.querySelector(".dropdown");
     const dropdownBtn = document.getElementById("dropdownBtn");
 
     if (dropdownBtn && dropdown) {
-        dropdownBtn.onclick = (e) => {
+        dropdownBtn.addEventListener('click', (e) => {
             e.preventDefault();
+            e.stopPropagation();
             dropdown.classList.toggle("active");
-        };
+        });
 
         window.addEventListener("click", (e) => {
-            if (!dropdown.contains(e.target)) {
+            if (dropdown && !dropdown.contains(e.target)) {
                 dropdown.classList.remove("active");
             }
         });
     }
 
-    // 5. Verificación de sesión e inicialización de Firestore
     observarSesion(async (user) => {
         if (!user) {
             window.location.href = 'login.html';
             return;
         }
         await cargarElementosPapelera(user.uid);
+
+        if (btnVaciarPapelera) {
+            btnVaciarPapelera.addEventListener('click', () => {
+                abrirModal('¿Estás seguro de vaciar toda la papelera? Se eliminarán permanentemente todos los elementos.', async () => {
+                    await vaciarPapeleraCompleta(user.uid);
+                });
+            });
+        }
     });
 
     /**
-     * Escanea registros eliminados en colecciones de Firestore
+     * Carga elementos, evalúa expiración automática a las 48 horas y los depura en Firestore[cite: 10].
      */
     async function cargarElementosPapelera(userId) {
         if (!trashGrid) return;
@@ -119,12 +137,14 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             trashGrid.innerHTML = `
                 <div class="trash-empty" style="font-style: normal;">
-                    <p>🔄 Sincronizando elementos eliminados...</p>
+                    <p>🔄 Verificando registros y aplicando retención de 48 horas...</p>
                 </div>
             `;
 
-            let elementosEliminadosTotales = [];
+            let elementosValidos = [];
             const coleccionesAEvaluar = ['formularios', 'notas', 'tareas'];
+            const ahora = new Date().getTime();
+            const LIMITE_48HS = 48 * 60 * 60 * 1000; // 48 horas en milisegundos
 
             for (const nombreColeccion of coleccionesAEvaluar) {
                 try {
@@ -134,46 +154,56 @@ document.addEventListener('DOMContentLoaded', () => {
                     );
                     
                     const querySnapshot = await getDocs(q);
-                    querySnapshot.forEach((documento) => {
+                    
+                    for (const documento of querySnapshot.docs) {
                         const data = documento.data();
-                        
                         const estaEliminado = data.enPapelera === true || 
                                               data.eliminado === true || 
                                               data.eliminado === "true";
 
                         if (estaEliminado) {
-                            if (!elementosEliminadosTotales.some(el => el.id === documento.id)) {
-                                elementosEliminadosTotales.push({
-                                    id: documento.id,
-                                    coleccion: nombreColeccion,
-                                    ...data
+                            // Evaluar antigüedad de 48 horas
+                            let tiempoEliminacion = data.eliminadoEn ? new Date(data.eliminadoEn).getTime() : 0;
+                            
+                            // Si no tiene fecha registrada, se le asigna la actual para empezar a contar
+                            if (!tiempoEliminacion) {
+                                await updateDoc(doc(db, nombreColeccion, documento.id), {
+                                    eliminadoEn: new Date().toISOString()
                                 });
+                                tiempoEliminacion = ahora;
+                            }
+
+                            // Si superó las 48 horas, se elimina automáticamente de Firestore[cite: 10]
+                            if (ahora - tiempoEliminacion >= LIMITE_48HS) {
+                                await deleteDoc(doc(db, nombreColeccion, documento.id));
+                                console.log(`Auto-eliminado por superar 48hs: ${documento.id}`);
+                            } else {
+                                if (!elementosValidos.some(el => el.id === documento.id)) {
+                                    elementosValidos.push({
+                                        id: documento.id,
+                                        coleccion: nombreColeccion,
+                                        ...data
+                                    });
+                                }
                             }
                         }
-                    });
+                    }
                 } catch (errColeccion) {
-                    console.warn(`Aviso: No se pudo procesar la colección '${nombreColeccion}':`, errColeccion);
+                    console.warn(`Aviso en colección '${nombreColeccion}':`, errColeccion);
                 }
             }
 
-            renderizarCuadriculaPapelera(elementosEliminadosTotales);
+            renderizarCuadriculaPapelera(elementosValidos);
 
         } catch (error) {
-            console.error("Error general al procesar la papelera:", error);
+            console.error("Error al procesar la papelera:", error);
             mostrarToast('No se pudieron cargar los elementos eliminados', 'danger');
             if (trashGrid) {
-                trashGrid.innerHTML = `
-                    <div class="trash-empty">
-                        <p>Ocurrió un error al conectar con la base de datos.</p>
-                    </div>
-                `;
+                trashGrid.innerHTML = `<div class="trash-empty"><p>Error al sincronizar con la base de datos.</p></div>`;
             }
         }
     }
 
-    /**
-     * Renderiza dinámicamente las tarjetas de la papelera
-     */
     function renderizarCuadriculaPapelera(elementos) {
         trashGrid.innerHTML = '';
 
@@ -188,7 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         elementos.forEach((item) => {
             const tituloVisual = item.titulo || item.nombre || item.materia || item.tema || 'Sin título o tema';
-            const descripcionVisual = item.contenido || item.descripcion || item.evaluacion || item.detalle || 'Sin descripción adicional registrada.';
+            const descripcionVisual = item.contenido || item.descripcion || item.evaluacion || item.detalle || 'Sin descripción adicional.';
             
             let tipoEtiqueta = 'Elemento';
             if (item.coleccion === 'tareas') tipoEtiqueta = 'Tarea';
@@ -218,12 +248,9 @@ document.addEventListener('DOMContentLoaded', () => {
         vincularAccionesBotones();
     }
 
-    /**
-     * Asigna eventos para restaurar o eliminar definitivamente
-     */
     function vincularAccionesBotones() {
         document.querySelectorAll('.btn-restore').forEach(btn => {
-            btn.onclick = async (e) => {
+            btn.addEventListener('click', async (e) => {
                 const id = e.currentTarget.getAttribute('data-id');
                 const coleccion = e.currentTarget.getAttribute('data-coleccion');
 
@@ -232,46 +259,64 @@ document.addEventListener('DOMContentLoaded', () => {
                     await updateDoc(docRef, { 
                         enPapelera: false,
                         eliminado: false,
+                        eliminadoEn: null,
                         restauradoEn: new Date().toISOString()
                     });
 
                     mostrarToast('Elemento restaurado con éxito al panel activo', 'success');
-                    
-                    observarSesion(user => {
-                        if (user) cargarElementosPapelera(user.uid);
-                    });
+                    observarSesion(user => { if (user) cargarElementosPapelera(user.uid); });
                 } catch (err) {
-                    console.error("Error al intentar restaurar el elemento:", err);
-                    mostrarToast('Error al restaurar el elemento seleccionado', 'danger');
+                    console.error("Error al restaurar:", err);
+                    mostrarToast('Error al restaurar el elemento', 'danger');
                 }
-            };
+            });
         });
 
         document.querySelectorAll('.btn-delete-perm').forEach(btn => {
-            btn.onclick = async (e) => {
+            btn.addEventListener('click', (e) => {
                 const id = e.currentTarget.getAttribute('data-id');
                 const coleccion = e.currentTarget.getAttribute('data-coleccion');
 
-                if (window.confirm('¿Estás totalmente seguro de eliminar este elemento de forma permanente? Esta acción no se puede deshacer.')) {
+                abrirModal('¿Estás seguro de eliminar este elemento de forma permanente de Firestore?', async () => {
                     try {
                         await deleteDoc(doc(db, coleccion, id));
-                        mostrarToast('Elemento eliminado permanentemente', 'success');
-                        
-                        observarSesion(user => {
-                            if (user) cargarElementosPapelera(user.uid);
-                        });
+                        mostrarToast('Elemento eliminado permanentemente de Firestore', 'success');
+                        observarSesion(user => { if (user) cargarElementosPapelera(user.uid); });
                     } catch (err) {
-                        console.error("Error al intentar eliminar permanentemente:", err);
-                        mostrarToast('No se pudo eliminar el elemento del sistema', 'danger');
+                        console.error("Error al eliminar:", err);
+                        mostrarToast('No se pudo eliminar el elemento', 'danger');
                     }
-                }
-            };
+                });
+            });
         });
     }
 
-    /**
-     * Sanea cadenas para evitar inyección HTML
-     */
+    async function vaciarPapeleraCompleta(userId) {
+        try {
+            const coleccionesAEvaluar = ['formularios', 'notas', 'tareas'];
+            let contadorBorrados = 0;
+
+            for (const nombreColeccion of coleccionesAEvaluar) {
+                const q = query(collection(db, nombreColeccion), where('userId', '==', userId));
+                const querySnapshot = await getDocs(q);
+
+                for (const documento of querySnapshot.docs) {
+                    const data = documento.data();
+                    if (data.enPapelera === true || data.eliminado === true || data.eliminado === "true") {
+                        await deleteDoc(doc(db, nombreColeccion, documento.id));
+                        contadorBorrados++;
+                    }
+                }
+            }
+
+            mostrarToast(`Papelera vaciada con éxito (${contadorBorrados} elementos borrados)`, 'success');
+            await cargarElementosPapelera(userId);
+        } catch (err) {
+            console.error("Error al vaciar papelera:", err);
+            mostrarToast('Error al vaciar la papelera', 'danger');
+        }
+    }
+
     function sanearTexto(texto) {
         if (!texto) return '';
         return String(texto)

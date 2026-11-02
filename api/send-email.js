@@ -1,10 +1,13 @@
 export default async function handler(req, res) {
-  // Manejo de peticiones preflight CORS (opcional si el cliente está en el mismo dominio)
+  // Manejo de peticiones preflight CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
 
-  // Restricción de método HTTP
   if (req.method !== 'POST') {
     return res.status(405).json({ 
       status: 'error', 
@@ -14,7 +17,6 @@ export default async function handler(req, res) {
 
   const { email, tokenRecuperacion } = req.body || {};
 
-  // Validación de parámetros obligatorios
   if (!email || typeof email !== 'string') {
     return res.status(400).json({ 
       status: 'error', 
@@ -29,13 +31,12 @@ export default async function handler(req, res) {
     });
   }
 
-  // Obtención de credenciales e información de remitente desde las variables de entorno de Vercel
   const apiKey = process.env.BREVO_API_KEY;
   const senderEmail = process.env.BREVO_SENDER_EMAIL || "no-reply@tu-dominio-verificado.com";
   const senderName = process.env.BREVO_SENDER_NAME || "CRECER Plataforma";
 
   if (!apiKey) {
-    console.error("Error crítico: BREVO_API_KEY no está configurada en las variables de entorno de Vercel.");
+    console.error("Error crítico: BREVO_API_KEY no está configurada en Vercel.");
     return res.status(500).json({ 
       status: 'error', 
       message: 'Configuración interna del servidor incompleta. Contacta al administrador.' 

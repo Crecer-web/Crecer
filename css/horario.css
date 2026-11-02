@@ -1,5 +1,5 @@
 /* ==========================================================================
-   MÓDULO DE HORARIO / AGENDA SEMANAL - CRECER
+   MÓDULO DE HORARIO / AGENDA SEMANAL - CRECER (1000% RESPONSIVE & THEMED)
    ========================================================================== */
 
 :root {
@@ -22,7 +22,6 @@
   --radius-lg: 14px;
 }
 
-/* Modo Oscuro asignado a :root[data-theme="dark"] o body[data-theme="dark"] */
 :root[data-theme="dark"],
 body[data-theme="dark"] {
   --bg-color: #090d16;
@@ -174,12 +173,6 @@ body.dashboard-body {
 .dropdown-content a.active {
   background-color: rgba(37, 99, 235, 0.12);
   color: var(--accent);
-}
-
-.dropdown-divider {
-  height: 1px;
-  background-color: var(--border-color);
-  margin: 0.35rem 0;
 }
 
 .dropdown-logout {
@@ -590,28 +583,42 @@ body.dashboard-body {
 }
 
 /* PIE DE PÁGINA */
-.app-footer {
-  background-color: var(--header-bg);
-  color: var(--header-text);
-  padding: 1.5rem 3rem;
-  border-top: 1px solid var(--border-color);
-  width: 100%;
+.app-footer, 
+.auth-footer-simple {
+  background-color: var(--header-bg, #0f172a);
+  color: #94a3b8;
+  text-align: center;
+  padding: 1.15rem 1.5rem;
   margin-top: auto;
+  width: 100%;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
   box-sizing: border-box;
 }
 
-.footer-container {
+.app-footer .footer-container, 
+.auth-footer-simple {
   display: flex;
   justify-content: center;
   align-items: center;
-  max-width: 1200px;
+  max-width: 1550px;
   margin: 0 auto;
 }
 
-.footer-container p {
-  font-size: 0.9rem;
-  color: #94a3b8;
+.app-footer p, 
+.auth-footer-simple p {
   margin: 0;
+  font-size: 0.85rem;
+  color: #94a3b8;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.app-footer strong, 
+.auth-footer-simple strong {
+  color: #f8fafc;
+  font-weight: 600;
 }
 
 /* ADAPTABILIDAD RESPONSIVA */
@@ -662,6 +669,17 @@ body.dashboard-body {
   .dropdown-content a {
     color: #cbd5e1;
   }
+
+  .app-footer, 
+  .auth-footer-simple {
+    padding: 1rem 1rem;
+  }
+
+  .app-footer p, 
+  .auth-footer-simple p {
+    font-size: 0.78rem;
+    line-height: 1.4;
+  }
 }
 
 @media (max-width: 640px) {
@@ -680,63 +698,4 @@ body.dashboard-body {
   .col-day.mobile-visible {
     display: table-cell;
   }
-}
-
-
-/* ==========================================================================
-   PIE DE PÁGINA PROFESIONAL Y RESPONSIVO - CRECER
-   ========================================================================== */
-
-.app-footer, 
-.auth-footer-simple {
-    background-color: var(--header-bg, #0f172a);
-    color: #94a3b8;
-    text-align: center;
-    padding: 1.15rem 1.5rem;
-    margin-top: auto;
-    width: 100%;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    box-sizing: border-box;
-}
-
-.app-footer .footer-container, 
-.auth-footer-simple {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    max-width: 1550px;
-    margin: 0 auto;
-}
-
-.app-footer p, 
-.auth-footer-simple p {
-    margin: 0;
-    font-size: 0.85rem;
-    color: #94a3b8;
-    font-weight: 400;
-    letter-spacing: 0.01em;
-    line-height: 1.5;
-    text-align: center;
-}
-
-.app-footer strong, 
-.auth-footer-simple strong {
-    color: #f8fafc;
-    font-weight: 600;
-}
-
-/* ==========================================
-   ADAPTABILIDAD MÓVIL (RESPONSIVE)
-   ========================================== */
-@media (max-width: 768px) {
-    .app-footer, 
-    .auth-footer-simple {
-        padding: 1rem 1rem;
-    }
-
-    .app-footer p, 
-    .auth-footer-simple p {
-        font-size: 0.78rem;
-        line-height: 1.4;
-    }
 }

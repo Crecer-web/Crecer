@@ -1,5 +1,5 @@
 /* ==========================================================================
-   ESTILOS PERFIL - CRECER
+   ESTILOS PERFIL - CRECER (1000% RESPONSIVE)
    ========================================================================== */
 
 :root {
@@ -170,12 +170,6 @@ body.dashboard-body {
   color: var(--accent);
 }
 
-.dropdown-divider {
-  height: 1px;
-  background-color: var(--border-color);
-  margin: 0.35rem 0;
-}
-
 .dropdown-logout {
   color: #ef4444 !important;
 }
@@ -241,21 +235,22 @@ body.dashboard-body {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  padding: 1.5rem 0;
+  padding: 2rem 0;
 }
 
 .main-container {
   max-width: 850px;
   width: 100%;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 0 1.5rem;
+  box-sizing: border-box;
 }
 
 .profile-card {
   background-color: var(--card-bg);
   border: 1px solid var(--border-color);
   border-radius: 16px;
-  padding: 1.75rem;
+  padding: 2rem;
   box-shadow: var(--shadow-md);
   display: flex;
   flex-direction: column;
@@ -356,6 +351,8 @@ body.dashboard-body {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
+  min-width: 0;
+  flex: 1;
 }
 
 .avatar-info h2 {
@@ -363,6 +360,7 @@ body.dashboard-body {
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
+  word-break: break-word;
 }
 
 .profile-email-text {
@@ -417,7 +415,7 @@ body.dashboard-body {
   font-size: 1rem;
   font-weight: 600;
   color: var(--text-primary);
-  word-break: break-word;
+  word-break: break-all;
 }
 
 /* --------------------------------------------------------------------------
@@ -600,37 +598,40 @@ body.dashboard-body {
 /* --------------------------------------------------------------------------
    7. FOOTER
    -------------------------------------------------------------------------- */
-.app-footer {
-  background-color: var(--header-bg);
-  color: #ffffff;
-  padding: 1.25rem 0;
-  border-top: 1px solid var(--border-color);
-  width: 100%;
+.app-footer, 
+.auth-footer-simple {
+  background-color: var(--header-bg, #0f172a);
+  color: #94a3b8;
+  text-align: center;
+  padding: 1.15rem 1.5rem;
   margin-top: auto;
-}
-
-.footer-container {
+  width: 100%;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  box-sizing: border-box;
   display: flex;
   justify-content: center;
   align-items: center;
-  max-width: 1200px;
-  margin: 0 auto;
 }
 
-.footer-container p {
-  font-size: 0.88rem;
-  color: #94a3b8;
+.auth-footer-simple p {
   margin: 0;
+  font-size: 0.85rem;
+  color: #94a3b8;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.auth-footer-simple strong {
+  color: #f8fafc;
+  font-weight: 600;
 }
 
 /* --------------------------------------------------------------------------
-   8. ADAPTABILIDAD RESPONSIVA MÓVIL
+   8. ADAPTABILIDAD RESPONSIVA MÓVIL EXTREMA
    -------------------------------------------------------------------------- */
 @media (max-width: 768px) {
-  .app-main-container {
-    padding: 1rem 0;
-  }
-
   .menu-toggle {
     display: flex;
   }
@@ -672,6 +673,14 @@ body.dashboard-body {
     color: #cbd5e1;
   }
 
+  .app-main-container {
+    padding: 1rem 0;
+  }
+
+  .main-container {
+    padding: 0 1rem;
+  }
+
   .profile-card {
     padding: 1.25rem;
     gap: 1.25rem;
@@ -690,6 +699,14 @@ body.dashboard-body {
   .user-role-badge {
     align-self: center;
   }
+
+  .auth-footer-simple {
+    padding: 1rem;
+  }
+
+  .auth-footer-simple p {
+    font-size: 0.78rem;
+  }
 }
 
 @media (max-width: 480px) {
@@ -700,63 +717,4 @@ body.dashboard-body {
   .photo-modal-footer button {
     width: 100%;
   }
-}
-
-
-/* ==========================================================================
-   PIE DE PÁGINA PROFESIONAL Y RESPONSIVO - CRECER
-   ========================================================================== */
-
-.app-footer, 
-.auth-footer-simple {
-    background-color: var(--header-bg, #0f172a);
-    color: #94a3b8;
-    text-align: center;
-    padding: 1.15rem 1.5rem;
-    margin-top: auto;
-    width: 100%;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    box-sizing: border-box;
-}
-
-.app-footer .footer-container, 
-.auth-footer-simple {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    max-width: 1550px;
-    margin: 0 auto;
-}
-
-.app-footer p, 
-.auth-footer-simple p {
-    margin: 0;
-    font-size: 0.85rem;
-    color: #94a3b8;
-    font-weight: 400;
-    letter-spacing: 0.01em;
-    line-height: 1.5;
-    text-align: center;
-}
-
-.app-footer strong, 
-.auth-footer-simple strong {
-    color: #f8fafc;
-    font-weight: 600;
-}
-
-/* ==========================================
-   ADAPTABILIDAD MÓVIL (RESPONSIVE)
-   ========================================== */
-@media (max-width: 768px) {
-    .app-footer, 
-    .auth-footer-simple {
-        padding: 1rem 1rem;
-    }
-
-    .app-footer p, 
-    .auth-footer-simple p {
-        font-size: 0.78rem;
-        line-height: 1.4;
-    }
 }

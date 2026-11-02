@@ -9,9 +9,26 @@ import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-
 import { mostrarToast } from './global.js';
 
 /**
+ * Aplica el tema de forma sincronizada en la vista de autenticación
+ */
+function aplicarTemaDirecto(tema) {
+    const themeToggle = document.getElementById('themeToggle');
+
+    if (tema === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.body.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
+        if (themeToggle) themeToggle.textContent = '☀️';
+    } else {
+        document.documentElement.removeAttribute('data-theme');
+        document.body.removeAttribute('data-theme');
+        localStorage.setItem('theme', 'light');
+        if (themeToggle) themeToggle.textContent = '🌙';
+    }
+}
+
+/**
  * Guarda o actualiza la información del perfil del usuario en la colección "usuarios" de Firestore.
- * @param {string} uid - Identificador único del usuario de Firebase Auth.
- * @param {Object} datos - Objeto con los atributos del usuario.
  */
 async function guardarPerfilUsuario(uid, datos) {
     try {
@@ -27,9 +44,34 @@ async function guardarPerfilUsuario(uid, datos) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    let themeToggle = document.getElementById('themeToggle');
     const registerForm = document.getElementById('registerForm');
     const btnGoogleAuth = document.getElementById('btnGoogleAuth');
     const btnSubmitRegister = document.getElementById('btnSubmitRegister');
+
+    // Inicialización del tema
+    const temaGuardado = localStorage.getItem('theme');
+    const prefiereDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const temaInicial = temaGuardado ? temaGuardado : (prefiereDark ? 'dark' : 'light');
+    
+    aplicarTemaDirecto(temaInicial);
+
+    if (themeToggle) {
+        const nuevoBtn = themeToggle.cloneNode(true);
+        themeToggle.parentNode.replaceChild(nuevoBtn, themeToggle);
+        themeToggle = nuevoBtn;
+
+        themeToggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const esOscuroActual = document.documentElement.getAttribute('data-theme') === 'dark' || 
+                                   document.body.getAttribute('data-theme') === 'dark';
+            
+            const nuevoTema = esOscuroActual ? 'light' : 'dark';
+            aplicarTemaDirecto(nuevoTema);
+        });
+    }
 
     // 1. Registro manual con Nombre, Apellido, Correo y Contraseña
     if (registerForm) {
@@ -125,7 +167,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const result = await signInWithPopup(auth, provider);
                 const user = result.user;
 
-                // Separar el nombre y apellido si displayName existe
                 const partesNombre = (user.displayName || '').split(' ');
                 const nombre = partesNombre[0] || 'Usuario';
                 const apellido = partesNombre.slice(1).join(' ') || '';

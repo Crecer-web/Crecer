@@ -5,23 +5,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const navRegisterBtn = document.getElementById('navRegisterBtn');
     const heroStartBtn = document.getElementById('heroStartBtn');
 
-    // Control dinámico de botones según el estado de la sesión
+    // Control dinámico de botones según el estado de la sesión de Firebase
     observarSesion((user) => {
         if (user) {
-            // Usuario Autenticado: Redirigir a inicio.html
+            // Usuario Autenticado: Redirigir directamente a la agenda activa
             if (navLoginBtn) {
                 navLoginBtn.textContent = 'Ir a la Agenda 📋';
                 navLoginBtn.href = 'inicio.html';
             }
             if (navRegisterBtn) {
-                navRegisterBtn.style.display = 'none'; // Ocultamos el botón de registro sobrante
+                navRegisterBtn.style.display = 'none'; // Ocultamos el registro si ya tiene sesión
             }
             if (heroStartBtn) {
                 heroStartBtn.textContent = 'Ingresar a mi Cuenta 🚀';
                 heroStartBtn.href = 'inicio.html';
             }
         } else {
-            // Usuario Visitante: Mantener accesos de login/registro
+            // Usuario Visitante: Mantener accesos institucionales estándar
             if (navLoginBtn) {
                 navLoginBtn.textContent = 'Iniciar Sesión';
                 navLoginBtn.href = 'login.html';
@@ -31,13 +31,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 navRegisterBtn.href = 'register.html';
             }
             if (heroStartBtn) {
-                heroStartBtn.textContent = 'Comenzar Ahora';
+                heroStartBtn.textContent = 'Comenzar Ahora 🚀';
                 heroStartBtn.href = 'register.html';
             }
         }
     });
 
-    // Menús desplegables (Dropdowns)
+    // Menús desplegables (Dropdowns) por seguridad de interacción
     const dropdowns = document.querySelectorAll(".dropdown");
 
     dropdowns.forEach((dropdown) => {

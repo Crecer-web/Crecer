@@ -4,8 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Papelera</title>
+    <title>Papelera - CRECER</title>
     
+    <!-- Script síncrono para prevenir parpadeos del tema -->
+    <script>
+        (function() {
+            const temaGuardado = localStorage.getItem('theme') || 'light';
+            if (temaGuardado === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+            }
+        })();
+    </script>
+
     <!-- Iconos y Manifest PWA -->
     <link rel="icon" type="image/png" sizes="32x32" href="img/logo.png">
     <link rel="apple-touch-icon" href="img/logo.png">
@@ -21,18 +33,14 @@
     <!-- Encabezado de Navegación del Dashboard -->
     <header class="app-header">
         <div class="header-container">
-            <!-- Logo -->
             <div class="logo">
                 <a href="inicio.html">CRECER</a>
             </div>
             
-            <!-- Contenedor Unificado Alineado Totalmente a la Derecha -->
             <div class="header-right-group">
-                <!-- Navegación Principal -->
                 <nav class="nav-menu" id="navMenu" aria-label="Navegación principal">
                     <a href="inicio.html" class="nav-link">Inicio</a>
                     
-                    <!-- Menú Desplegable de Módulos Unificado -->
                     <div class="dropdown" id="modulesDropdown">
                         <button class="dropdown-btn" id="dropdownBtn" aria-haspopup="true" aria-expanded="false" type="button">
                             Módulos ▼
@@ -41,16 +49,16 @@
                             <a href="notas.html">Calificaciones</a>
                             <a href="horario.html">Horario</a>
                             <a href="recursos.html">Recursos</a>
+                            <a href="exportar.html">Respaldo</a>
                             <a href="perfil.html">Mi Perfil</a>
+                            <div class="dropdown-divider"></div>
                             <a href="#" id="logoutBtn" class="dropdown-logout">Cerrar Sesión</a>
                         </div>
                     </div>
                 </nav>
 
-                <!-- Botón de Conmutación de Tema (Siempre Fijo a la Derecha) -->
                 <button id="themeToggle" class="theme-toggle" type="button" aria-label="Cambiar tema">🌙</button>
 
-                <!-- Botón Hamburguesa para Dispositivos Móviles -->
                 <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú de navegación" type="button">
                     <span class="bar"></span>
                     <span class="bar"></span>
@@ -60,22 +68,21 @@
         </div>
     </header>
 
-    <!-- Contenedor Principal Adaptado para Estirar la Página -->
+    <!-- Contenedor Principal -->
     <main class="app-main-container">
         <div class="main-container">
             
-            <!-- Barra superior con Título y Botón de Retorno -->
             <div class="trash-top-bar">
                 <div class="trash-header">
                     <h1>Papelera de Reciclaje</h1>
-                    <p>Elementos eliminados temporalmente. Restáuralos a tu panel activo o elimínalos de forma permanente.</p>
+                    <p>Los elementos eliminados se borran automáticamente de forma definitiva tras 48 horas. Puedes restaurarlos o vaciar la papelera manualmente.</p>
                 </div>
-                <div class="trash-nav-action">
+                <div class="trash-actions-header">
+                    <button type="button" id="btnVaciarPapelera" class="btn-danger-outline">🗑️ Vaciar Papelera</button>
                     <a href="inicio.html" class="btn-secondary">← Volver al Panel</a>
                 </div>
             </div>
 
-            <!-- Sección de Contenido / Cuadrícula de Papelera -->
             <section class="trash-content-section">
                 <div id="trashGrid" class="trash-grid">
                     <!-- Se cargan dinámicamente desde Firestore -->
@@ -85,12 +92,29 @@
         </div>
     </main>
 
-<!-- Pie de Página Institucional Mínimo -->
-<footer class="auth-footer-simple">
-    <p>&copy; 2026 <strong>CRECER</strong> &bull; Plataforma Institucional de Gestión Académica</p>
-</footer>
+    <!-- MINI VENTANA MODAL DE CONFIRMACIÓN -->
+    <div id="modalConfirmacion" class="modal-overlay hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>⚠️ Confirmar Eliminación</h3>
+                <button type="button" id="btnCerrarModal" class="btn-close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="modalMensajeTexto">¿Estás seguro de eliminar este elemento de forma permanente de Firestore?</p>
+            </div>
+            <div class="modal-actions">
+                <button type="button" id="btnCancelarModal" class="btn-secondary">Cancelar</button>
+                <button type="button" id="btnAceptarModal" class="btn-danger">Sí, eliminar</button>
+            </div>
+        </div>
+    </div>
 
-    <!-- Scripts de la aplicación -->
+    <div id="toast-container"></div>
+
+    <footer class="auth-footer-simple">
+        <p>&copy; 2026 <strong>CRECER</strong> &bull; Plataforma Institucional de Gestión Académica</p>
+    </footer>
+
     <script type="module" src="js/global.js"></script>
     <script type="module" src="js/papelera.js"></script>
 </body>

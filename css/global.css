@@ -1,10 +1,13 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+/* ==========================================================================
+   HOJA DE ESTILOS GLOBALES - CRECER (1000% RESPONSIVE)
+   ========================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-  /* Paleta Formal / Profesional (Modo Claro) */
-  --primary: #0f172a;        /* Slate 900 */
-  --primary-hover: #1e293b;  /* Slate 800 */
-  --accent: #2563eb;         /* Royal Blue */
+  /* Paleta Modo Claro */
+  --primary: #0f172a;        
+  --primary-hover: #1e293b;  
+  --accent: #2563eb;         
   --accent-hover: #1d4ed8;
   
   --bg-main: #f8fafc;
@@ -38,10 +41,14 @@
   --shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.06), 0 2px 4px -1px rgba(15, 23, 42, 0.04);
 }
 
-/* Variables para Modo Oscuro */
-[data-theme="dark"] {
+/* Variables Modo Oscuro */
+:root[data-theme="dark"],
+body[data-theme="dark"] {
   --primary: #0f172a;
   --primary-hover: #1e293b;
+  --accent: #3b82f6;
+  --accent-hover: #2563eb;
+
   --bg-main: #090d16;
   --bg-color: #090d16;
   --card-bg: #1e293b;
@@ -56,7 +63,7 @@
   --nav-link-hover: #f8fafc;
   
   --input-bg: #0f172a;
-  --filter-bg: #1e293b;
+  --filter-bg: #0f172a;
   --border-color: #334155;
   
   --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.3);
@@ -64,7 +71,7 @@
   --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
 }
 
-/* Reset Global y Estilos Base */
+/* Reset Global */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -84,17 +91,17 @@ body {
   display: flex;
   flex-direction: column;
   -webkit-font-smoothing: antialiased;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.25s ease, color 0.25s ease;
   overflow-x: hidden;
 }
 
 /* ==========================================================================
-   HEADER Y NAVEGACIÓN
+   1. HEADER Y NAVEGACIÓN
    ========================================================================== */
 .header, .app-header {
   background-color: var(--header-bg);
   color: var(--header-text);
-  padding: 0.85rem 2.5rem;
+  padding: 0.85rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -116,18 +123,26 @@ body {
 .brand-container a, .logo a {
   color: #ffffff;
   text-decoration: none;
-  font-weight: 700;
-  font-size: 1.25rem;
+  font-weight: 800;
+  font-size: 1.35rem;
   letter-spacing: -0.02em;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  text-transform: uppercase;
+}
+
+.header-right-group {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-left: auto;
 }
 
 .nav, .nav-menu {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1.25rem;
 }
 
 .nav a, .nav-link, .nav-menu a {
@@ -150,29 +165,31 @@ body {
   border-bottom-color: var(--accent);
 }
 
-/* Conmutador de Modo Oscuro */
+/* Conmutador de Tema */
 .theme-toggle, .btn-theme-nav {
-  background: transparent;
-  border: 1px solid var(--border-color);
-  color: var(--header-text);
-  padding: 0.4rem 0.8rem;
-  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
   cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: 500;
+  font-size: 1.1rem;
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  justify-content: center;
   transition: all 0.2s ease;
+  padding: 0;
+  flex-shrink: 0;
 }
 
 .theme-toggle:hover, .btn-theme-nav:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  border-color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
 }
 
 /* ==========================================================================
-   MENÚ DESPLEGABLE (DROPDOWN)
+   2. DESPLEGABLES (DROPDOWN)
    ========================================================================== */
 .dropdown {
   position: relative;
@@ -180,14 +197,14 @@ body {
 }
 
 .dropdown-btn {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: var(--header-text);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 0.45rem 0.9rem;
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  padding: 0.45rem 0.95rem;
   border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: 0.88rem;
-  font-weight: 500;
+  font-weight: 600;
   transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
@@ -195,45 +212,48 @@ body {
 }
 
 .dropdown-btn:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.4);
+  background-color: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .dropdown-content {
   display: none;
   position: absolute;
   right: 0;
-  top: calc(100% + 0.6rem);
+  top: calc(100% + 0.5rem);
   background-color: var(--card-bg);
   min-width: 200px;
-  box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.3), var(--shadow-lg);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
   border-radius: var(--radius-md);
   border: 1px solid var(--border-color);
   overflow: hidden;
   z-index: 1005;
+  padding: 0.35rem 0;
+  transition: background-color 0.25s ease, border-color 0.25s ease;
 }
 
 .dropdown-content a {
   color: var(--text-primary);
-  padding: 0.75rem 1rem;
+  padding: 0.7rem 1.2rem;
   text-decoration: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  font-size: 0.88rem;
+  display: block;
+  font-size: 0.9rem;
   font-weight: 500;
-  border-bottom: 1px solid var(--border-color);
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: background-color 0.18s ease, color 0.18s ease;
 }
 
-.dropdown-content a:last-child {
-  border-bottom: none;
-}
-
-.dropdown-content a:hover {
-  background-color: var(--filter-bg);
+.dropdown-content a:hover,
+.dropdown-content a.active {
+  background-color: rgba(37, 99, 235, 0.12);
   color: var(--accent);
+}
+
+.dropdown-logout {
+  color: #ef4444 !important;
+}
+
+.dropdown-logout:hover {
+  background-color: rgba(239, 68, 68, 0.12) !important;
 }
 
 .dropdown:hover .dropdown-content,
@@ -242,25 +262,15 @@ body {
   display: block;
 }
 
-.dropdown-logout {
-  color: #dc2626 !important;
-  font-weight: 500;
-}
-
-.dropdown-logout:hover {
-  background-color: rgba(220, 38, 38, 0.1) !important;
-  color: #b91c1c !important;
-}
-
 /* ==========================================================================
-   MODAL DE CONFIRMACIÓN PERSONALIZADO (REEMPLAZO DE confirm())
+   3. MODAL DE CONFIRMACIÓN PERSONALIZADO
    ========================================================================== */
 .custom-confirm-overlay {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   background-color: rgba(15, 23, 42, 0.65);
   backdrop-filter: blur(5px);
   display: flex;
@@ -268,7 +278,6 @@ body {
   justify-content: center;
   z-index: 10000;
   padding: 1rem;
-  box-sizing: border-box;
   opacity: 0;
   transition: opacity 0.2s ease-in-out;
 }
@@ -278,13 +287,13 @@ body {
 }
 
 .custom-confirm-card {
-  background: var(--card-bg, #ffffff);
-  border: 1px solid var(--border-color, #e2e8f0);
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   width: 100%;
   max-width: 400px;
   padding: 1.5rem;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-lg);
   transform: translateY(10px) scale(0.95);
   transition: transform 0.2s ease-in-out;
 }
@@ -297,7 +306,7 @@ body {
   margin: 0 0 0.5rem 0;
   font-size: 1.1rem;
   font-weight: 700;
-  color: var(--text-primary, #0f172a);
+  color: var(--text-primary);
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -306,7 +315,7 @@ body {
 .custom-confirm-card p {
   margin: 0 0 1.5rem 0;
   font-size: 0.92rem;
-  color: var(--text-secondary, #64748b);
+  color: var(--text-secondary);
   line-height: 1.5;
 }
 
@@ -318,8 +327,8 @@ body {
 
 .btn-confirm-cancel {
   background-color: transparent;
-  border: 1px solid var(--border-color, #cbd5e1);
-  color: var(--text-primary, #0f172a);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
   padding: 0.55rem 1.1rem;
   border-radius: 6px;
   font-weight: 600;
@@ -329,7 +338,7 @@ body {
 }
 
 .btn-confirm-cancel:hover {
-  background-color: var(--filter-bg, #f1f5f9);
+  background-color: var(--filter-bg);
 }
 
 .btn-confirm-accept {
@@ -348,28 +357,8 @@ body {
   background-color: #dc2626;
 }
 
-/* Modo Oscuro para Modal de Confirmación */
-[data-theme="dark"] .custom-confirm-card {
-  background-color: #1e293b;
-  border-color: #334155;
-  color: #f8fafc;
-}
-
-[data-theme="dark"] .custom-confirm-card p {
-  color: #94a3b8;
-}
-
-[data-theme="dark"] .btn-confirm-cancel {
-  border-color: #475569;
-  color: #f8fafc;
-}
-
-[data-theme="dark"] .btn-confirm-cancel:hover {
-  background-color: #334155;
-}
-
 /* ==========================================================================
-   SISTEMA DE NOTIFICACIONES Y ALERTAS (TOASTS)
+   4. NOTIFICACIONES Y ALERTAS (TOASTS)
    ========================================================================== */
 #toast-container {
   position: fixed;
@@ -391,16 +380,16 @@ body {
   justify-content: space-between;
   gap: 0.85rem;
   padding: 0.9rem 1.1rem;
-  border-radius: var(--radius-md, 10px);
-  background: var(--card-bg, #ffffff);
-  color: var(--text-primary, #0f172a);
+  border-radius: var(--radius-md);
+  background: var(--card-bg);
+  color: var(--text-primary);
   font-family: inherit;
   font-size: 0.9rem;
   font-weight: 500;
   line-height: 1.4;
-  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.15), 0 8px 10px -6px rgba(15, 23, 42, 0.1);
-  border: 1px solid var(--border-color, #e2e8f0);
-  border-left: 5px solid #2563eb;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-color);
+  border-left: 5px solid var(--accent);
   backdrop-filter: blur(8px);
   opacity: 0;
   transform: translateY(1rem) scale(0.95);
@@ -414,68 +403,112 @@ body {
 
 .toast-success {
   border-left-color: #10b981;
-  background: linear-gradient(to right, rgba(16, 185, 129, 0.08), var(--card-bg, #ffffff));
 }
 
-.toast-danger,
-.toast-error {
+.toast-danger, .toast-error {
   border-left-color: #ef4444;
-  background: linear-gradient(to right, rgba(239, 68, 68, 0.08), var(--card-bg, #ffffff));
 }
 
 .toast-warning {
   border-left-color: #f59e0b;
-  background: linear-gradient(to right, rgba(245, 158, 11, 0.08), var(--card-bg, #ffffff));
 }
 
 .toast-info {
-  border-left-color: #3b82f6;
-  background: linear-gradient(to right, rgba(59, 130, 246, 0.08), var(--card-bg, #ffffff));
+  border-left-color: var(--accent);
 }
 
 .toast-close {
   background: transparent;
   border: none;
-  color: var(--text-secondary, #64748b);
+  color: var(--text-secondary);
   font-size: 1.1rem;
   cursor: pointer;
   padding: 0.2rem;
   line-height: 1;
   border-radius: 4px;
-  transition: color 0.15s ease, background-color 0.15s ease;
 }
 
 .toast-close:hover {
-  color: var(--text-primary, #0f172a);
-  background-color: rgba(0, 0, 0, 0.05);
+  color: var(--text-primary);
 }
 
-/* Modo Oscuro para Toasts */
-[data-theme="dark"] .toast {
-  background-color: #1e293b;
+/* ==========================================================================
+   5. PIE DE PÁGINA (FOOTER)
+   ========================================================================== */
+.app-footer, 
+.auth-footer-simple {
+  background-color: var(--header-bg);
+  color: #94a3b8;
+  text-align: center;
+  padding: 1.15rem 1.5rem;
+  margin-top: auto;
+  width: 100%;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.auth-footer-simple p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #94a3b8;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.auth-footer-simple strong {
   color: #f8fafc;
-  border-color: #334155;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+  font-weight: 600;
 }
 
-[data-theme="dark"] .toast-success {
-  background: linear-gradient(to right, rgba(16, 185, 129, 0.15), #1e293b);
-}
+/* ==========================================================================
+   6. RESPONSIVO MÓVIL EXTREMO (1000% RESPONSIVE)
+   ========================================================================== */
+@media (max-width: 768px) {
+  .app-header {
+    padding: 0.75rem 1.25rem;
+  }
 
-[data-theme="dark"] .toast-danger,
-[data-theme="dark"] .toast-error {
-  background: linear-gradient(to right, rgba(239, 68, 68, 0.15), #1e293b);
-}
+  .nav-menu {
+    position: fixed;
+    top: 60px;
+    right: -100%;
+    width: 260px;
+    height: calc(100vh - 60px);
+    background-color: var(--header-bg);
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1.5rem;
+    gap: 1.25rem;
+    box-shadow: -5px 0 15px rgba(0,0,0,0.3);
+    transition: right 0.3s ease;
+    z-index: 999;
+  }
 
-[data-theme="dark"] .toast-warning {
-  background: linear-gradient(to right, rgba(245, 158, 11, 0.15), #1e293b);
-}
+  .nav-menu.active {
+    right: 0;
+  }
 
-[data-theme="dark"] .toast-info {
-  background: linear-gradient(to right, rgba(59, 130, 246, 0.15), #1e293b);
-}
+  .dropdown, .dropdown-btn {
+    width: 100%;
+  }
 
-@media (max-width: 640px) {
+  .dropdown-content {
+    position: static;
+    box-shadow: none;
+    border: none;
+    background-color: rgba(255, 255, 255, 0.05);
+    margin-top: 0.5rem;
+    width: 100%;
+  }
+
+  .dropdown-content a {
+    color: #cbd5e1;
+  }
+
   #toast-container {
     bottom: 1rem;
     right: 1rem;
@@ -483,182 +516,8 @@ body {
     width: auto;
     max-width: none;
   }
-}
 
-/* ==========================================================================
-   PIE DE PÁGINA (FOOTER)
-   ========================================================================== */
-.footer, .app-footer {
-  width: 100%;
-  background-color: #0f172a;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 20px 0;
-  margin-top: auto;
-  color: #94a3b8;
-  font-size: 0.9rem;
-}
-
-.footer-content, .footer-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
-  gap: 15px;
-}
-
-.footer-content p, .footer-container p {
-  margin: 0;
-}
-
-.footer-links {
-  display: flex;
-  gap: 20px;
-}
-
-.footer-links a {
-  color: #94a3b8;
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-.footer-links a:hover {
-  color: #38bdf8;
-  text-decoration: underline;
-}
-
-/* ==========================================================================
-   PIE DE PÁGINA INSTITUCIONAL UNIFICADO - CRECER
-   ========================================================================== */
-.app-footer {
-  width: 100%;
-  background-color: var(--header-bg, #0f172a);
-  color: #94a3b8;
-  padding: 1rem 0;
-  border-top: 1px solid var(--border-color, #334155);
-  margin-top: auto;
-}
-
-.footer-container {
-  max-width: 1200px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 0 1.5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-}
-
-.footer-brand {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.footer-logo {
-  font-weight: 800;
-  color: #ffffff;
-  letter-spacing: -0.02em;
-  font-size: 0.95rem;
-}
-
-.footer-container p {
-  margin: 0;
-  font-size: 0.85rem;
-}
-
-.footer-links {
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-}
-
-.footer-links a {
-  color: #94a3b8;
-  text-decoration: none;
-  font-size: 0.82rem;
-  font-weight: 500;
-  transition: color 0.2s ease;
-}
-
-.footer-links a:hover {
-  color: #ffffff;
-}
-
-/* Adaptación para pantallas pequeñas */
-@media (max-width: 600px) {
-  .footer-container {
-    flex-direction: column;
-    justify-content: center;
-    text-align: center;
-    gap: 0.5rem;
+  .auth-footer-simple p {
+    font-size: 0.78rem;
   }
-
-  .footer-brand {
-    flex-direction: column;
-    gap: 0.2rem;
-  }
-}
-
-
-/* ==========================================================================
-   PIE DE PÁGINA PROFESIONAL Y RESPONSIVO - CRECER
-   ========================================================================== */
-
-.app-footer, 
-.auth-footer-simple {
-    background-color: var(--header-bg, #0f172a);
-    color: #94a3b8;
-    text-align: center;
-    padding: 1.15rem 1.5rem;
-    margin-top: auto;
-    width: 100%;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    box-sizing: border-box;
-}
-
-.app-footer .footer-container, 
-.auth-footer-simple {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    max-width: 1550px;
-    margin: 0 auto;
-}
-
-.app-footer p, 
-.auth-footer-simple p {
-    margin: 0;
-    font-size: 0.85rem;
-    color: #94a3b8;
-    font-weight: 400;
-    letter-spacing: 0.01em;
-    line-height: 1.5;
-    text-align: center;
-}
-
-.app-footer strong, 
-.auth-footer-simple strong {
-    color: #f8fafc;
-    font-weight: 600;
-}
-
-/* ==========================================
-   ADAPTABILIDAD MÓVIL (RESPONSIVE)
-   ========================================== */
-@media (max-width: 768px) {
-    .app-footer, 
-    .auth-footer-simple {
-        padding: 1rem 1rem;
-    }
-
-    .app-footer p, 
-    .auth-footer-simple p {
-        font-size: 0.78rem;
-        line-height: 1.4;
-    }
 }

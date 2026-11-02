@@ -1,18 +1,22 @@
-const CACHE_NAME = 'crecer-cache-v2';
+/* =================================================================
+   SERVICE WORKER - PLATAFORMA CRECER (PWA Offline & Push)
+   ================================================================= */
+
+const CACHE_NAME = 'crecer-cache-v3';
 
 const urlsToCache = [
-    './',
     './bienvenida.html',
     './login.html',
+    './register.html',
     './inicio.html',
-    './formularios.html',
     './notas.html',
     './recursos.html',
     './perfil.html',
+    './horario.html',
     './papelera.html',
     './css/global.css',
-    './css/inicio.css',
     './js/global.js',
+    './js/firebase-config.js',
     './img/logo.png'
 ];
 
@@ -20,7 +24,11 @@ const urlsToCache = [
 self.addEventListener('install', (event) => {
     self.skipWaiting();
     event.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => cache.addAll(urlsToCache))
+        caches.open(CACHE_NAME).then((cache) => {
+            return cache.addAll(urlsToCache);
+        }).catch((err) => {
+            console.warn("Advertencia al precargar archivos en cache:", err);
+        })
     );
 });
 
@@ -39,22 +47,23 @@ self.addEventListener('activate', (event) => {
     );
 });
 
-// Estrategia Network First para peticiones web
+// Estrategia Network First para peticiones web con respaldo offline
 self.addEventListener('fetch', (event) => {
     const req = event.request;
 
     if (req.method !== 'GET') return;
 
-    // Ignorar peticiones a servicios internos de Firebase Auth y Firestore
+    // Ignorar llamadas a servicios externos de Firebase Auth, Firestore o Apis remotas
     if (req.url.includes('firestore.googleapis.com') || 
         req.url.includes('identitytoolkit.googleapis.com') ||
-        req.url.includes('fcmregistrations.googleapis.com')) {
+        req.url.includes('fcmregistrations.googleapis.com') ||
+        req.url.includes('api.brevo.com')) {
         return;
     }
 
     event.respondWith(
         fetch(req).then((networkResponse) => {
-            if (networkResponse && networkResponse.status === 200) {
+            if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
                 const responseToCache = networkResponse.clone();
                 caches.open(CACHE_NAME).then((cache) => cache.put(req, responseToCache));
             }
@@ -63,7 +72,7 @@ self.addEventListener('fetch', (event) => {
             return caches.match(req).then((cachedResponse) => {
                 if (cachedResponse) return cachedResponse;
                 if (req.headers.get('accept')?.includes('text/html')) {
-                    return caches.match('./inicio.html');
+                    return caches.match('./inicio.html') || caches.match('./login.html');
                 }
             });
         })
