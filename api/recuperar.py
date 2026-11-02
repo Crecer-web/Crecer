@@ -28,13 +28,13 @@ class handler(BaseHTTPRequestHandler):
             RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
             
             if not RESEND_API_KEY:
-                raise Exception("La variable de entorno RESEND_API_KEY no está configurada en el servidor.")
+                raise Exception("La variable de entorno RESEND_API_KEY no está configurada en el servidor de Vercel.")
 
             api_url = "https://api.resend.com/emails"
 
             # Estructura completa del correo HTML profesional para la plataforma CRECER
             payload = {
-                "from": "Plataforma CRECER <onboarding@resend.dev>",
+                "from": "onboarding@resend.dev",  # <--- IMPORTANTE: Si usas este dominio de prueba, Resend solo permite enviar al correo con el que te registraste en su plataforma.
                 "to": [correo_destino],
                 "subject": "CRECER - Recuperación de Contraseña",
                 "html": """
