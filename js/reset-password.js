@@ -1,14 +1,18 @@
 /* =================================================================
-   SISTEMA AVANZADO DE RESTABLECIMIENTO DE CONTRASEÑA - CRECER
+   SISTEMA DE RESTABLECIMIENTO Y EXPIRACIÓN EN 10 MINUTOS - CRECER
    ================================================================= */
 
 import { auth } from './firebase-config.js';
 import { confirmPasswordReset, verifyPasswordResetCode } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { mostrarToast } from './global.js';
 
-// Extracción estricta de parámetros en la URL para capturar el oobCode de Firebase
+// Extraer parámetros oobCode y tstamp de la URL
 const urlParams = new URLSearchParams(window.location.search);
 const oobCode = urlParams.get('oobCode');
+const timeStampParam = urlParams.get('tstamp');
+
+// Tiempo límite de caducidad: 10 minutos (600.000 ms)
+const EXPIRATION_LIMIT_MS = 10 * 60 * 1000;
 
 document.addEventListener('DOMContentLoaded', async () => {
     const formRestaurar = document.getElementById('resetPasswordForm');
@@ -16,30 +20,53 @@ document.addEventListener('DOMContentLoaded', async () => {
     const inputPassword = document.getElementById('newPassword');
     const inputConfirm = document.getElementById('confirmPassword');
 
-    // Validación crítica de seguridad: Si no hay oobCode, el enlace no es legítimo
+    // 1. Verificación del parámetro de seguridad oobCode
     if (!oobCode) {
-        console.error("[Seguridad CRECER]: Intento de acceso sin código de verificación oobCode.");
-        mostrarToast('⚠️ Enlace de recuperación inválido o expirado.', 'danger');
-        setTimeout(() => { 
-            window.location.href = 'login.html'; 
-        }, 3500);
+        console.warn("[Seguridad CRECER]: Entrando a reset-password sin código oobCode en la URL.");
+        mostrarToast('⚠️ Debes acceder desde el enlace enviado a tu correo.', 'warning');
+        
+        // Si no hay oobCode, deshabilitar el botón para evitar envíos vacíos
+        if (btnActualizar) {
+            btnActualizar.disabled = true;
+            btnActualizar.textContent = 'Enlace Inválido o Ausente';
+        }
         return;
     }
 
-    // Comprobación de validez del código directamente con los servidores de Firebase
+    // 2. Control de expiración del enlace a los 10 minutos
+    if (timeStampParam) {
+        const creationTime = parseInt(timeStampParam, 10);
+        const currentTime = Date.now();
+
+        if (!isNaN(creationTime) && (currentTime - creationTime) > EXPIRATION_LIMIT_MS) {
+            console.error("[Seguridad CRECER]: El token ha superado la ventana de 10 minutos.");
+            mostrarToast('⚠️ El enlace ha caducado (pasaron más de 10 minutos). Solicita uno nuevo.', 'danger');
+            if (btnActualizar) {
+                btnActualizar.disabled = true;
+                btnActualizar.textContent = 'Enlace Expirado';
+            }
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 4000);
+            return;
+        }
+    }
+
+    // 3. Verificación del token con los servidores de Firebase
     try {
         await verifyPasswordResetCode(auth, oobCode);
-        console.log("[Seguridad CRECER]: Código oobCode verificado y válido.");
+        console.log("[Seguridad CRECER]: Código oobCode verificado correctamente en Firebase.");
     } catch (error) {
-        console.error("[Error de Validación Firebase]:", error);
-        mostrarToast('⚠️ El enlace de recuperación ha expirado o ya fue utilizado previamente.', 'danger');
-        setTimeout(() => { 
-            window.location.href = 'login.html'; 
-        }, 4000);
+        console.error("[Error Firebase Auth Code]:", error);
+        mostrarToast('⚠️ El enlace de recuperación es inválido o ya fue utilizado.', 'danger');
+        if (btnActualizar) {
+            btnActualizar.disabled = true;
+            btnActualizar.textContent = 'Código Inválido';
+        }
         return;
     }
 
-    // Manejador del evento Submit para procesar el cambio de contraseña
+    // 4. Envío del formulario de actualización
     if (formRestaurar) {
         formRestaurar.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -47,37 +74,31 @@ document.addEventListener('DOMContentLoaded', async () => {
             const nuevaClave = inputPassword ? inputPassword.value.trim() : '';
             const repetirClave = inputConfirm ? inputConfirm.value.trim() : '';
 
-            // Validaciones locales exhaustivas de longitud y coincidencia
             if (!nuevaClave || !repetirClave) {
-                mostrarToast('Por favor, completa todos los campos obligatorios.', 'warning');
+                mostrarToast('Por favor completa ambos campos.', 'warning');
                 return;
             }
 
             if (nuevaClave.length < 6) {
-                mostrarToast('La nueva contraseña debe contener al menos 6 caracteres.', 'warning');
+                mostrarToast('La contraseña debe tener al menos 6 caracteres.', 'warning');
                 if (inputPassword) inputPassword.focus();
                 return;
             }
 
             if (nuevaClave !== repetirClave) {
-                mostrarToast('Las contraseñas ingresadas no coinciden entre sí.', 'danger');
+                mostrarToast('Las contraseñas no coinciden.', 'danger');
                 if (inputConfirm) inputConfirm.focus();
                 return;
             }
 
-            // Feedback visual dinámico de procesamiento en curso
             if (btnActualizar) {
                 btnActualizar.disabled = true;
-                btnActualizar.textContent = 'Actualizando credenciales... ⏳';
+                btnActualizar.textContent = 'Actualizando contraseña... ⏳';
             }
 
             try {
-                // Ejecución oficial de la actualización de contraseña en Firebase Auth
                 await confirmPasswordReset(auth, oobCode, nuevaClave);
-                
-                mostrarToast('¡Contraseña actualizada con éxito! Redirigiendo al inicio de sesión...', 'success');
-                
-                // Limpieza de campos por seguridad
+                mostrarToast('¡Contraseña actualizada con éxito! Redirigiendo...', 'success');
                 formRestaurar.reset();
 
                 setTimeout(() => {
@@ -85,9 +106,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }, 3000);
 
             } catch (error) {
-                console.error("[Error Crítico al Actualizar Credencial]:", error);
-                mostrarToast(`Error al actualizar: ${error.message}`, 'danger');
-                
+                console.error("[Error confirmPasswordReset]:", error);
+                mostrarToast(`Error al cambiar contraseña: ${error.message}`, 'danger');
                 if (btnActualizar) {
                     btnActualizar.disabled = false;
                     btnActualizar.textContent = 'Actualizar Contraseña';
