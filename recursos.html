@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Recursos - CRECER</title>
+    
+    <!-- Iconos y Manifest PWA -->
+    <link rel="icon" type="image/png" sizes="32x32" href="img/logo.png">
+    <link rel="apple-touch-icon" href="img/logo.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    
+    <!-- Hojas de Estilos -->
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/recursos.css">
+</head>
+<body class="dashboard-body">
+
+    <!-- Encabezado de Navegación del Dashboard -->
+    <header class="app-header">
+        <div class="header-container">
+            <!-- Logo -->
+            <div class="logo">
+                <a href="inicio.html">CRECER</a>
+            </div>
+            
+            <!-- Contenedor Unificado Alineado Totalmente a la Derecha -->
+            <div class="header-right-group">
+                <!-- Navegación Principal -->
+                <nav class="nav-menu" id="navMenu" aria-label="Navegación principal">
+                    <a href="inicio.html" class="nav-link">Inicio</a>
+                    
+                    <!-- Menú Desplegable de Módulos -->
+                    <div class="dropdown" id="modulesDropdown">
+                        <button class="dropdown-btn" id="dropdownBtn" aria-haspopup="true" aria-expanded="false" type="button">
+                            Módulos ▼
+                        </button>
+                        <div class="dropdown-content" id="dropdownContent">
+                            <a href="notas.html">Calificaciones</a>
+                            <a href="horario.html">Horario</a>
+                            <a href="recursos.html" class="active">Recursos</a>
+                            <a href="perfil.html">Mi Perfil</a>
+                            <a href="exportar.html">Respaldo</a>
+                            <a href="#" id="logoutBtn" class="dropdown-logout">Cerrar Sesión</a>
+                        </div>
+                    </div>
+                </nav>
+
+                <!-- Botón de Conmutación de Tema -->
+                <button id="themeToggle" class="theme-toggle" type="button" aria-label="Cambiar tema">🌙</button>
+
+                <!-- Botón Hamburguesa para Móvil -->
+                <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú de navegación" type="button">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenedor Principal (Compatible con Sticky Footer) -->
+    <main class="app-main-container">
+        <div class="main-container">
+            
+            <div class="page-header">
+                <h2>Apuntes y Enlaces Académicos</h2>
+                <p>Organiza tus herramientas de estudio, enlaces a documentos y material académico.</p>
+            </div>
+
+            <section class="form-section">
+                <form id="resourceForm" novalidate>
+                    <div class="form-group">
+                        <label for="resSubject">Materia *</label>
+                        <input type="text" id="resSubject" placeholder="Ej. Programación Web" required autocomplete="off">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="resTitle">Título del Recurso *</label>
+                        <input type="text" id="resTitle" placeholder="Ej. Documentación JS ES6" required autocomplete="off">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="resUrl">Enlace / URL *</label>
+                        <input type="url" id="resUrl" placeholder="https://..." required autocomplete="off">
+                    </div>
+
+                    <button type="submit" id="btnGuardarRecurso" class="btn-submit">Guardar Recurso</button>
+                </form>
+            </section>
+
+            <section class="list-section">
+                <h3>Recursos Registrados</h3>
+                <div id="loadingResources" class="loading-text">Cargando enlaces...</div>
+                <div id="resourceGrid" class="resource-grid"></div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Contenedor Toast -->
+    <div id="toast-container"></div>
+
+    <footer class="auth-footer-simple">
+        <p>&copy; 2026 <strong>CRECER</strong> &bull; Plataforma Institucional de Gestión Académica</p>
+    </footer>
+
+    <!-- Scripts de la Aplicación -->
+    <script type="module" src="js/global.js"></script>
+    <script type="module" src="js/recursos.js"></script>
+</body>
+</html>

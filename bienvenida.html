@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRECER &bull; Plataforma Académica Institucional</title>
+    
+    <!-- Script síncrono crítico para aplicar el tema de forma automática idéntica al resto de las pantallas -->
+    <script>
+        (function() {
+            const tema = localStorage.getItem('theme') || 'light';
+            if (tema === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+            }
+        })();
+    </script>
+
+    <!-- Iconos y Manifest PWA -->
+    <link rel="icon" type="image/png" sizes="32x32" href="img/logo.png">
+    <link rel="apple-touch-icon" href="img/logo.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    
+    <!-- Hojas de Estilos Separadas -->
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/bienvenida.css">
+</head>
+<body class="welcome-page">
+
+    <!-- Encabezado Principal Institucional -->
+    <header class="header" role="banner">
+        <div class="header-content">
+            <div class="logo">
+                <a href="bienvenida.html">CRECER</a>
+            </div>
+            <nav class="nav-menu" id="navMenu" aria-label="Navegación principal">
+                <a href="login.html" id="navLoginBtn" class="btn-secondary">Iniciar Sesión</a>
+                <a href="register.html" id="navRegisterBtn" class="btn-primary">Registrarse</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Contenedor Principal -->
+    <main class="main-container" role="main">
+        
+        <!-- Sección Hero / Presentación -->
+        <section class="hero">
+            <div class="hero-badge">Plataforma Académica Institucional</div>
+            <h1>Potencia tu rendimiento académico con <span>CRECER</span></h1>
+            <p>La solución integral diseñada para organizar tus tareas, exámenes, horarios y calificaciones en un entorno seguro, eficiente y optimizado para tu éxito estudiantil.</p>
+            
+            <div class="hero-buttons">
+                <a href="register.html" id="heroStartBtn" class="btn-hero-primary">Comenzar Ahora 🚀</a>
+                <a href="#caracteristicas" class="btn-hero-secondary">Saber Más 📖</a>
+            </div>
+        </section>
+
+        <!-- Sección de Características -->
+        <section id="caracteristicas" class="features-section">
+            <div class="section-title">
+                <h2>Diseñado para optimizar tu día a día</h2>
+                <p>Herramientas potentes y minimalistas enfocadas en tu trayectoria académica.</p>
+            </div>
+
+            <div class="features-grid">
+                <article class="feature-card">
+                    <div class="feature-icon-wrapper">📝</div>
+                    <h3>Gestión de Formularios</h3>
+                    <p>Crea registros detallados de tus tareas y exámenes, adjuntando material de estudio y controlando fechas límites de entrega sin complicaciones.</p>
+                </article>
+
+                <article class="feature-card">
+                    <div class="feature-icon-wrapper">📊</div>
+                    <h3>Seguimiento de Notas</h3>
+                    <p>Lleva el control absoluto de tus calificaciones por materia y visualiza tu promedio general en tiempo real con analíticas claras y profesionales.</p>
+                </article>
+
+                <article class="feature-card">
+                    <div class="feature-icon-wrapper">📅</div>
+                    <h3>Horario y Recursos</h3>
+                    <p>Organiza tu agenda semanal de clases y mantén tu biblioteca personal de documentos y enlaces institucionales siempre al alcance de tu mano.</p>
+                </article>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Pie de Página Institucional Corregido y Elegante -->
+    <footer class="app-footer" role="contentinfo">
+        <div class="footer-container">
+            <p>&copy; 2026 <strong>CRECER</strong> &bull; Plataforma Institucional de Gestión Académica</p>
+            <span class="footer-subtitle">Optimizado para el desarrollo académico independiente.</span>
+        </div>
+    </footer>
+
+    <!-- Script modular independiente -->
+    <script type="module" src="js/bienvenida.js"></script>
+</body>
+</html>

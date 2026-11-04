@@ -1,0 +1,333 @@
+/* ==========================================
+   VARIABLES DE TEMA (CLARO Y OSCURO)
+   ========================================== */
+:root {
+    --bg-color: #f1f5f9;
+    --card-bg: #ffffff;
+    --border-color: #cbd5e1;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --input-bg: #f8fafc;
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+    --shadow-auth: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+}
+
+:root[data-theme="dark"],
+body[data-theme="dark"] {
+    --bg-color: #090d16;
+    --card-bg: #1e293b;
+    --border-color: #334155;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --input-bg: #0f172a;
+    --accent: #3b82f6;
+    --accent-hover: #2563eb;
+    --shadow-auth: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+}
+
+/* ==========================================
+   ESTILOS GENERALES Y LAYOUT PRINCIPAL
+   ========================================== */
+
+.auth-body {
+    background-color: var(--bg-color);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: var(--text-primary);
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* Botón de Tema Flotante */
+.theme-toggle-auth {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    background: var(--card-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-auth);
+    transition: transform 0.2s ease, background-color 0.2s ease;
+    z-index: 100;
+}
+
+.theme-toggle-auth:hover {
+    transform: scale(1.08);
+}
+
+.auth-main-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+    padding: 2rem 1rem;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 440px;
+}
+
+/* Tarjeta principal de autenticación */
+.login-card,
+.auth-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 2.25rem;
+    box-shadow: var(--shadow-auth);
+    color: var(--text-primary);
+    width: 100%;
+    box-sizing: border-box;
+    transition: background-color 0.25s ease, border-color 0.25s ease;
+}
+
+/* ==========================================
+   ENCABEZADO DE MARCA Y TÍTULOS
+   ========================================== */
+
+.brand-header,
+.auth-header {
+    text-align: center;
+    margin-bottom: 1.25rem;
+}
+
+.brand-header h1,
+.auth-logo {
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: var(--accent);
+    margin: 0 0 0.15rem 0;
+    letter-spacing: 0.05em;
+}
+
+.brand-header p,
+.auth-subtitle {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: 4px 0 0 0;
+}
+
+.auth-title-section,
+.auth-intro {
+    margin-bottom: 1.25rem;
+}
+
+.auth-title-section h2,
+.auth-intro h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 0.35rem 0;
+}
+
+.auth-title-section p,
+.auth-intro p {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* ==========================================
+   ESTRUCTURA DE FORMULARIO Y CAMPOS
+   ========================================== */
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.form-row {
+    display: flex;
+    gap: 0.75rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.form-row .form-group {
+    flex: 1 1 0%;
+    min-width: 0;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.form-group input {
+    width: 100%;
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0.7rem 0.85rem;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s, background-color 0.25s ease;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* ==========================================
+   BOTONES
+   ========================================== */
+
+.btn-auth,
+.btn-primary {
+    width: 100%;
+    background-color: var(--accent);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    margin-top: 0.25rem;
+    box-sizing: border-box;
+}
+
+.btn-auth:hover,
+.btn-primary:hover {
+    background-color: var(--accent-hover);
+}
+
+.btn-auth:active,
+.btn-primary:active {
+    transform: scale(0.98);
+}
+
+/* ==========================================
+   SEPARADOR MODERNO
+   ========================================== */
+
+.divider,
+.auth-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 1.25rem 0;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.divider::before,
+.divider::after,
+.auth-divider::before,
+.auth-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.divider span,
+.auth-divider span {
+    padding: 0 0.75rem;
+}
+
+/* ==========================================
+   BOTÓN GOOGLE DE AUTENTICACIÓN
+   ========================================== */
+
+.btn-google {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    background-color: var(--card-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0.75rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    box-sizing: border-box;
+}
+
+.btn-google:hover {
+    background-color: var(--input-bg);
+}
+
+.google-icon {
+    display: block;
+    flex-shrink: 0;
+}
+
+/* ==========================================
+   TEXTO DE REDIRECCIÓN (LOGIN)
+   ========================================== */
+
+.auth-redirect-text {
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-top: 1.5rem;
+}
+
+.auth-redirect-text p {
+    margin: 0;
+}
+
+.auth-redirect-text a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.auth-redirect-text a:hover {
+    text-decoration: underline;
+}
+
+/* ==========================================
+   CONTENEDOR DE NOTIFICACIONES TOAST
+   ========================================== */
+
+#toast-container {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    pointer-events: none;
+}
+
+/* Adaptación para pantallas móviles muy estrechas */
+@media (max-width: 420px) {
+    .form-row {
+        flex-direction: column;
+        gap: 1rem;
+    }
+}
