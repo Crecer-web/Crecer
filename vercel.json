@@ -13,17 +13,19 @@
     },
     {
       "src": "/sw.js",
+      "dest": "/sw.js",
       "headers": {
         "Cache-Control": "no-cache, no-store, must-revalidate",
         "Service-Worker-Allowed": "/"
       }
     },
     {
-      "handle": "filesystem"
+      "src": "/",
+      "dest": "/bienvenida.html"
     },
     {
       "src": "/(.*)",
-      "dest": "/bienvenida.html"
+      "dest": "/$1"
     }
   ]
 }

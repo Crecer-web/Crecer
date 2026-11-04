@@ -1,125 +1,73 @@
 /* =================================================================
-   SERVICE WORKER - PLATAFORMA CRECER (PWA Offline & Push)
+   SERVICE WORKER - PLATAFORMA CRECER (MODO SEGURO)
    ================================================================= */
 
-const CACHE_NAME = 'crecer-cache-v3';
-
-const urlsToCache = [
-    './bienvenida.html',
-    './login.html',
-    './register.html',
-    './inicio.html',
-    './notas.html',
-    './recursos.html',
-    './perfil.html',
-    './horario.html',
-    './papelera.html',
-    './css/global.css',
-    './js/global.js',
-    './js/firebase-config.js',
-    './img/logo.png'
+const CACHE_NAME = 'crecer-cache-v5';
+const ASSETS_TO_CACHE = [
+    '/',
+    '/bienvenida.html',
+    '/login.html',
+    '/reset-password.html',
+    '/css/global.css',
+    '/css/login.css',
+    '/css/reset-password.css',
+    '/js/global.js',
+    '/js/recuperar.js',
+    '/js/reset-password.js',
+    '/js/firebase-config.js'
 ];
 
-// Instalación del Service Worker
+// Evento de Instalación: Guarda los recursos principales en caché
 self.addEventListener('install', (event) => {
-    self.skipWaiting();
     event.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => {
-            return cache.addAll(urlsToCache);
-        }).catch((err) => {
-            console.warn("Advertencia al precargar archivos en cache:", err);
-        })
+        caches.open(CACHE_NAME)
+            .then((cache) => {
+                console.log('[Service Worker]: Caché abierto con éxito.');
+                return cache.addAll(ASSETS_TO_CACHE.map(url => new Request(url, { cache: 'reload' })));
+            })
+            .catch((err) => {
+                console.error('[Service Worker Error en Install]:', err);
+            })
     );
+    self.skipWaiting();
 });
 
-// Activación y limpieza de caches obsoletas
+// Evento de Activación: Limpia cachés antiguos obsoletos
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((cacheNames) => {
             return Promise.all(
                 cacheNames.map((cache) => {
                     if (cache !== CACHE_NAME) {
+                        console.log('[Service Worker]: Limpiando caché antiguo:', cache);
                         return caches.delete(cache);
                     }
                 })
             );
-        }).then(() => self.clients.claim())
+        })
     );
+    self.clients.claim();
 });
 
-// Estrategia Network First para peticiones web con respaldo offline
+// Evento Fetch: Intercepta peticiones de forma segura sin romper promesas
 self.addEventListener('fetch', (event) => {
-    const req = event.request;
-
-    if (req.method !== 'GET') return;
-
-    // Ignorar llamadas a servicios externos de Firebase Auth, Firestore o Apis remotas
-    if (req.url.includes('firestore.googleapis.com') || 
-        req.url.includes('identitytoolkit.googleapis.com') ||
-        req.url.includes('fcmregistrations.googleapis.com') ||
-        req.url.includes('api.brevo.com')) {
+    // Evitar interceptar peticiones hacia la API de Flask o Firebase Auth para no alterar datos dinámicos
+    if (event.request.url.includes('/api/') || event.request.url.includes('identitytoolkit.googleapis.com')) {
         return;
     }
 
     event.respondWith(
-        fetch(req).then((networkResponse) => {
-            if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
-                const responseToCache = networkResponse.clone();
-                caches.open(CACHE_NAME).then((cache) => cache.put(req, responseToCache));
-            }
-            return networkResponse;
-        }).catch(() => {
-            return caches.match(req).then((cachedResponse) => {
-                if (cachedResponse) return cachedResponse;
-                if (req.headers.get('accept')?.includes('text/html')) {
-                    return caches.match('./inicio.html') || caches.match('./login.html');
+        caches.match(event.request)
+            .then((cachedResponse) => {
+                if (cachedResponse) {
+                    return cachedResponse;
                 }
-            });
-        })
-    );
-});
-
-// Evento Push para Notificaciones PWA
-self.addEventListener('push', (event) => {
-    let payload = { title: 'CRECER', body: 'Tienes una nueva notificación académica.' };
-    if (event.data) {
-        try {
-            payload = event.data.json();
-        } catch (e) {
-            payload.body = event.data.text();
-        }
-    }
-
-    const options = {
-        body: payload.body,
-        icon: 'img/logo.png',
-        badge: 'img/logo.png',
-        vibrate: [100, 50, 100],
-        data: {
-            url: payload.url || 'inicio.html'
-        }
-    };
-
-    event.waitUntil(
-        self.registration.showNotification(payload.title || 'CRECER', options)
-    );
-});
-
-// Apertura de la app al hacer clic en la notificación
-self.addEventListener('notificationclick', (event) => {
-    event.notification.close();
-    const targetUrl = event.notification.data?.url || 'inicio.html';
-
-    event.waitUntil(
-        clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
-            for (let client of windowClients) {
-                if (client.url.includes(targetUrl) && 'focus' in client) {
-                    return client.focus();
-                }
-            }
-            if (clients.openWindow) {
-                return clients.openWindow(targetUrl);
-            }
-        })
+                return fetch(event.request).catch(() => {
+                    // Si falla la red y no está en caché, evitamos el pantallazo de error devuelto por la promesa
+                    if (event.request.headers.get('accept').includes('text/html')) {
+                        return caches.match('/bienvenida.html');
+                    }
+                });
+            })
     );
 });
