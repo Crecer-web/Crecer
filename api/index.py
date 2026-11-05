@@ -1,16 +1,17 @@
 # =================================================================
-# BACKEND API - PLATAFORMA CRECER (FLASK & FIREBASE REST & SMTP)
+# BACKEND API - PLATAFORMA CRECER (FLASK & FIREBASE ADMIN & SMTP)
 # =================================================================
 
 import os
 import time
 import smtplib
-import requests
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
+import firebase_admin
+from firebase_admin import credentials, auth
 
 # Carga las variables de entorno locales si existe el archivo .env en desarrollo
 if os.path.exists('.env'):
@@ -18,6 +19,19 @@ if os.path.exists('.env'):
 
 app = Flask(__name__)
 CORS(app)  # Habilita el intercambio de recursos de origen cruzado para desarrollo local
+
+# Inicialización segura de Firebase Admin SDK
+if not firebase_admin._apps:
+    try:
+        cred_path = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', 'serviceAccountKey.json')
+        if os.path.exists(cred_path):
+            cred = credentials.Certificate(cred_path)
+            firebase_admin.initialize_app(cred)
+        else:
+            # Inicialización por defecto usando variables de entorno o credenciales predeterminadas
+            firebase_admin.initialize_app()
+    except Exception as e:
+        print(f"[Error Inicialización Firebase Admin]: {e}")
 
 # Credenciales y configuraciones iniciales del servidor SMTP de Gmail
 SMTP_SERVER = "smtp.gmail.com"
@@ -28,15 +42,15 @@ def home():
     return jsonify({
         "status": "online",
         "system": "Plataforma CRECER Backend",
-        "version": "2.5.0"
+        "version": "2.6.0"
     })
 
 @app.route('/api/send-reset-email', methods=['POST'])
 def send_reset_email():
     """
     Endpoint principal para gestionar el restablecimiento de credenciales.
-    Se comunica con la REST API de Google Firebase para generar el enlace con el oobCode único
-    y utiliza Gmail SMTP para enviar un correo con diseño corporativo avanzado y enlace dinámico seguro.
+    Utiliza Firebase Admin SDK para generar el enlace oficial con el oobCode único
+    y utiliza Gmail SMTP para enviar un correo con diseño corporativo avanzado.
     """
     try:
         data = request.get_json()
@@ -49,49 +63,32 @@ def send_reset_email():
         if not user_email:
             return jsonify({'error': 'El campo de correo electrónico es obligatorio'}), 400
 
-        # Credenciales SMTP personales y clave API obtenidas de las variables de entorno
+        # Credenciales SMTP personales obtenidas de las variables de entorno
         sender_email = os.environ.get('EMAIL_USER')
         sender_password = os.environ.get('EMAIL_PASS')
-        firebase_api_key = os.environ.get('FIREBASE_API_KEY')
 
         if not sender_email or not sender_password:
             return jsonify({'error': 'Faltan configurar las credenciales de correo (EMAIL_USER / EMAIL_PASS)'}), 500
 
-        if not firebase_api_key:
-            return jsonify({'error': 'Falta configurar la clave de API de Firebase (FIREBASE_API_KEY)'}), 500
-
         # Definir la URL de redirección base según el entorno de ejecución (Local vs Vercel)
         base_url = 'http://127.0.0.1:5500/reset-password.html' if is_local else 'https://crecer-jet.vercel.app/reset-password.html'
 
-        # Petición oficial a la REST API de Firebase Auth para generar el enlace con el oobCode
-        firebase_url = f"https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key={firebase_api_key}"
-        payload = {
-            "requestType": "PASSWORD_RESET",
-            "email": user_email,
-            "continueUrl": base_url,
-            "canHandleCodeInApp": True
-        }
+        # Configuración de ActionCodeSettings para Firebase Auth
+        action_code_settings = auth.ActionCodeSettings(
+            url=base_url,
+            handleCodeInApp=True
+        )
 
-        firebase_response = requests.post(firebase_url, json=payload)
-        
-        if firebase_response.status_code != 200:
-            error_data = firebase_response.json()
-            error_message = error_data.get('error', {}).get('message', 'Error desconocido al procesar con Firebase')
-            print(f"[Error Firebase Auth]: {error_message}")
-            return jsonify({'error': f'Firebase rechazó la solicitud: {error_message}'}), 400
-
-        # Procesar la respuesta de Firebase para extraer el enlace oficial con el oobCode
-        firebase_data = firebase_response.json()
-        oob_link = firebase_data.get('oobLink')
+        try:
+            # Generación oficial del link de restablecimiento con Firebase Admin SDK (incluye el oobCode)
+            link_firebase = auth.generate_password_reset_link(user_email, action_code_settings)
+        except Exception as fb_error:
+            print(f"[Error Firebase Admin Auth]: {fb_error}")
+            return jsonify({'error': f'No se pudo generar el enlace en Firebase: {str(fb_error)}'}), 400
 
         # Inyección de marca temporal (tstamp) para controlar la caducidad estricta de 10 minutos
         timestamp_actual = int(time.time() * 1000)
-        
-        if oob_link:
-            enlace_con_tiempo = f"{oob_link}&tstamp={timestamp_actual}"
-        else:
-            # Fallback de seguridad por si la respuesta no trae oobLink directo
-            enlace_con_tiempo = f"{base_url}?tstamp={timestamp_actual}"
+        enlace_con_tiempo = f"{link_firebase}&tstamp={timestamp_actual}"
 
         # Construcción avanzada del mensaje HTML corporativo para el correo electrónico
         msg = MIMEMultipart("alternative")
@@ -148,7 +145,7 @@ def send_reset_email():
         server.sendmail(sender_email, user_email, msg.as_string())
         server.quit()
         
-        print(f"[CRECER Success]: Correo de recuperación enviado con éxito a {user_email}")
+        print(f"[CRECER Success]: Correo de recuperación con oobCode enviado con éxito a {user_email}")
         return jsonify({'message': 'Correo de recuperación con enlace seguro enviado con éxito'}), 200
 
     except Exception as e:
