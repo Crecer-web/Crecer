@@ -1,4 +1,9 @@
+# =================================================================
+# BACKEND API - PLATAFORMA CRECER (FLASK & FIREBASE REST & SMTP)
+# =================================================================
+
 import os
+import time
 import smtplib
 import requests
 from email.mime.text import MIMEText
@@ -7,23 +12,31 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
 
-# Carga las variables de entorno locales si existe el archivo .env
+# Carga las variables de entorno locales si existe el archivo .env en desarrollo
 if os.path.exists('.env'):
     load_dotenv()
 
 app = Flask(__name__)
 CORS(app)  # Habilita el intercambio de recursos de origen cruzado para desarrollo local
 
-# Credenciales y configuraciones iniciales del servidor
+# Credenciales y configuraciones iniciales del servidor SMTP de Gmail
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
+
+@app.route('/')
+def home():
+    return jsonify({
+        "status": "online",
+        "system": "Plataforma CRECER Backend",
+        "version": "2.5.0"
+    })
 
 @app.route('/api/send-reset-email', methods=['POST'])
 def send_reset_email():
     """
     Endpoint principal para gestionar el restablecimiento de credenciales.
-    Se comunica con Google Firebase para generar el enlace con el oobCode único
-    y utiliza Gmail SMTP para enviar un correo con diseño corporativo avanzado.
+    Se comunica con la REST API de Google Firebase para generar el enlace con el oobCode único
+    y utiliza Gmail SMTP para enviar un correo con diseño corporativo avanzado y enlace dinámico seguro.
     """
     try:
         data = request.get_json()
@@ -36,7 +49,7 @@ def send_reset_email():
         if not user_email:
             return jsonify({'error': 'El campo de correo electrónico es obligatorio'}), 400
 
-        # Credenciales SMTP personales obtenidas de las variables de entorno
+        # Credenciales SMTP personales y clave API obtenidas de las variables de entorno
         sender_email = os.environ.get('EMAIL_USER')
         sender_password = os.environ.get('EMAIL_PASS')
         firebase_api_key = os.environ.get('FIREBASE_API_KEY')
@@ -47,7 +60,7 @@ def send_reset_email():
         if not firebase_api_key:
             return jsonify({'error': 'Falta configurar la clave de API de Firebase (FIREBASE_API_KEY)'}), 500
 
-        # Definir la URL de redirección según el entorno de ejecución
+        # Definir la URL de redirección base según el entorno de ejecución (Local vs Vercel)
         base_url = 'http://127.0.0.1:5500/reset-password.html' if is_local else 'https://crecer-jet.vercel.app/reset-password.html'
 
         # Petición oficial a la REST API de Firebase Auth para generar el enlace con el oobCode
@@ -66,6 +79,19 @@ def send_reset_email():
             error_message = error_data.get('error', {}).get('message', 'Error desconocido al procesar con Firebase')
             print(f"[Error Firebase Auth]: {error_message}")
             return jsonify({'error': f'Firebase rechazó la solicitud: {error_message}'}), 400
+
+        # Procesar la respuesta de Firebase para extraer el enlace oficial con el oobCode
+        firebase_data = firebase_response.json()
+        oob_link = firebase_data.get('oobLink')
+
+        # Inyección de marca temporal (tstamp) para controlar la caducidad estricta de 10 minutos
+        timestamp_actual = int(time.time() * 1000)
+        
+        if oob_link:
+            enlace_con_tiempo = f"{oob_link}&tstamp={timestamp_actual}"
+        else:
+            # Fallback de seguridad por si la respuesta no trae oobLink directo
+            enlace_con_tiempo = f"{base_url}?tstamp={timestamp_actual}"
 
         # Construcción avanzada del mensaje HTML corporativo para el correo electrónico
         msg = MIMEMultipart("alternative")
@@ -98,9 +124,9 @@ def send_reset_email():
                     <div class="email-body">
                         <p style="margin-top: 0;">Estimado usuario,</p>
                         <p>Hemos recibido una solicitud para restablecer la contraseña asociada a tu cuenta en la plataforma de gestión académica.</p>
-                        <p>Para proceder con el cambio seguro de tus credenciales, haz clic en el siguiente botón:</p>
+                        <p>Para proceder con el cambio seguro de tus credenciales, haz clic en el siguiente botón (válido por 10 minutos):</p>
                         <div class="btn-container">
-                            <a href="{base_url}" class="btn-reset" target="_blank">Establecer Nueva Contraseña</a>
+                            <a href="{enlace_con_tiempo}" class="btn-reset" target="_blank">Establecer Nueva Contraseña</a>
                         </div>
                         <p style="font-size: 14px; color: #6b7280;">Si tú no realizaste esta solicitud, puedes ignorar este mensaje con total seguridad; tu cuenta se mantendrá protegida.</p>
                     </div>
@@ -122,6 +148,7 @@ def send_reset_email():
         server.sendmail(sender_email, user_email, msg.as_string())
         server.quit()
         
+        print(f"[CRECER Success]: Correo de recuperación enviado con éxito a {user_email}")
         return jsonify({'message': 'Correo de recuperación con enlace seguro enviado con éxito'}), 200
 
     except Exception as e:

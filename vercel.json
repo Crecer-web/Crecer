@@ -6,15 +6,29 @@
       "destination": "/api/index.py"
     },
     {
-      "source": "/",
-      "destination": "/bienvenida.html"
-    },
-    {
       "source": "/((?!api/).*)",
       "destination": "/$1"
     }
   ],
   "headers": [
+    {
+      "source": "/css/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/js/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
     {
       "source": "/sw.js",
       "headers": [
