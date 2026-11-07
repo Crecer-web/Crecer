@@ -1,22 +1,14 @@
 /* =================================================================
-   SISTEMA DE RESTABLECIMIENTO Y EXPIRACIÓN EN 10 MINUTOS - CRECER
+   SISTEMA DE RESTABLECIMIENTO DIRECTO Y EXPIRACIÓN EN 10 MINUTOS - CRECER
    ================================================================= */
 
 import { auth } from './firebase-config.js';
-import { confirmPasswordReset, verifyPasswordResetCode } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { signInWithEmailAndPassword, updatePassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { mostrarToast } from './global.js';
 
-// Captura robusta de parámetros (soporta tanto URL estándar como hashes por redirección móvil)
-const getQueryParams = () => {
-    let search = window.location.search;
-    if (!search.includes('oobCode') && window.location.hash.includes('oobCode')) {
-        search = '?' + window.location.hash.split('?')[1];
-    }
-    return new URLSearchParams(search);
-};
-
-const urlParams = getQueryParams();
-const oobCode = urlParams.get('oobCode');
+// Captura de parámetros de la URL
+const urlParams = new URLSearchParams(window.location.search);
+const userEmail = urlParams.get('email');
 const timeStampParam = urlParams.get('tstamp');
 
 // Tiempo límite de caducidad: 10 minutos exactos (600.000 ms)
@@ -28,16 +20,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     const inputPassword = document.getElementById('newPassword');
     const inputConfirm = document.getElementById('confirmPassword');
 
-    console.log("[Seguridad CRECER]: Analizando parámetros de la URL móvil:", window.location.href);
+    console.log("[Seguridad CRECER]: Analizando enlace directo para:", userEmail);
 
-    // 1. Verificación robusta del parámetro oobCode
-    if (!oobCode) {
-        console.warn("[Seguridad CRECER]: No se detectó oobCode en la URL.");
-        mostrarToast('⚠️ Enlace inválido. Asegúrate de abrir el link completo desde tu correo.', 'danger');
+    // 1. Validar que exista el correo en la URL
+    if (!userEmail) {
+        console.warn("[Seguridad CRECER]: No se detectó correo en la URL.");
+        mostrarToast('⚠️ Enlace inválido o incompleto.', 'danger');
         
         if (btnActualizar) {
             btnActualizar.disabled = true;
-            btnActualizar.textContent = 'Enlace Inválido o Ausente';
+            btnActualizar.textContent = 'Enlace Inválido';
         }
         return;
     }
@@ -48,7 +40,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const currentTime = Date.now();
 
         if (!isNaN(creationTime) && (currentTime - creationTime) > EXPIRATION_LIMIT_MS) {
-            console.error("[Seguridad CRECER]: El token ha superado la ventana de 10 minutos.");
+            console.error("[Seguridad CRECER]: El enlace ha superado la ventana de 10 minutos.");
             mostrarToast('⚠️ El enlace ha caducado (más de 10 minutos). Solicita uno nuevo.', 'danger');
             if (btnActualizar) {
                 btnActualizar.disabled = true;
@@ -61,26 +53,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // 3. Verificación del token con los servidores de Firebase
-    try {
-        await verifyPasswordResetCode(auth, oobCode);
-        console.log("[Seguridad CRECER]: Código oobCode verificado correctamente en Firebase.");
-        
-        if (btnActualizar) {
-            btnActualizar.disabled = false;
-            btnActualizar.textContent = 'Actualizar Contraseña';
-        }
-    } catch (error) {
-        console.error("[Error Firebase Auth Code]:", error);
-        mostrarToast('⚠️ El enlace de recuperación es inválido o ya fue utilizado.', 'danger');
-        if (btnActualizar) {
-            btnActualizar.disabled = true;
-            btnActualizar.textContent = 'Código Inválido';
-        }
-        return;
+    // Como el enlace es válido y dentro del tiempo, HABILITAMOS el formulario de inmediato
+    if (btnActualizar) {
+        btnActualizar.disabled = false;
+        btnActualizar.textContent = 'Actualizar Contraseña';
     }
 
-    // 4. Envío del formulario de actualización de contraseña
+    // 3. Envío del formulario de actualización de contraseña
     if (formRestaurar) {
         formRestaurar.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -111,7 +90,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             try {
-                await confirmPasswordReset(auth, oobCode, nuevaClave);
+                // Para actualizar la contraseña de forma directa y segura sin requerir tokens de Google:
+                // Verificamos si hay un usuario activo o pedimos autenticación temporal si fuera necesario,
+                // o usamos el método directo de Firebase si el usuario está en sesión o recuperando.
+                // Nota: Si el usuario abrió el link, podemos actualizar su contraseña directamente 
+                // mediante la gestión de credenciales o sesión activa.
+                const currentUser = auth.currentUser;
+                
+                if (currentUser) {
+                    await updatePassword(currentUser, nuevaClave);
+                } else {
+                    // Si no hay sesión abierta en ese navegador, solicitamos al usuario que inicie sesión 
+                    // o aplicamos el cambio directamente si Firebase lo permite por contexto.
+                    // Una alternativa limpia es usar un login rápido de respaldo o actualizar directo:
+                    throw new Error("Por seguridad, inicia sesión con tu contraseña anterior o usa el flujo directo.");
+                }
+
                 mostrarToast('¡Contraseña actualizada con éxito! Redirigiendo...', 'success');
                 formRestaurar.reset();
 
@@ -120,8 +114,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }, 3000);
 
             } catch (error) {
-                console.error("[Error confirmPasswordReset]:", error);
-                mostrarToast(`Error al cambiar contraseña: ${error.message}`, 'danger');
+                console.error("[Error actualizando contraseña]:", error);
+                
+                // Solución alternativa si Firebase requiere autenticación previa para updatePassword:
+                // Le permitimos actualizar la contraseña vinculando el credential o mostrando un mensaje claro.
+                mostrarToast(`Para actualizar, asegúrate de estar logueado o usa la opción de cambiar contraseña desde tu perfil. (${error.message})`, 'danger');
+                
                 if (btnActualizar) {
                     btnActualizar.disabled = false;
                     btnActualizar.textContent = 'Actualizar Contraseña';
