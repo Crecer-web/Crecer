@@ -9,7 +9,6 @@ import { mostrarToast } from './global.js';
 // Captura robusta de parámetros (soporta tanto URL estándar como hashes por redirección móvil)
 const getQueryParams = () => {
     let search = window.location.search;
-    // Si el navegador móvil o Gmail metió un hash o redireccionó extraño, buscar en el hash
     if (!search.includes('oobCode') && window.location.hash.includes('oobCode')) {
         search = '?' + window.location.hash.split('?')[1];
     }
@@ -67,7 +66,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         await verifyPasswordResetCode(auth, oobCode);
         console.log("[Seguridad CRECER]: Código oobCode verificado correctamente en Firebase.");
         
-        // Si pasa la verificación, habilitamos el botón por completo
         if (btnActualizar) {
             btnActualizar.disabled = false;
             btnActualizar.textContent = 'Actualizar Contraseña';
