@@ -3,6 +3,7 @@
 # =================================================================
 
 import os
+import time
 import smtplib
 import requests
 from email.mime.text import MIMEText
@@ -25,7 +26,7 @@ def home():
     return jsonify({
         "status": "online",
         "system": "Plataforma CRECER Backend",
-        "version": "3.2.0"
+        "version": "3.3.0"
     })
 
 @app.route('/api/send-reset-email', methods=['POST'])
@@ -54,7 +55,7 @@ def send_reset_email():
         # URL de redirección base según el entorno
         base_url = 'http://127.0.0.1:5500/reset-password.html' if is_local else 'https://crecer-jet.vercel.app/reset-password.html'
 
-        # Petición a la REST API de Firebase Auth para generar el enlace de recuperación
+        # Petición a la REST API de Firebase Auth para obtener el enlace oficial
         firebase_url = f"https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key={firebase_api_key}"
         payload = {
             "requestType": "PASSWORD_RESET",
@@ -71,8 +72,73 @@ def send_reset_email():
             print(f"[Error Firebase Auth]: {error_message}")
             return jsonify({'error': f'Firebase rechazó la solicitud: {error_message}'}), 400
 
-        print(f"[CRECER Success]: Correo de recuperación procesado para {user_email}")
-        return jsonify({'message': 'Correo de recuperación enviado con éxito'}), 200
+        firebase_data = firebase_response.json()
+        oob_link = firebase_data.get('oobLink')
+
+        # Marca temporal (tstamp) para controlar la caducidad de 10 minutos
+        timestamp_actual = int(time.time() * 1000)
+        
+        if oob_link:
+            enlace_con_tiempo = f"{oob_link}&tstamp={timestamp_actual}"
+        else:
+            enlace_con_tiempo = f"{base_url}?tstamp={timestamp_actual}"
+
+        # Construcción del mensaje HTML corporativo para que llegue a la bandeja principal con diseño
+        msg = MIMEMultipart("alternative")
+        msg['Subject'] = "CRECER - Sistema de Recuperación y Seguridad Académica"
+        msg['From'] = f"Plataforma CRECER <{sender_email}>"
+        msg['To'] = user_email
+
+        html_content = f"""
+        <!DOCTYPE html>
+        <html lang="es">
+        <head>
+            <meta charset="UTF-8">
+            <style>
+                body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; margin: 0; padding: 0; }}
+                .email-wrapper {{ width: 100%; table-layout: fixed; background-color: #f3f4f6; padding: 40px 0; }}
+                .email-content {{ max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }}
+                .email-header {{ background-color: #4f46e5; color: #ffffff; padding: 24px; text-align: center; }}
+                .email-body {{ padding: 32px; color: #374151; line-height: 1.6; }}
+                .btn-container {{ text-align: center; margin: 32px 0; }}
+                .btn-reset {{ background-color: #4f46e5; color: #ffffff !important; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; box-shadow: 0 2px 4px rgba(79, 70, 229,.3); }}
+                .email-footer {{ background-color: #f9fafb; padding: 20px; text-align: center; font-size: 12px; color: #9ca3af; border-top: 1px solid #e5e7eb; }}
+            </style>
+        </head>
+        <body>
+            <div class="email-wrapper">
+                <div class="email-content">
+                    <div class="email-header">
+                        <h2 style="margin: 0; font-size: 22px;">Plataforma Académica CRECER</h2>
+                    </div>
+                    <div class="email-body">
+                        <p style="margin-top: 0;">Estimado usuario,</p>
+                        <p>Hemos recibido una solicitud para restablecer la contraseña asociada a tu cuenta en la plataforma de gestión académica.</p>
+                        <p>Para proceder con el cambio seguro de tus credenciales, haz clic en el siguiente botón (válido por 10 minutos):</p>
+                        <div class="btn-container">
+                            <a href="{enlace_con_tiempo}" class="btn-reset" target="_blank">Establecer Nueva Contraseña</a>
+                        </div>
+                        <p style="font-size: 14px; color: #6b7280;">Si tú no realizaste esta solicitud, puedes ignorar este mensaje con total seguridad.</p>
+                    </div>
+                    <div class="email-footer">
+                        <p style="margin: 0;">Proyecto de Tesina - Sexto Año | Sistema CRECER</p>
+                    </div>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        msg.attach(MIMEText(html_content, "html"))
+
+        # Envío seguro mediante SMTP de Gmail (evita que caiga en spam al ir autenticado con tu app password)
+        server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+        server.starttls()
+        server.login(sender_email, sender_password)
+        server.sendmail(sender_email, user_email, msg.as_string())
+        server.quit()
+
+        print(f"[CRECER Success]: Correo corporativo enviado con éxito a {user_email}")
+        return jsonify({'message': 'Correo de recuperación con diseño enviado con éxito'}), 200
 
     except Exception as e:
         print(f"[Error Crítico en Backend CRECER]: {str(e)}")
