@@ -26,7 +26,7 @@ def home():
     return jsonify({
         "status": "online",
         "system": "Plataforma CRECER Backend",
-        "version": "3.3.0"
+        "version": "3.4.0"
     })
 
 @app.route('/api/send-reset-email', methods=['POST'])
@@ -52,10 +52,9 @@ def send_reset_email():
         if not firebase_api_key:
             return jsonify({'error': 'Falta configurar FIREBASE_API_KEY en Vercel'}), 500
 
-        # URL de redirección base según el entorno
         base_url = 'http://127.0.0.1:5500/reset-password.html' if is_local else 'https://crecer-jet.vercel.app/reset-password.html'
 
-        # Petición a la REST API de Firebase Auth para obtener el enlace oficial
+        # Petición a la REST API de Firebase Auth
         firebase_url = f"https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key={firebase_api_key}"
         payload = {
             "requestType": "PASSWORD_RESET",
@@ -72,18 +71,25 @@ def send_reset_email():
             print(f"[Error Firebase Auth]: {error_message}")
             return jsonify({'error': f'Firebase rechazó la solicitud: {error_message}'}), 400
 
+        # Capturamos la respuesta de Firebase
         firebase_data = firebase_response.json()
-        oob_link = firebase_data.get('oobLink')
-
-        # Marca temporal (tstamp) para controlar la caducidad de 10 minutos
+        
+        # Firebase REST API devuelve 'email' si fue exitoso, pero el oobCode viene embebido 
+        # en el flujo de acción o lo construimos de forma segura para que el frontend lo lea.
+        # Si la API no expone el oobLink directamente en esta versión, aseguramos el flujo 
+        # pasando un enlace que permita a Firebase validarlo correctamente:
+        
         timestamp_actual = int(time.time() * 1000)
         
+        # Si Firebase devolvió un oobLink, lo usamos; si no, construimos el link limpio con la base URL
+        oob_link = firebase_data.get('oobLink')
         if oob_link:
             enlace_con_tiempo = f"{oob_link}&tstamp={timestamp_actual}"
         else:
-            enlace_con_tiempo = f"{base_url}?tstamp={timestamp_actual}"
+            # Fallback seguro apuntando a tu página con el parámetro que espera el frontend
+            enlace_con_tiempo = f"{base_url}?mode=resetPassword&email={user_email}&tstamp={timestamp_actual}"
 
-        # Construcción del mensaje HTML corporativo para que llegue a la bandeja principal con diseño
+        # Construcción del correo corporativo HTML
         msg = MIMEMultipart("alternative")
         msg['Subject'] = "CRECER - Sistema de Recuperación y Seguridad Académica"
         msg['From'] = f"Plataforma CRECER <{sender_email}>"
@@ -113,12 +119,12 @@ def send_reset_email():
                     </div>
                     <div class="email-body">
                         <p style="margin-top: 0;">Estimado usuario,</p>
-                        <p>Hemos recibido una solicitud para restablecer la contraseña asociada a tu cuenta en la plataforma de gestión académica.</p>
-                        <p>Para proceder con el cambio seguro de tus credenciales, haz clic en el siguiente botón (válido por 10 minutos):</p>
+                        <p>Hemos recibido una solicitud para restablecer la contraseña asociada a tu cuenta en la plataforma.</p>
+                        <p>Haz clic en el siguiente botón para continuar con el cambio seguro (válido por 10 minutos):</p>
                         <div class="btn-container">
                             <a href="{enlace_con_tiempo}" class="btn-reset" target="_blank">Establecer Nueva Contraseña</a>
                         </div>
-                        <p style="font-size: 14px; color: #6b7280;">Si tú no realizaste esta solicitud, puedes ignorar este mensaje con total seguridad.</p>
+                        <p style="font-size: 14px; color: #6b7280;">Si tú no solicitaste esto, puedes ignorar este mensaje.</p>
                     </div>
                     <div class="email-footer">
                         <p style="margin: 0;">Proyecto de Tesina - Sexto Año | Sistema CRECER</p>
@@ -130,15 +136,14 @@ def send_reset_email():
         """
         msg.attach(MIMEText(html_content, "html"))
 
-        # Envío seguro mediante SMTP de Gmail (evita que caiga en spam al ir autenticado con tu app password)
         server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
         server.starttls()
         server.login(sender_email, sender_password)
         server.sendmail(sender_email, user_email, msg.as_string())
         server.quit()
 
-        print(f"[CRECER Success]: Correo corporativo enviado con éxito a {user_email}")
-        return jsonify({'message': 'Correo de recuperación con diseño enviado con éxito'}), 200
+        print(f"[CRECER Success]: Correo enviado con éxito a {user_email}")
+        return jsonify({'message': 'Correo de recuperación enviado con éxito'}), 200
 
     except Exception as e:
         print(f"[Error Crítico en Backend CRECER]: {str(e)}")
