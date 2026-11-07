@@ -1,22 +1,50 @@
 # =================================================================
-# BACKEND API - PLATAFORMA CRECER (FLASK & FIREBASE REST & SMTP)
+# BACKEND API - PLATAFORMA CRECER (FLASK & FIREBASE ADMIN & SMTP)
 # =================================================================
 
 import os
 import time
 import smtplib
-import requests
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
+import firebase_admin
+from firebase_admin import credentials, auth
 
 if os.path.exists('.env'):
     load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
+
+# Inicialización ultrarrobusta de Firebase Admin para evitar cualquier fallo en Vercel
+if not firebase_admin._apps:
+    try:
+        private_key = os.environ.get('FIREBASE_PRIVATE_KEY')
+        client_email = os.environ.get('FIREBASE_CLIENT_EMAIL')
+        project_id = os.environ.get('FIREBASE_PROJECT_ID')
+        
+        if private_key and client_email and project_id:
+            # Reparación automática de saltos de línea en Vercel
+            formatted_key = private_key.strip('"\'')
+            if '\\n' in formatted_key:
+                formatted_key = formatted_key.replace('\\n', '\n')
+            
+            cert_dict = {
+                "type": "service_account",
+                "project_id": project_id.strip('"\''),
+                "private_key": formatted_key,
+                "client_email": client_email.strip('"\''),
+            }
+            cred = credentials.Certificate(cert_dict)
+            firebase_admin.initialize_app(cred)
+            print("[Firebase Admin]: Inicializado correctamente.")
+        else:
+            firebase_admin.initialize_app()
+    except Exception as e:
+        print(f"[Error Init Firebase]: {str(e)}")
 
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
@@ -26,7 +54,7 @@ def home():
     return jsonify({
         "status": "online",
         "system": "Plataforma CRECER Backend",
-        "version": "3.4.0"
+        "version": "3.5.0"
     })
 
 @app.route('/api/send-reset-email', methods=['POST'])
@@ -34,62 +62,36 @@ def send_reset_email():
     try:
         data = request.get_json()
         if not data:
-            return jsonify({'error': 'No se recibieron datos JSON válidos'}), 400
+            return jsonify({'error': 'No se recibieron datos JSON'}), 400
 
         user_email = data.get('email')
         is_local = data.get('is_local', False)
 
         if not user_email:
-            return jsonify({'error': 'El correo electrónico es obligatorio'}), 400
+            return jsonify({'error': 'El correo es obligatorio'}), 400
 
         sender_email = os.environ.get('EMAIL_USER')
         sender_password = os.environ.get('EMAIL_PASS')
-        firebase_api_key = os.environ.get('FIREBASE_API_KEY')
 
         if not sender_email or not sender_password:
             return jsonify({'error': 'Faltan credenciales de correo en Vercel'}), 500
 
-        if not firebase_api_key:
-            return jsonify({'error': 'Falta configurar FIREBASE_API_KEY en Vercel'}), 500
-
         base_url = 'http://127.0.0.1:5500/reset-password.html' if is_local else 'https://crecer-jet.vercel.app/reset-password.html'
 
-        # Petición a la REST API de Firebase Auth
-        firebase_url = f"https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key={firebase_api_key}"
-        payload = {
-            "requestType": "PASSWORD_RESET",
-            "email": user_email,
-            "continueUrl": base_url,
-            "canHandleCodeInApp": True
-        }
+        # Generación oficial del enlace con el oobCode real de Firebase
+        try:
+            action_code_settings = auth.ActionCodeSettings(
+                url=base_url,
+                handleCodeInApp=True
+            )
+            link_firebase = auth.generate_password_reset_link(user_email, action_code_settings)
+        except Exception as fb_error:
+            return jsonify({'error': f'Error generando enlace en Firebase: {str(fb_error)}'}), 400
 
-        firebase_response = requests.post(firebase_url, json=payload)
-        
-        if firebase_response.status_code != 200:
-            error_data = firebase_response.json()
-            error_message = error_data.get('error', {}).get('message', 'Error desconocido en Firebase')
-            print(f"[Error Firebase Auth]: {error_message}")
-            return jsonify({'error': f'Firebase rechazó la solicitud: {error_message}'}), 400
-
-        # Capturamos la respuesta de Firebase
-        firebase_data = firebase_response.json()
-        
-        # Firebase REST API devuelve 'email' si fue exitoso, pero el oobCode viene embebido 
-        # en el flujo de acción o lo construimos de forma segura para que el frontend lo lea.
-        # Si la API no expone el oobLink directamente en esta versión, aseguramos el flujo 
-        # pasando un enlace que permita a Firebase validarlo correctamente:
-        
         timestamp_actual = int(time.time() * 1000)
-        
-        # Si Firebase devolvió un oobLink, lo usamos; si no, construimos el link limpio con la base URL
-        oob_link = firebase_data.get('oobLink')
-        if oob_link:
-            enlace_con_tiempo = f"{oob_link}&tstamp={timestamp_actual}"
-        else:
-            # Fallback seguro apuntando a tu página con el parámetro que espera el frontend
-            enlace_con_tiempo = f"{base_url}?mode=resetPassword&email={user_email}&tstamp={timestamp_actual}"
+        enlace_con_tiempo = f"{link_firebase}&tstamp={timestamp_actual}"
 
-        # Construcción del correo corporativo HTML
+        # Construcción del correo corporativo con diseño y el oobCode incluido
         msg = MIMEMultipart("alternative")
         msg['Subject'] = "CRECER - Sistema de Recuperación y Seguridad Académica"
         msg['From'] = f"Plataforma CRECER <{sender_email}>"
@@ -119,8 +121,8 @@ def send_reset_email():
                     </div>
                     <div class="email-body">
                         <p style="margin-top: 0;">Estimado usuario,</p>
-                        <p>Hemos recibido una solicitud para restablecer la contraseña asociada a tu cuenta en la plataforma.</p>
-                        <p>Haz clic en el siguiente botón para continuar con el cambio seguro (válido por 10 minutos):</p>
+                        <p>Hemos recibido una solicitud para restablecer la contraseña de tu cuenta.</p>
+                        <p>Haz clic en el siguiente botón para establecer tus nuevas credenciales (enlace válido por 10 minutos):</p>
                         <div class="btn-container">
                             <a href="{enlace_con_tiempo}" class="btn-reset" target="_blank">Establecer Nueva Contraseña</a>
                         </div>
@@ -136,18 +138,17 @@ def send_reset_email():
         """
         msg.attach(MIMEText(html_content, "html"))
 
+        # Envío seguro por SMTP de Gmail para evitar spam y mantener bandeja principal
         server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
         server.starttls()
         server.login(sender_email, sender_password)
         server.sendmail(sender_email, user_email, msg.as_string())
         server.quit()
 
-        print(f"[CRECER Success]: Correo enviado con éxito a {user_email}")
-        return jsonify({'message': 'Correo de recuperación enviado con éxito'}), 200
+        return jsonify({'message': 'Correo enviado con éxito'}), 200
 
     except Exception as e:
-        print(f"[Error Crítico en Backend CRECER]: {str(e)}")
-        return jsonify({'error': f'Error interno del servidor: {str(e)}'}), 500
+        return jsonify({'error': f'Error interno: {str(e)}'}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
