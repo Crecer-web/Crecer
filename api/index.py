@@ -18,20 +18,43 @@ if os.path.exists('.env'):
     load_dotenv()
 
 app = Flask(__name__)
-CORS(app)  # Habilita el intercambio de recursos de origen cruzado para desarrollo local
+CORS(app)  # Habilita el intercambio de recursos de origen cruzado
 
-# Inicialización segura de Firebase Admin SDK
+# =================================================================
+# INICIALIZACIÓN BLINDADA DE FIREBASE ADMIN SDK (LOCAL Y VERCEL)
+# =================================================================
 if not firebase_admin._apps:
     try:
         cred_path = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', 'serviceAccountKey.json')
+        
         if os.path.exists(cred_path):
+            # Inicialización local mediante archivo físico de clave privada
             cred = credentials.Certificate(cred_path)
             firebase_admin.initialize_app(cred)
+            print("[Firebase Admin]: Inicializado correctamente con archivo local.")
         else:
-            # Inicialización por defecto usando variables de entorno o credenciales predeterminadas
-            firebase_admin.initialize_app()
+            # Inicialización en producción (Vercel) mediante variables de entorno individuales
+            private_key = os.environ.get('FIREBASE_PRIVATE_KEY')
+            client_email = os.environ.get('FIREBASE_CLIENT_EMAIL')
+            project_id = os.environ.get('FIREBASE_PROJECT_ID')
+            
+            if private_key and client_email and project_id:
+                formatted_key = private_key.replace('\\n', '\n')
+                cert_dict = {
+                    "type": "service_account",
+                    "project_id": project_id,
+                    "private_key": formatted_key,
+                    "client_email": client_email,
+                }
+                cred = credentials.Certificate(cert_dict)
+                firebase_admin.initialize_app(cred)
+                print("[Firebase Admin]: Inicializado correctamente con variables de entorno en Vercel.")
+            else:
+                # Inicialización por defecto de respaldo
+                firebase_admin.initialize_app()
+                print("[Firebase Admin]: Inicializado con credenciales por defecto del sistema.")
     except Exception as e:
-        print(f"[Error Inicialización Firebase Admin]: {e}")
+        print(f"[Error Crítico en Inicialización Firebase Admin]: {e}")
 
 # Credenciales y configuraciones iniciales del servidor SMTP de Gmail
 SMTP_SERVER = "smtp.gmail.com"
@@ -41,16 +64,16 @@ SMTP_PORT = 587
 def home():
     return jsonify({
         "status": "online",
-        "system": "Plataforma CRECER Backend",
-        "version": "2.6.0"
+        "system": "Plataforma CRECER Backend - Auth Service",
+        "version": "3.0.0"
     })
 
 @app.route('/api/send-reset-email', methods=['POST'])
 def send_reset_email():
     """
     Endpoint principal para gestionar el restablecimiento de credenciales.
-    Utiliza Firebase Admin SDK para generar el enlace oficial con el oobCode único
-    y utiliza Gmail SMTP para enviar un correo con diseño corporativo avanzado.
+    Utiliza Firebase Admin SDK para generar de forma oficial el enlace con el oobCode
+    y utiliza Gmail SMTP para despachar el correo con diseño corporativo HTML avanzado.
     """
     try:
         data = request.get_json()
@@ -70,23 +93,24 @@ def send_reset_email():
         if not sender_email or not sender_password:
             return jsonify({'error': 'Faltan configurar las credenciales de correo (EMAIL_USER / EMAIL_PASS)'}), 500
 
-        # Definir la URL de redirección base según el entorno de ejecución (Local vs Vercel)
+        # Definir la URL de redirección base según el entorno de ejecución
         base_url = 'http://127.0.0.1:5500/reset-password.html' if is_local else 'https://crecer-jet.vercel.app/reset-password.html'
 
-        # Configuración de ActionCodeSettings para Firebase Auth
+        # Configuración de ActionCodeSettings requerida por Firebase Admin SDK
         action_code_settings = auth.ActionCodeSettings(
             url=base_url,
             handleCodeInApp=True
         )
 
         try:
-            # Generación oficial del link de restablecimiento con Firebase Admin SDK (incluye el oobCode)
+            # Generación oficial y segura del link de restablecimiento con el oobCode integrado
             link_firebase = auth.generate_password_reset_link(user_email, action_code_settings)
         except Exception as fb_error:
-            print(f"[Error Firebase Admin Auth]: {fb_error}")
-            return jsonify({'error': f'No se pudo generar el enlace en Firebase: {str(fb_error)}'}), 400
+            error_msg = str(fb_error)
+            print(f"[Error Firebase Admin Auth]: {error_msg}")
+            return jsonify({'error': f'Firebase rechazó la generación del enlace: {error_msg}'}), 400
 
-        # Inyección de marca temporal (tstamp) para controlar la caducidad estricta de 10 minutos
+        # Inyección de marca temporal (tstamp) para controlar la caducidad estricta de 10 minutos en el cliente
         timestamp_actual = int(time.time() * 1000)
         enlace_con_tiempo = f"{link_firebase}&tstamp={timestamp_actual}"
 
@@ -121,7 +145,7 @@ def send_reset_email():
                     <div class="email-body">
                         <p style="margin-top: 0;">Estimado usuario,</p>
                         <p>Hemos recibido una solicitud para restablecer la contraseña asociada a tu cuenta en la plataforma de gestión académica.</p>
-                        <p>Para proceder con el cambio seguro de tus credenciales, haz clic en el siguiente botón (válido por 10 minutos):</p>
+                        <p>Para proceder con el cambio seguro de tus credenciales, haz clic en el siguiente botón (enlace válido por 10 minutos):</p>
                         <div class="btn-container">
                             <a href="{enlace_con_tiempo}" class="btn-reset" target="_blank">Establecer Nueva Contraseña</a>
                         </div>
@@ -145,12 +169,13 @@ def send_reset_email():
         server.sendmail(sender_email, user_email, msg.as_string())
         server.quit()
         
-        print(f"[CRECER Success]: Correo de recuperación con oobCode enviado con éxito a {user_email}")
+        print(f"[CRECER Success]: Correo con token oobCode generado y enviado con éxito a {user_email}")
         return jsonify({'message': 'Correo de recuperación con enlace seguro enviado con éxito'}), 200
 
     except Exception as e:
-        print(f"[Error Crítico en Backend CRECER]: {str(e)}")
-        return jsonify({'error': f'Error interno del servidor al procesar el correo: {str(e)}'}), 500
+        error_general = str(e)
+        print(f"[Error Crítico en Backend CRECER]: {error_general}")
+        return jsonify({'error': f'Error interno del servidor al procesar el correo: {error_general}'}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
