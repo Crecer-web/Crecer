@@ -19,31 +19,45 @@ if os.path.exists('.env'):
 app = Flask(__name__)
 CORS(app)
 
-# Inicialización blindada de Firebase Admin para Vercel
-if not firebase_admin._apps:
+# Inicialización ultrarrobusta y segura de Firebase Admin
+def get_firebase_app():
+    if firebase_admin._apps:
+        return firebase_admin._apps.get('[DEFAULT]')
+    
     try:
-        private_key = os.environ.get('FIREBASE_PRIVATE_KEY')
-        client_email = os.environ.get('FIREBASE_CLIENT_EMAIL')
-        project_id = os.environ.get('FIREBASE_PROJECT_ID')
+        private_key = os.environ.get('FIREBASE_PRIVATE_KEY', '')
+        client_email = os.environ.get('FIREBASE_CLIENT_EMAIL', '')
+        project_id = os.environ.get('FIREBASE_PROJECT_ID', '')
+
+        if not private_key or not client_email or not project_id:
+            raise ValueError("Faltan variables de entorno de Firebase Admin en Vercel.")
+
+        # Limpieza profunda y reparación de la clave privada para Vercel
+        clean_key = private_key.strip().strip('"\'')
         
-        if private_key and client_email and project_id:
-            formatted_key = private_key.strip('"\'')
-            if '\\n' in formatted_key:
-                formatted_key = formatted_key.replace('\\n', '\n')
+        # Si la clave viene con literales '\n', los convertimos en saltos de línea reales
+        if '\\n' in clean_key:
+            clean_key = clean_key.replace('\\n', '\n')
             
-            cert_dict = {
-                "type": "service_account",
-                "project_id": project_id.strip('"\''),
-                "private_key": formatted_key,
-                "client_email": client_email.strip('"\''),
-            }
-            cred = credentials.Certificate(cert_dict)
-            firebase_admin.initialize_app(cred)
-            print("[Firebase Admin]: Inicializado con éxito.")
-        else:
-            firebase_admin.initialize_app()
+        # Asegurar que tenga las cabeceras correctas de PEM
+        if '-----BEGIN PRIVATE KEY-----' not in clean_key:
+            # Por si acaso faltaron las cabeceras al pegarla en Vercel
+            clean_key = f"-----BEGIN PRIVATE KEY-----\n{clean_key}\n-----END PRIVATE KEY-----"
+
+        cert_dict = {
+            "type": "service_account",
+            "project_id": project_id.strip('"\''),
+            "private_key": clean_key,
+            "client_email": client_email.strip('"\''),
+        }
+
+        cred = credentials.Certificate(cert_dict)
+        app_instance = firebase_admin.initialize_app(cred)
+        print("[Firebase Admin]: Inicializado correctamente.")
+        return app_instance
     except Exception as e:
-        print(f"[Error Init Firebase Admin]: {str(e)}")
+        print(f"[Error Crítico Inicializando Firebase]: {str(e)}")
+        raise e
 
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
@@ -53,12 +67,18 @@ def home():
     return jsonify({
         "status": "online",
         "system": "Plataforma CRECER Backend",
-        "version": "4.0.0"
+        "version": "4.1.0"
     })
 
 @app.route('/api/send-reset-email', methods=['POST'])
 def send_reset_email():
     try:
+        # Asegurar que Firebase esté inicializado antes de procesar
+        try:
+            get_firebase_app()
+        except Exception as init_err:
+            return jsonify({'error': f'Fallo al inicializar Firebase Admin: {str(init_err)}'}), 500
+
         data = request.get_json()
         if not data:
             return jsonify({'error': 'No se recibieron datos JSON'}), 400
@@ -73,7 +93,7 @@ def send_reset_email():
         sender_password = os.environ.get('EMAIL_PASS')
 
         if not sender_email or not sender_password:
-            return jsonify({'error': 'Faltan credenciales de correo en Vercel'}), 500
+            return jsonify({'error': 'Faltan credenciales de correo (EMAIL_USER / EMAIL_PASS) en Vercel'}), 500
 
         base_url = 'http://127.0.0.1:5500/reset-password.html' if is_local else 'https://crecer-jet.vercel.app/reset-password.html'
 
@@ -88,11 +108,9 @@ def send_reset_email():
             return jsonify({'error': f'Firebase rechazó la generación del link: {str(fb_error)}'}), 400
 
         timestamp_actual = int(time.time() * 1000)
-        
-        # Insertamos el oobCode real que viene de Firebase dentro de nuestra estructura con el timestamp
         enlace_con_tiempo = f"{link_firebase}&tstamp={timestamp_actual}"
 
-        # Construcción del correo corporativo HTML con diseño
+        # Construcción del correo corporativo HTML con diseño y el oobCode real
         msg = MIMEMultipart("alternative")
         msg['Subject'] = "CRECER - Sistema de Recuperación y Seguridad Académica"
         msg['From'] = f"Plataforma CRECER <{sender_email}>"
@@ -148,6 +166,7 @@ def send_reset_email():
         return jsonify({'message': 'Correo enviado con éxito'}), 200
 
     except Exception as e:
+        print(f"[Error Crítico en Backend]: {str(e)}")
         return jsonify({'error': f'Error interno: {str(e)}'}), 500
 
 if __name__ == '__main__':
