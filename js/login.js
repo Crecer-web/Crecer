@@ -1,5 +1,5 @@
 /* =================================================================
-   LÓGICA DE INICIO DE SESIÓN - PLATAFORMA CRECER
+   LÓGICA DE INICIO DE SESIÓN Y GUÍA DE ACCESO - PLATAFORMA CRECER
    ================================================================= */
 
 import { auth, db } from './firebase-config.js';
@@ -12,7 +12,7 @@ import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-
 import { mostrarToast } from './global.js';
 
 /**
- * Aplica el tema de forma sincronizada en la vista de inicio de sesión
+ * Aplica el tema (claro / oscuro) de forma sincronizada en la vista de inicio de sesión.
  */
 function aplicarTemaDirecto(tema) {
     const themeToggle = document.getElementById('themeToggle');
@@ -31,7 +31,7 @@ function aplicarTemaDirecto(tema) {
 }
 
 /**
- * Guarda o actualiza los datos del usuario en Firestore al iniciar sesión.
+ * Guarda o actualiza la información básica del usuario en Firestore al iniciar sesión.
  */
 async function guardarPerfilUsuario(uid, datos) {
     try {
@@ -45,13 +45,34 @@ async function guardarPerfilUsuario(uid, datos) {
     }
 }
 
+/**
+ * Resalta visualmente el enlace "¿Olvidaste tu contraseña?" para guiar al usuario
+ * cuando ocurre un fallo por incompatibilidad de proveedor o credencial.
+ */
+function resaltarEnlaceRecuperacion() {
+    const linkOlvido = document.getElementById('linkOlvidoPassword');
+    if (linkOlvido) {
+        linkOlvido.style.transition = 'all 0.3s ease';
+        linkOlvido.style.fontWeight = 'bold';
+        linkOlvido.style.color = '#ef4444'; // Color rojo destacado
+        linkOlvido.style.textDecoration = 'underline';
+
+        // Retorna a su estilo original suavemente tras 6 segundos
+        setTimeout(() => {
+            linkOlvido.style.fontWeight = 'normal';
+            linkOlvido.style.color = '';
+            linkOlvido.style.textDecoration = '';
+        }, 6000);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     let themeToggle = document.getElementById('themeToggle');
     const loginForm = document.getElementById('loginForm');
     const btnGoogleAuth = document.getElementById('btnGoogleAuth');
     const btnSubmitLogin = document.getElementById('btnSubmitLogin');
 
-    // Inicialización del tema
+    // Inicialización del tema en la vista de Login
     const temaGuardado = localStorage.getItem('theme');
     const prefiereDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const temaInicial = temaGuardado ? temaGuardado : (prefiereDark ? 'dark' : 'light');
@@ -75,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 1. Iniciar sesión con Correo y Contraseña
+    // 1. Manejo del Formulario de Inicio de Sesión (Email / Password)
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -97,6 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
+                // Intento de autenticación con Firebase Auth
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
@@ -112,20 +134,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, 600);
 
             } catch (error) {
-                console.error("Error en Login:", error);
-                let msg = 'Correo o contraseña incorrectos.';
+                console.error("Error en Login:", error.code, error.message);
 
+                // Captura y manejo guiado de los errores de Firebase Auth
                 if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-                    msg = 'Credenciales incorrectas. Si te registraste con Google, usa el botón de Google.';
-                } else if (error.code === 'auth/user-not-found') {
-                    msg = 'No existe una cuenta registrada con este correo electrónico.';
-                } else if (error.code === 'auth/invalid-email') {
-                    msg = 'El correo ingresado no es válido.';
-                } else if (error.code === 'auth/network-request-failed') {
-                    msg = 'Error de conexión a internet. Revisa tu red.';
-                }
+                    mostrarToast(
+                        'Credenciales incorrectas. Si te registraste con Google, usa el botón de Google o haz clic en "¿Olvidaste tu contraseña?" para crear una.',
+                        'danger'
+                    );
+                    resaltarEnlaceRecuperacion();
 
-                mostrarToast(msg, 'danger');
+                } else if (error.code === 'auth/user-not-found') {
+                    mostrarToast('No existe una cuenta registrada con este correo electrónico.', 'danger');
+
+                } else if (error.code === 'auth/invalid-email') {
+                    mostrarToast('El correo electrónico ingresado no es válido.', 'danger');
+
+                } else if (error.code === 'auth/network-request-failed') {
+                    mostrarToast('Error de conexión a internet. Revisa tu red.', 'danger');
+
+                } else {
+                    mostrarToast('Error al iniciar sesión: ' + error.message, 'danger');
+                }
 
                 if (btnSubmitLogin) {
                     btnSubmitLogin.disabled = false;
@@ -135,7 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 2. Iniciar sesión / Registrarse con Google
+    // 2. Manejo del Inicio de Sesión con Google (OAuth)
     if (btnGoogleAuth) {
         btnGoogleAuth.addEventListener('click', async () => {
             const provider = new GoogleAuthProvider();
@@ -159,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, 600);
 
             } catch (error) {
-                console.error("Error Google Auth:", error);
+                console.error("Error Google Auth:", error.code, error.message);
                 let errorMsg = 'No se pudo iniciar sesión con Google.';
 
                 if (error.code === 'auth/popup-closed-by-user') {
