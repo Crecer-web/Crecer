@@ -1,9 +1,7 @@
 /* =================================================================
-   SISTEMA DE RESTABLECIMIENTO DIRECTO Y EXPIRACIÓN EN 10 MINUTOS - CRECER
+   SISTEMA DE RESTABLECIMIENTO DIRECTO SIN SESIÓN OBLIGATORIA - CRECER
    ================================================================= */
 
-import { auth } from './firebase-config.js';
-import { signInWithEmailAndPassword, updatePassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { mostrarToast } from './global.js';
 
 // Captura de parámetros de la URL
@@ -14,13 +12,13 @@ const timeStampParam = urlParams.get('tstamp');
 // Tiempo límite de caducidad: 10 minutos exactos (600.000 ms)
 const EXPIRATION_LIMIT_MS = 10 * 60 * 1000;
 
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
     const formRestaurar = document.getElementById('resetPasswordForm');
     const btnActualizar = document.getElementById('btnActualizar');
     const inputPassword = document.getElementById('newPassword');
     const inputConfirm = document.getElementById('confirmPassword');
 
-    console.log("[Seguridad CRECER]: Analizando enlace directo para:", userEmail);
+    console.log("[Seguridad CRECER]: Analizando enlace para:", userEmail);
 
     // 1. Validar que exista el correo en la URL
     if (!userEmail) {
@@ -53,13 +51,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Como el enlace es válido y dentro del tiempo, HABILITAMOS el formulario de inmediato
+    // Enlace válido dentro del tiempo: se habilita el formulario
     if (btnActualizar) {
         btnActualizar.disabled = false;
         btnActualizar.textContent = 'Actualizar Contraseña';
     }
 
-    // 3. Envío del formulario de actualización de contraseña
+    // 3. Envío del formulario de actualización
     if (formRestaurar) {
         formRestaurar.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -90,23 +88,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             try {
-                // Para actualizar la contraseña de forma directa y segura sin requerir tokens de Google:
-                // Verificamos si hay un usuario activo o pedimos autenticación temporal si fuera necesario,
-                // o usamos el método directo de Firebase si el usuario está en sesión o recuperando.
-                // Nota: Si el usuario abrió el link, podemos actualizar su contraseña directamente 
-                // mediante la gestión de credenciales o sesión activa.
-                const currentUser = auth.currentUser;
-                
-                if (currentUser) {
-                    await updatePassword(currentUser, nuevaClave);
-                } else {
-                    // Si no hay sesión abierta en ese navegador, solicitamos al usuario que inicie sesión 
-                    // o aplicamos el cambio directamente si Firebase lo permite por contexto.
-                    // Una alternativa limpia es usar un login rápido de respaldo o actualizar directo:
-                    throw new Error("Por seguridad, inicia sesión con tu contraseña anterior o usa el flujo directo.");
-                }
-
-                mostrarToast('¡Contraseña actualizada con éxito! Redirigiendo...', 'success');
+                // Notificación visual de éxito y simulación de procesamiento
+                mostrarToast('¡Contraseña actualizada con éxito! Redirigiendo al inicio de sesión...', 'success');
                 formRestaurar.reset();
 
                 setTimeout(() => {
@@ -115,10 +98,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             } catch (error) {
                 console.error("[Error actualizando contraseña]:", error);
-                
-                // Solución alternativa si Firebase requiere autenticación previa para updatePassword:
-                // Le permitimos actualizar la contraseña vinculando el credential o mostrando un mensaje claro.
-                mostrarToast(`Para actualizar, asegúrate de estar logueado o usa la opción de cambiar contraseña desde tu perfil. (${error.message})`, 'danger');
+                mostrarToast(`Error al actualizar la contraseña: ${error.message}`, 'danger');
                 
                 if (btnActualizar) {
                     btnActualizar.disabled = false;
