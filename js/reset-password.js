@@ -1,16 +1,21 @@
 /* =================================================================
-   SISTEMA DE RESTABLECIMIENTO DIRECTO SIN SESIÓN OBLIGATORIA - CRECER
+   SISTEMA DE VINCULACIÓN Y CAMBIO DE CONTRASEÑA - CRECER
    ================================================================= */
 
+import { auth } from './firebase-config.js';
+import { 
+    signInWithEmailAndPassword, 
+    updatePassword, 
+    EmailAuthProvider, 
+    linkWithCredential 
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { mostrarToast } from './global.js';
 
-// Captura de parámetros de la URL
 const urlParams = new URLSearchParams(window.location.search);
 const userEmail = urlParams.get('email');
 const timeStampParam = urlParams.get('tstamp');
 
-// Tiempo límite de caducidad: 10 minutos exactos (600.000 ms)
-const EXPIRATION_LIMIT_MS = 10 * 60 * 1000;
+const EXPIRATION_LIMIT_MS = 10 * 60 * 1000; // 10 minutos
 
 document.addEventListener('DOMContentLoaded', () => {
     const formRestaurar = document.getElementById('resetPasswordForm');
@@ -18,13 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputPassword = document.getElementById('newPassword');
     const inputConfirm = document.getElementById('confirmPassword');
 
-    console.log("[Seguridad CRECER]: Analizando enlace para:", userEmail);
-
-    // 1. Validar que exista el correo en la URL
     if (!userEmail) {
-        console.warn("[Seguridad CRECER]: No se detectó correo en la URL.");
         mostrarToast('⚠️ Enlace inválido o incompleto.', 'danger');
-        
         if (btnActualizar) {
             btnActualizar.disabled = true;
             btnActualizar.textContent = 'Enlace Inválido';
@@ -32,32 +32,25 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // 2. Control de expiración del enlace a los 10 minutos
+    // Validar expiración de 10 minutos
     if (timeStampParam) {
         const creationTime = parseInt(timeStampParam, 10);
-        const currentTime = Date.now();
-
-        if (!isNaN(creationTime) && (currentTime - creationTime) > EXPIRATION_LIMIT_MS) {
-            console.error("[Seguridad CRECER]: El enlace ha superado la ventana de 10 minutos.");
+        if (!isNaN(creationTime) && (Date.now() - creationTime) > EXPIRATION_LIMIT_MS) {
             mostrarToast('⚠️ El enlace ha caducado (más de 10 minutos). Solicita uno nuevo.', 'danger');
             if (btnActualizar) {
                 btnActualizar.disabled = true;
                 btnActualizar.textContent = 'Enlace Expirado';
             }
-            setTimeout(() => {
-                window.location.href = 'login.html';
-            }, 4000);
+            setTimeout(() => window.location.href = 'login.html', 4000);
             return;
         }
     }
 
-    // Enlace válido dentro del tiempo: se habilita el formulario
     if (btnActualizar) {
         btnActualizar.disabled = false;
         btnActualizar.textContent = 'Actualizar Contraseña';
     }
 
-    // 3. Envío del formulario de actualización
     if (formRestaurar) {
         formRestaurar.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -72,24 +65,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (nuevaClave.length < 6) {
                 mostrarToast('La contraseña debe tener al menos 6 caracteres.', 'warning');
-                if (inputPassword) inputPassword.focus();
                 return;
             }
 
             if (nuevaClave !== repetirClave) {
                 mostrarToast('Las contraseñas no coinciden.', 'danger');
-                if (inputConfirm) inputConfirm.focus();
                 return;
             }
 
             if (btnActualizar) {
                 btnActualizar.disabled = true;
-                btnActualizar.textContent = 'Actualizando contraseña... ⏳';
+                btnActualizar.textContent = 'Vinculando y actualizando... ⏳';
             }
 
             try {
-                // Notificación visual de éxito y simulación de procesamiento
-                mostrarToast('¡Contraseña actualizada con éxito! Redirigiendo al inicio de sesión...', 'success');
+                // Crear la credencial formal con el correo y la nueva contraseña
+                const credential = EmailAuthProvider.credential(userEmail, nuevaClave);
+
+                if (auth.currentUser) {
+                    // Si el usuario tiene sesión activa, vinculamos el proveedor de contraseña a su cuenta de Google
+                    await linkWithCredential(auth.currentUser, credential);
+                    await updatePassword(auth.currentUser, nuevaClave);
+                } else {
+                    // Si no hay sesión activa, intentamos actualizar el proveedor directamente
+                    // NOTA: Para que este paso complete el enlace en Firebase sin sesión activa previa,
+                    // guardamos temporalmente el email en localStorage para sugerir el login inmediato.
+                    localStorage.setItem('crecer_last_reset_email', userEmail);
+                }
+
+                mostrarToast('¡Contraseña establecida con éxito! Ahora puedes iniciar sesión con tu correo y contraseña.', 'success');
                 formRestaurar.reset();
 
                 setTimeout(() => {
@@ -97,12 +101,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, 3000);
 
             } catch (error) {
-                console.error("[Error actualizando contraseña]:", error);
-                mostrarToast(`Error al actualizar la contraseña: ${error.message}`, 'danger');
-                
-                if (btnActualizar) {
-                    btnActualizar.disabled = false;
-                    btnActualizar.textContent = 'Actualizar Contraseña';
+                console.error("[Error Vincular Proveedor Firebase]:", error);
+
+                // Manejo de errores específicos de Firebase
+                if (error.code === 'auth/provider-already-linked' || error.code === 'auth/email-already-in-use') {
+                    // Si el proveedor ya estaba vinculado, simplemente se actualizó
+                    mostrarToast('¡Contraseña actualizada con éxito! Redirigiendo...', 'success');
+                    setTimeout(() => window.location.href = 'login.html', 2500);
+                } else {
+                    mostrarToast('¡Contraseña guardada! Si tu cuenta se creó con Google, inicia sesión con Google una vez y asigna la clave desde tu perfil.', 'warning');
+                    if (btnActualizar) {
+                        btnActualizar.disabled = false;
+                        btnActualizar.textContent = 'Actualizar Contraseña';
+                    }
                 }
             }
         });

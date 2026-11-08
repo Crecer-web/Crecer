@@ -1,91 +1,84 @@
 /* =================================================================
-   SISTEMA DE RECUPERACIÓN DE CONTRASEÑA - PLATAFORMA CRECER
+   SISTEMA DE ENVÍO DE CORREO DE RECUPERACIÓN - CRECER
    ================================================================= */
 
 import { mostrarToast } from './global.js';
 
-function esEmailValido(email) {
-    const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regexEmail.test(email);
-}
-
-async function procesarRecuperacion(event) {
-    event.preventDefault();
-
-    const emailInput = document.getElementById('recoveryEmail');
+document.addEventListener('DOMContentLoaded', () => {
+    const formRecuperar = document.getElementById('recuperarForm');
     const btnEnviar = document.getElementById('btnEnviarRecovery');
-    const email = emailInput ? emailInput.value.trim() : '';
+    const inputEmail = document.getElementById('recoveryEmail');
 
-    if (!email) {
-        mostrarToast('Por favor, ingresa tu correo electrónico.', 'danger');
-        if (emailInput) emailInput.focus();
-        return;
-    }
+    if (!formRecuperar) return;
 
-    if (!esEmailValido(email)) {
-        mostrarToast('Ingresa un formato de correo electrónico válido.', 'warning');
-        if (emailInput) emailInput.focus();
-        return;
-    }
+    formRecuperar.addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-    let textoOriginalBoton = 'Enviar Instrucciones';
-    if (btnEnviar) {
-        textoOriginalBoton = btnEnviar.textContent;
-        btnEnviar.disabled = true;
-        btnEnviar.textContent = 'Enviando correo real... ⏳';
-    }
+        const email = inputEmail ? inputEmail.value.trim() : '';
 
-    try {
-        // Detecta automáticamente si estás en local o en producción en Vercel
-        const esLocal = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
-        const urlAPI = esLocal ? 'http://127.0.0.1:5000/api/send-reset-email' : '/api/send-reset-email';
-        const linkRedireccion = esLocal ? 'http://127.0.0.1:5500/reset-password.html' : 'https://crecer-jet.vercel.app/reset-password.html';
-
-        const response = await fetch(urlAPI, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                email: email,
-                reset_link: linkRedireccion
-            })
-        });
-
-        const textResponse = await response.text();
-        let resultado;
-        try {
-            resultado = JSON.parse(textResponse);
-        } catch (e) {
-            throw new Error(`Respuesta inválida del servidor: ${textResponse.substring(0, 100)}`);
+        // Validaciones básicas de entrada
+        if (!email) {
+            mostrarToast('Por favor, ingresa tu correo electrónico.', 'warning');
+            if (inputEmail) inputEmail.focus();
+            return;
         }
 
-        if (response.ok) {
-            mostrarToast('¡Correo de recuperación enviado con éxito! Revisa tu bandeja.', 'success');
-            if (emailInput) emailInput.value = '';
+        // Expresión regular para validar formato de correo
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            mostrarToast('Por favor, ingresa un correo electrónico válido.', 'warning');
+            if (inputEmail) inputEmail.focus();
+            return;
+        }
 
+        // Deshabilitar botón y mostrar estado de carga
+        if (btnEnviar) {
+            btnEnviar.disabled = true;
+            btnEnviar.textContent = 'Enviando instrucciones... ⏳';
+        }
+
+        try {
+            // Detectar automáticamente si estamos en entorno local o producción en Vercel
+            const isLocal = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
+            
+            // Endpoint del backend Flask (en local apunta al puerto 5000 o ruta relativa, en Vercel a la ruta de la API)
+            const apiUrl = isLocal ? 'http://127.0.0.1:5000/api/send-reset-email' : '/api/send-reset-email';
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: email,
+                    is_local: isLocal
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'No se pudo procesar la solicitud en el servidor.');
+            }
+
+            // Éxito en el envío del correo corporativo
+            mostrarToast('¡Correo enviado con éxito! Revisa tu bandeja de entrada (y spam).', 'success');
+            formRecuperar.reset();
+
+            // Redirigir al login después de unos segundos
             setTimeout(() => {
                 window.location.href = 'login.html';
-            }, 3000);
-        } else {
-            throw new Error(resultado.error || 'No se pudo procesar la solicitud.');
-        }
+            }, 4000);
 
-    } catch (error) {
-        console.error("[CRECER Error - Recuperación]:", error);
-        mostrarToast(`Error: ${error.message}`, 'danger');
-    } finally {
-        if (btnEnviar) {
-            btnEnviar.disabled = false;
-            btnEnviar.textContent = textoOriginalBoton;
-        }
-    }
-}
+        } catch (error) {
+            console.error('[Error en Recuperación]:', error);
+            mostrarToast(`Error: ${error.message}`, 'danger');
 
-document.addEventListener('DOMContentLoaded', () => {
-    const recuperarForm = document.getElementById('recuperarForm');
-    if (recuperarForm) {
-        recuperarForm.addEventListener('submit', procesarRecuperacion);
-    }
+            // Restaurar botón
+            if (btnEnviar) {
+                btnEnviar.disabled = false;
+                btnEnviar.textContent = 'Enviar Instrucciones';
+            }
+        }
+    });
 });
