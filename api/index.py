@@ -17,33 +17,37 @@ from firebase_admin import credentials, auth as firebase_auth
 if os.path.exists('.env'):
     load_dotenv()
 
+# Inicialización blindada de Firebase Admin para Vercel y entorno local
 if not firebase_admin._apps:
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    cred_path = os.path.join(current_dir, 'serviceAccountKey.json')
+    try:
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        cred_path = os.path.join(current_dir, 'serviceAccountKey.json')
 
-    if os.path.exists(cred_path):
-        cred = credentials.Certificate(cred_path)
-        firebase_admin.initialize_app(cred)
-        print("[CRECER Security]: Firebase Admin inicializado localmente con JSON.")
-    elif os.environ.get('FIREBASE_PROJECT_ID'):
-        cred_dict = {
-            "type": "service_account",
-            "project_id": os.environ.get('FIREBASE_PROJECT_ID'),
-            "private_key_id": os.environ.get('FIREBASE_PRIVATE_KEY_ID', ''),
-            "private_key": os.environ.get('FIREBASE_PRIVATE_KEY', '').replace('\\n', '\n'),
-            "client_email": os.environ.get('FIREBASE_CLIENT_EMAIL'),
-            "client_id": os.environ.get('FIREBASE_CLIENT_ID'),
-            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-            "token_uri": "https://oauth2.googleapis.com/token",
-            "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-            "client_x509_cert_url": f"https://www.googleapis.com/robot/v1/metadata/x509/{os.environ.get('FIREBASE_CLIENT_EMAIL')}"
-        }
-        cred = credentials.Certificate(cred_dict)
-        firebase_admin.initialize_app(cred)
-        print("[CRECER Security]: Firebase Admin inicializado en Vercel con variables de entorno.")
-    else:
-        firebase_admin.initialize_app(options={'projectId': 'crecer-web'})
-        print("[CRECER Warning]: Inicializado con projectId por defecto.")
+        if os.path.exists(cred_path):
+            cred = credentials.Certificate(cred_path)
+            firebase_admin.initialize_app(cred)
+            print("[CRECER Security]: Firebase Admin inicializado localmente con JSON.")
+        elif os.environ.get('FIREBASE_PROJECT_ID'):
+            cred_dict = {
+                "type": "service_account",
+                "project_id": os.environ.get('FIREBASE_PROJECT_ID'),
+                "private_key_id": os.environ.get('FIREBASE_PRIVATE_KEY_ID', ''),
+                "private_key": os.environ.get('FIREBASE_PRIVATE_KEY', '').replace('\\n', '\n'),
+                "client_email": os.environ.get('FIREBASE_CLIENT_EMAIL'),
+                "client_id": os.environ.get('FIREBASE_CLIENT_ID'),
+                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                "token_uri": "https://oauth2.googleapis.com/token",
+                "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+                "client_x509_cert_url": f"https://www.googleapis.com/robot/v1/metadata/x509/{os.environ.get('FIREBASE_CLIENT_EMAIL')}"
+            }
+            cred = credentials.Certificate(cred_dict)
+            firebase_admin.initialize_app(cred)
+            print("[CRECER Security]: Firebase Admin inicializado en Vercel con variables de entorno.")
+        else:
+            firebase_admin.initialize_app(options={'projectId': 'crecer-web'})
+            print("[CRECER Warning]: Inicializado con projectId por defecto.")
+    except Exception as e:
+        print(f"[Error Inicialización Firebase Admin]: {str(e)}")
 
 app = Flask(__name__)
 CORS(app)
