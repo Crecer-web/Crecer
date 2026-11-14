@@ -2,11 +2,11 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Respaldo y Reportes - CRECER</title>
+    <title>Respaldo - CRECER</title>
     
-    <!-- Script síncrono para prevenir parpadeos del tema -->
+    <!-- Script síncrono unificado para prevenir parpadeos del tema -->
     <script>
         (function() {
             const temaGuardado = localStorage.getItem('theme') || 'light';
@@ -65,9 +65,9 @@
 
                 <!-- Botón Hamburguesa para Móvil -->
                 <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú de navegación" type="button">
-                    <span class="bar"></span>
-                    <span class="bar"></span>
-                    <span class="bar"></span>
+                    <span class="bar" aria-hidden="true"></span>
+                    <span class="bar" aria-hidden="true"></span>
+                    <span class="bar" aria-hidden="true"></span>
                 </button>
             </div>
         </div>
@@ -87,65 +87,61 @@
                 
                 <!-- Tarjeta 1: Tareas y Pendientes -->
                 <article class="export-card">
-                    <div class="card-icon">📝</div>
                     <div class="card-content">
                         <h3>Tareas y Exámenes Pendientes</h3>
                         <p>Listado completo de tus entregas y evaluaciones ordenadas alfabéticamente por materia.</p>
                     </div>
                     <div class="card-actions">
                         <button type="button" class="btn-export btn-csv" id="btnExportTareasCSV">
-                            <span>📄</span> Guardar CSV
+                            Guardar CSV
                         </button>
                         <button type="button" class="btn-export btn-pdf" id="btnExportTareasPDF">
-                            <span>🖨️</span> Ver PDF / Imprimir
+                            Imprimir
                         </button>
                     </div>
                 </article>
 
                 <!-- Tarjeta 2: Calificaciones -->
                 <article class="export-card">
-                    <div class="card-icon">🎓</div>
                     <div class="card-content">
                         <h3>Boletín de Calificaciones</h3>
                         <p>Informe detallado con tus notas ordenadas de la A a la Z y promedio general de rendimiento.</p>
                     </div>
                     <div class="card-actions">
                         <button type="button" class="btn-export btn-csv" id="btnExportNotasCSV">
-                            <span>📄</span> Guardar CSV
+                            Guardar CSV
                         </button>
                         <button type="button" class="btn-export btn-pdf" id="btnExportNotasPDF">
-                            <span>🖨️</span> Ver PDF / Imprimir
+                            Imprimir
                         </button>
                     </div>
                 </article>
 
                 <!-- Tarjeta 3: Horarios de Clases -->
                 <article class="export-card">
-                    <div class="card-icon">📅</div>
                     <div class="card-content">
                         <h3>Horario Escolar Semanal</h3>
                         <p>Exporta la grilla completa de clases y asignaturas organizadas de lunes a viernes.</p>
                     </div>
                     <div class="card-actions">
                         <button type="button" class="btn-export btn-csv" id="btnExportHorarioCSV">
-                            <span>📄</span> Guardar CSV
+                            Guardar CSV
                         </button>
                         <button type="button" class="btn-export btn-pdf" id="btnExportHorarioPDF">
-                            <span>🖨️</span> Ver PDF / Imprimir
+                            Imprimir
                         </button>
                     </div>
                 </article>
 
                 <!-- Tarjeta 4: Reporte Completo Unificado -->
                 <article class="export-card featured-card">
-                    <div class="card-icon">📦</div>
                     <div class="card-content">
                         <h3>Respaldo Integral Académico</h3>
                         <p>Consolida toda tu información académica en un único reporte ordenado alfabéticamente para presentar o guardar.</p>
                     </div>
                     <div class="card-actions">
                         <button type="button" class="btn-export btn-primary-export" id="btnExportIntegralPDF">
-                            <span>🖨️</span> Generar Informe Completo (PDF / Impresión)
+                            Generar Informe Completo Impresión
                         </button>
                     </div>
                 </article>
@@ -156,9 +152,9 @@
     </main>
 
     <!-- Contenedor Toast -->
-    <div id="toast-container"></div>
+    <div id="toast-container" aria-live="polite"></div>
 
-    <footer class="auth-footer-simple">
+    <footer class="auth-footer-simple" role="contentinfo">
         <p>&copy; 2026 <strong>CRECER</strong> &bull; Plataforma Institucional de Gestión Académica</p>
     </footer>
 

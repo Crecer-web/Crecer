@@ -8,9 +8,6 @@ import {
 import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { mostrarToast } from './global.js';
 
-/**
- * Aplica el tema de forma sincronizada en la vista de autenticación
- */
 function aplicarTemaDirecto(tema) {
     const themeToggle = document.getElementById('themeToggle');
 
@@ -27,9 +24,6 @@ function aplicarTemaDirecto(tema) {
     }
 }
 
-/**
- * Guarda o actualiza la información del perfil del usuario en la colección "usuarios" de Firestore.
- */
 async function guardarPerfilUsuario(uid, datos) {
     try {
         const userRef = doc(db, 'usuarios', uid);
@@ -49,7 +43,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnGoogleAuth = document.getElementById('btnGoogleAuth');
     const btnSubmitRegister = document.getElementById('btnSubmitRegister');
 
-    // Inicialización del tema
     const temaGuardado = localStorage.getItem('theme');
     const prefiereDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const temaInicial = temaGuardado ? temaGuardado : (prefiereDark ? 'dark' : 'light');
@@ -73,24 +66,32 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 1. Registro manual con Nombre, Apellido, Correo y Contraseña
     if (registerForm) {
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const nameInput = document.getElementById('registerName');
             const lastNameInput = document.getElementById('registerLastName');
+            const birthDateInput = document.getElementById('registerBirthDate');
             const emailInput = document.getElementById('registerEmail');
             const passwordInput = document.getElementById('registerPassword');
+            const confirmPasswordInput = document.getElementById('registerConfirmPassword');
 
             const nombre = nameInput ? nameInput.value.trim() : '';
             const apellido = lastNameInput ? lastNameInput.value.trim() : '';
+            const fechaNacimiento = birthDateInput ? birthDateInput.value : '';
             const email = emailInput ? emailInput.value.trim() : '';
-            const password = passwordInput ? passwordInput.value.trim() : '';
+            const password = passwordInput ? passwordInput.value : '';
+            const confirmPassword = confirmPasswordInput ? confirmPasswordInput.value : '';
 
-            // Validaciones de formulario
-            if (!nombre || !apellido || !email || !password) {
+            if (!nombre || !apellido || !fechaNacimiento || !email || !password || !confirmPassword) {
                 mostrarToast('Por favor, completa todos los campos requeridos.', 'danger');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                mostrarToast('Las contraseñas no coinciden. Por favor, revísalas.', 'danger');
+                if (confirmPasswordInput) confirmPasswordInput.focus();
                 return;
             }
 
@@ -99,27 +100,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Cambiar estado visual del botón
             if (btnSubmitRegister) {
                 btnSubmitRegister.disabled = true;
-                btnSubmitRegister.textContent = 'Creando cuenta... ⏳';
+                btnSubmitRegister.textContent = 'Creando cuenta...';
             }
 
             try {
-                // Crear usuario en Firebase Authentication
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
-                // Actualizar el perfil básico del usuario en Auth (displayName)
                 const nombreCompleto = `${nombre} ${apellido}`;
                 await updateProfile(user, {
                     displayName: nombreCompleto
                 });
 
-                // Guardar en la base de datos Firestore el perfil estructurado
                 await guardarPerfilUsuario(user.uid, {
                     nombre: nombre,
                     apellido: apellido,
+                    fechaNacimiento: fechaNacimiento,
                     email: email,
                     fotoPerfil: '',
                     creadoEn: new Date().toISOString(),
@@ -148,7 +146,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 mostrarToast(msg, 'danger');
 
-                // Restablecer botón en caso de falla
                 if (btnSubmitRegister) {
                     btnSubmitRegister.disabled = false;
                     btnSubmitRegister.textContent = 'Crear Cuenta';
@@ -157,7 +154,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 2. Registro o Inicio de Sesión rápido mediante Google
     if (btnGoogleAuth) {
         btnGoogleAuth.addEventListener('click', async () => {
             const provider = new GoogleAuthProvider();
@@ -177,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     email: user.email,
                     fotoPerfil: user.photoURL || '',
                     actualizadoEn: new Date().toISOString()
-                });
+                }, { merge: true });
 
                 mostrarToast(`¡Bienvenido/a ${nombre}!`, 'success');
 
@@ -192,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (error.code === 'auth/popup-closed-by-user') {
                     errorMsg = 'La ventana de inicio de sesión de Google se cerró antes de completar el proceso.';
                 } else if (error.code === 'auth/network-request-failed') {
-                    errorMsg = 'Error de conexión durante la autenticación con Google.';
+                    errorMsg = 'Error de red durante la autenticación con Google.';
                 }
 
                 mostrarToast(errorMsg, 'danger');

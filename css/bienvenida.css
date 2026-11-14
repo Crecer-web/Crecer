@@ -60,7 +60,7 @@ html, body {
   height: 100%;
 }
 
-body { 
+body.welcome-page { 
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
   background-color: var(--bg-color); 
   color: var(--text-primary); 

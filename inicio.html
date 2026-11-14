@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Inicio - CRECER</title>
     
-    <!-- Script síncrono crítico para prevenir parpadeos del tema -->
+    <!-- Script síncrono unificado para prevenir parpadeos del tema -->
     <script>
         (function() {
             const temaGuardado = localStorage.getItem('theme') || 'light';
@@ -98,8 +98,8 @@
             <section class="control-bar">
                 <div class="search-and-actions">
                     <input type="text" id="searchInput" placeholder="Buscar por materia, tema o descripción..." class="search-input" autocomplete="off">
-                    <a href="formularios.html" class="btn-action btn-primary-action">➕ Nueva Tarea</a>
-                    <a href="papelera.html" class="btn-action btn-trash-nav">🗑️ Papelera</a>
+                    <a href="formularios.html" class="btn-action btn-primary-action">Nueva Tarea</a>
+                    <a href="papelera.html" class="btn-action btn-trash-nav">Papelera</a>
                 </div>
                 
                 <div class="filter-buttons">
@@ -124,7 +124,7 @@
     <div id="modalConfirmacion" class="modal-overlay hidden">
         <div class="modal-card">
             <div class="modal-header">
-                <h3>⚠️ Confirmar Eliminación</h3>
+                <h3>Confirmar Eliminación</h3>
                 <button type="button" id="btnCerrarModal" class="btn-close-modal">&times;</button>
             </div>
             <div class="modal-body">

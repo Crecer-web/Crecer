@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Calificaciones por Materia - CRECER</title>
     
-    <!-- Script síncrono para prevenir parpadeos del tema -->
+    <!-- Script síncrono unificado para prevenir parpadeos del tema -->
     <script>
         (function() {
             const temaGuardado = localStorage.getItem('theme') || 'light';
@@ -125,7 +125,7 @@
                             <input type="text" id="observacionesInput" placeholder="Ej. Recuperatorio, Unidad 1 y 2" autocomplete="off">
                         </div>
 
-                        <button type="submit" id="btnGuardarNota" class="btn-primary">💾 Registrar Calificación</button>
+                        <button type="submit" id="btnGuardarNota" class="btn-primary">Registrar Calificación</button>
                     </form>
                 </section>
 
@@ -148,7 +148,7 @@
     <div id="modalEditarNota" class="modal-overlay hidden">
         <div class="modal-card">
             <div class="modal-header">
-                <h3>✏️ Modificar Calificación</h3>
+                <h3>Modificar Calificación</h3>
                 <button type="button" id="btnCerrarModal" class="btn-close-modal">&times;</button>
             </div>
             <form id="editNotaForm" novalidate>
@@ -182,7 +182,7 @@
 
                 <div class="modal-actions">
                     <button type="button" id="btnCancelarEdit" class="btn-secondary">Cancelar</button>
-                    <button type="submit" id="btnGuardarEditNota" class="btn-primary">💾 Guardar Cambios</button>
+                    <button type="submit" id="btnGuardarEditNota" class="btn-primary">Guardar Cambios</button>
                 </div>
             </form>
         </div>

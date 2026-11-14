@@ -14,12 +14,8 @@ import { observarSesion, mostrarToast, mostrarConfirmacion } from './global.js';
 let currentUser = null;
 let misNotas = [];
 
-// ==========================================
-// GESTIÓN DE TEMA (CLARO / OSCURO)
-// ==========================================
 function inicializarTema() {
     const themeToggle = document.getElementById('themeToggle');
-    
     const temaGuardado = localStorage.getItem('theme');
     const prefiereDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const temaInicial = temaGuardado ? temaGuardado : (prefiereDark ? 'dark' : 'light');
@@ -86,7 +82,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Eventos del Modal
     const modal = document.getElementById('modalEditarNota');
     const btnCerrarModal = document.getElementById('btnCerrarModal');
     const btnCancelarEdit = document.getElementById('btnCancelarEdit');
@@ -104,7 +99,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Control de Sesión
 observarSesion((user) => {
     if (user) {
         currentUser = user;
@@ -114,9 +108,6 @@ observarSesion((user) => {
     }
 });
 
-/**
- * Cargar calificaciones desde Firestore
- */
 async function cargarNotas() {
     if (!currentUser) return;
 
@@ -136,9 +127,6 @@ async function cargarNotas() {
     }
 }
 
-/**
- * Normaliza textos para evitar duplicados por acentos o mayúsculas.
- */
 function normalizarTextoMateria(texto) {
     if (!texto) return '';
     return texto
@@ -148,9 +136,6 @@ function normalizarTextoMateria(texto) {
         .replace(/[\u0300-\u036f]/g, "");
 }
 
-/**
- * Agrupa las notas por nombre de materia, calcula promedios y renderiza las tarjetas.
- */
 function renderizarMateriasAgrupadas() {
     const materiasGrid = document.getElementById('materiasGrid');
     const promedioGeneralEl = document.getElementById('promedioGeneral');
@@ -216,12 +201,12 @@ function renderizarMateriasAgrupadas() {
                 <div class="evaluacion-item">
                     <div class="evaluacion-info">
                         <span class="evaluacion-nombre">${sanearTexto(ev.evaluacion)}</span>
-                        <span class="evaluacion-meta">📅 ${sanearTexto(ev.fecha || 'Sin fecha')} ${ev.observacion ? `&bull; <i>${sanearTexto(ev.observacion)}</i>` : ''}</span>
+                        <span class="evaluacion-meta">Fecha: ${sanearTexto(ev.fecha || 'Sin fecha')} ${ev.observacion ? `&bull; <i>${sanearTexto(ev.observacion)}</i>` : ''}</span>
                     </div>
                     <div class="evaluacion-nota-group">
                         <span class="evaluacion-nota">${parseFloat(ev.calificacion).toFixed(1)}</span>
-                        <button class="btn-edit-eval" data-id="${ev.id}" title="Editar nota" type="button">✏️</button>
-                        <button class="btn-delete-eval" data-id="${ev.id}" title="Eliminar nota" type="button">🗑️</button>
+                        <button class="btn-edit-eval" data-id="${ev.id}" title="Editar nota" type="button">Editar</button>
+                        <button class="btn-delete-eval" data-id="${ev.id}" title="Eliminar nota" type="button">Eliminar</button>
                     </div>
                 </div>
             `;
@@ -230,7 +215,7 @@ function renderizarMateriasAgrupadas() {
         cardMateria.innerHTML = `
             <div class="materia-card-header">
                 <div class="materia-titulo-group">
-                    <h4>📚 ${sanearTexto(materiaObj.nombreOriginal)}</h4>
+                    <h4>${sanearTexto(materiaObj.nombreOriginal)}</h4>
                 </div>
                 <div class="materia-promedio-badge ${esAprobado ? 'aprobado' : 'reprobado'}">
                     Promedio: ${promedioMateria}
@@ -241,7 +226,6 @@ function renderizarMateriasAgrupadas() {
             </div>
         `;
 
-        // Eventos para Editar
         cardMateria.querySelectorAll('.btn-edit-eval').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const idNota = e.currentTarget.getAttribute('data-id');
@@ -249,7 +233,6 @@ function renderizarMateriasAgrupadas() {
             });
         });
 
-        // Eventos para Eliminar
         cardMateria.querySelectorAll('.btn-delete-eval').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 const idNota = e.currentTarget.getAttribute('data-id');
@@ -283,20 +266,17 @@ function renderizarMateriasAgrupadas() {
     if (promedioEstadoEl) {
         const promedioNum = parseFloat(promedioGeneral);
         if (promedioNum >= 8.5) {
-            promedioEstadoEl.textContent = '🌟 ¡Excelente rendimiento académico general en tus materias!';
+            promedioEstadoEl.textContent = 'Excelente rendimiento académico general en tus materias.';
         } else if (promedioNum >= 7) {
-            promedioEstadoEl.textContent = '👍 Muy buen desempeño académico, continúas con un promedio sólido.';
+            promedioEstadoEl.textContent = 'Muy buen desempeño académico, continúas con un promedio sólido.';
         } else if (promedioNum >= 6) {
-            promedioEstadoEl.textContent = '⚠️ Rendimiento regular aprobado. Mantén atención constante a los parciales.';
+            promedioEstadoEl.textContent = 'Rendimiento regular aprobado. Mantén atención constante a los parciales.';
         } else {
-            promedioEstadoEl.textContent = '❌ Promedio general por debajo de 6. Se recomienda revisar las materias reprobadas.';
+            promedioEstadoEl.textContent = 'Promedio general por debajo de 6. Se recomienda revisar las materias reprobadas.';
         }
     }
 }
 
-/**
- * Abre la mini ventana modal y rellena los datos correspondientes
- */
 function abrirModalEdicion(idNota) {
     const nota = misNotas.find(n => n.id === idNota);
     if (!nota) return;
@@ -312,7 +292,6 @@ function abrirModalEdicion(idNota) {
     if (modal) modal.classList.remove('hidden');
 }
 
-// Guardar cambios desde el Modal de Edición
 const editNotaForm = document.getElementById('editNotaForm');
 if (editNotaForm) {
     editNotaForm.addEventListener('submit', async (e) => {
@@ -361,7 +340,6 @@ if (editNotaForm) {
     });
 }
 
-// Registro de Nuevas Calificaciones
 const notaForm = document.getElementById('notaForm');
 if (notaForm) {
     notaForm.addEventListener('submit', async (e) => {

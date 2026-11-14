@@ -1,28 +1,52 @@
 /* =================================================================
-   SERVICE WORKER - PLATAFORMA CRECER (PRODUCCIÓN Y OFFLINE)
+   SERVICE WORKER SEGURO - PLATAFORMA CRECER
    ================================================================= */
 
-const CACHE_NAME = 'crecer-cache-v7';
+const CACHE_NAME = 'crecer-cache-v10';
 const ASSETS_TO_CACHE = [
     '/',
     '/bienvenida.html',
     '/login.html',
+    '/register.html',
     '/reset-password.html',
+    '/inicio.html',
+    '/horario.html',
+    '/notas.html',
+    '/recursos.html',
+    '/papelera.html',
+    '/perfil.html',
+    '/exportar.html',
     '/css/global.css',
     '/css/login.css',
+    '/css/register.css',
     '/css/reset-password.css',
+    '/css/inicio.css',
+    '/css/horario.css',
+    '/css/notas.css',
+    '/css/recursos.css',
+    '/css/papelera.css',
+    '/css/perfil.css',
+    '/css/exportar.css',
     '/js/global.js',
-    '/js/recuperar.js',
+    '/js/login.js',
+    '/js/register.js',
     '/js/reset-password.js',
-    '/js/firebase-config.js'
+    '/js/inicio.js',
+    '/js/horario.js',
+    '/js/notas.js',
+    '/js/recursos.js',
+    '/js/papelera.js',
+    '/js/perfil.js',
+    '/js/exportar.js',
+    '/js/firebase-config.js',
+    '/img/logo.png',
+    '/manifest.json'
 ];
 
-// Evento de Instalación: Carga de recursos esenciales al almacenamiento en caché
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then((cache) => {
-                console.log('[Service Worker CRECER]: Instalando caché de recursos principales.');
                 return cache.addAll(ASSETS_TO_CACHE);
             })
             .catch((error) => {
@@ -32,14 +56,12 @@ self.addEventListener('install', (event) => {
     self.skipWaiting();
 });
 
-// Evento de Activación: Limpieza exhaustiva de cachés obsoletas y antiguas
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((cacheNames) => {
             return Promise.all(
                 cacheNames.map((cache) => {
                     if (cache !== CACHE_NAME) {
-                        console.log('[Service Worker CRECER]: Eliminando caché obsoleta:', cache);
                         return caches.delete(cache);
                     }
                 })
@@ -49,12 +71,11 @@ self.addEventListener('activate', (event) => {
     self.clients.claim();
 });
 
-// Evento Fetch: Interceptación segura de peticiones HTTP en la red
 self.addEventListener('fetch', (event) => {
-    const urlPeticion = event.request.url;
+    const url = new URL(event.request.url);
 
-    // Omitir por completo la intercepción en peticiones de API o autenticación de Firebase
-    if (urlPeticion.includes('/api/') || urlPeticion.includes('identitytoolkit.googleapis.com')) {
+    if (url.pathname.startsWith('/api/') || url.hostname.includes('googleapis.com') || url.hostname.includes('firebaseapp.com') || url.hostname.includes('gstatic.com')) {
+        event.respondWith(fetch(event.request));
         return;
     }
 
@@ -65,7 +86,6 @@ self.addEventListener('fetch', (event) => {
                     return respuestaEnCache;
                 }
                 return fetch(event.request).catch(() => {
-                    // Si la red falla y es una petición de navegación HTML, redirigir a bienvenida
                     if (event.request.headers.get('accept') && event.request.headers.get('accept').includes('text/html')) {
                         return caches.match('/bienvenida.html');
                     }

@@ -6,6 +6,18 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Registrarse - CRECER</title>
     
+  <!-- Script síncrono unificado para prevenir parpadeos del tema -->
+    <script>
+        (function() {
+            const temaGuardado = localStorage.getItem('theme') || 'light';
+            if (temaGuardado === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+            }
+        })();
+    </script>
+
     <!-- Iconos y Manifest PWA -->
     <link rel="icon" type="image/png" sizes="32x32" href="img/logo.png">
     <link rel="apple-touch-icon" href="img/logo.png">
@@ -52,16 +64,27 @@
             </div>
           </div>
 
+          <!-- Fecha de Nacimiento -->
+          <div class="form-group">
+            <label for="registerBirthDate">Fecha de Nacimiento *</label>
+            <input type="date" id="registerBirthDate" required>
+          </div>
+
           <!-- Correo Electrónico -->
           <div class="form-group">
             <label for="registerEmail">Correo Electrónico *</label>
             <input type="email" id="registerEmail" placeholder="estudiante@ejemplo.com" required autocomplete="email">
           </div>
 
-          <!-- Contraseña -->
+          <!-- Contraseña y Confirmación (Doble Verificación) -->
           <div class="form-group">
             <label for="registerPassword">Contraseña *</label>
             <input type="password" id="registerPassword" placeholder="••••••••" required minlength="6" autocomplete="new-password">
+          </div>
+
+          <div class="form-group">
+            <label for="registerConfirmPassword">Confirmar Contraseña *</label>
+            <input type="password" id="registerConfirmPassword" placeholder="••••••••" required minlength="6" autocomplete="new-password">
           </div>
 
           <button type="submit" id="btnSubmitRegister" class="btn-primary btn-auth">Crear Cuenta</button>

@@ -1,5 +1,5 @@
 /* =================================================================
-   MÓDULO DE PERFIL - PLATAFORMA CRECER (Versión Definitiva)
+   MÓDULO DE PERFIL - PLATAFORMA CRECER
    ================================================================= */
 
 import { db } from './firebase-config.js';
@@ -97,7 +97,6 @@ function aplicarTemaDirecto(tema) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Referencias DOM
     const profileImage = document.getElementById('profileImage');
     const avatarInitial = document.getElementById('avatarInitial');
     const profileDisplayName = document.getElementById('profileDisplayName');
@@ -125,13 +124,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let usuarioActual = null;
     let nombreUsuarioActual = 'Usuario';
 
-    // Inicialización del tema según preferencia guardada
     const temaGuardado = localStorage.getItem('theme');
     const prefiereDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const temaInicial = temaGuardado ? temaGuardado : (prefiereDark ? 'dark' : 'light');
     aplicarTemaDirecto(temaInicial);
 
-    // Event Listener único para el botón de conmutación de tema
     if (themeToggle) {
         const nuevoBtn = themeToggle.cloneNode(true);
         themeToggle.parentNode.replaceChild(nuevoBtn, themeToggle);
@@ -149,7 +146,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Menú hamburguesa móvil
     if (menuToggle && navMenu) {
         menuToggle.addEventListener('click', (e) => {
             e.preventDefault();
@@ -158,7 +154,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Dropdown de módulos
     const dropdown = document.querySelector(".dropdown");
     const dropdownBtn = document.getElementById("dropdownBtn");
 
@@ -176,7 +171,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Control de Modal
     const abrirModal = (e) => {
         if (e) e.preventDefault();
         if (photoOptionsModal) photoOptionsModal.style.display = 'flex';
@@ -215,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
         profileFile.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
-                if (fileNameDisplay) fileNameDisplay.textContent = `📎 ${file.name}`;
+                if (fileNameDisplay) fileNameDisplay.textContent = file.name;
                 if (profilePhotoUrl) profilePhotoUrl.value = '';
             } else {
                 if (fileNameDisplay) fileNameDisplay.textContent = 'Ningún archivo seleccionado';
@@ -234,7 +228,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Aplicar Foto de Perfil
     if (applyPhotoBtn) {
         applyPhotoBtn.addEventListener('click', async (e) => {
             e.preventDefault();
@@ -266,7 +259,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 applyPhotoBtn.disabled = true;
-                applyPhotoBtn.textContent = 'Guardando... ⏳';
+                applyPhotoBtn.textContent = 'Guardando...';
 
                 const userRef = doc(db, 'usuarios', usuarioActual.uid);
                 await setDoc(userRef, {
@@ -276,7 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, { merge: true });
 
                 actualizarVisualizacionFoto(nuevaFoto, nombreUsuarioActual);
-                mostrarToast('¡Foto de perfil actualizada correctamente!', 'success');
+                mostrarToast('Foto de perfil actualizada correctamente.', 'success');
                 cerrarModal();
 
             } catch (err) {
@@ -289,7 +282,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Carga de la Sesión de Usuario y Documento en Firestore
     observarSesion(async (user) => {
         if (!user) {
             window.location.href = 'login.html';
@@ -315,7 +307,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 nombre = data.nombre || '';
                 apellido = data.apellido || '';
                 fechaNac = data.fechaNacimiento || '';
-                foto = data.fotoPerfil || foto;
+                // Mantenemos la foto guardada en Firestore de forma prioritaria
+                if (data.fotoPerfil) {
+                    foto = data.fotoPerfil;
+                }
             } else {
                 const parts = (user.displayName || emailUser.split('@')[0]).split(' ');
                 nombre = parts[0] || 'Estudiante';
@@ -346,9 +341,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    /**
-     * Muestra la foto de perfil o activa la inicial si hay error de carga
-     */
     function actualizarVisualizacionFoto(urlFoto, nombreUsuario) {
         if (!profileImage || !avatarInitial) return;
 

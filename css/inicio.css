@@ -425,7 +425,7 @@ body.dashboard-body {
 }
 
 /* ==========================================================================
-   BOTONES DE ACCIÓN DE LA TARJETA (ALINEADOS UNO AL LADO DEL OTRO)
+   BOTONES DE ACCIÓN DE LA TARJETA
    ========================================================================== */
 .card-actions {
   display: flex;

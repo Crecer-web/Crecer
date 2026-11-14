@@ -29,7 +29,7 @@ export async function cerrarSesion() {
 /**
  * Reemplazo asíncrono estilizado para confirm() nativo del navegador
  */
-export function mostrarConfirmacion(mensaje, titulo = '¿Estás seguro?') {
+export function mostrarConfirmacion(mensaje, titulo = 'Estás seguro') {
     return new Promise((resolve) => {
         const modalExistente = document.getElementById('customConfirmModal');
         if (modalExistente) modalExistente.remove();
@@ -40,7 +40,7 @@ export function mostrarConfirmacion(mensaje, titulo = '¿Estás seguro?') {
 
         overlay.innerHTML = `
             <div class="custom-confirm-card" role="dialog" aria-modal="true">
-                <h4>⚠️ ${sanearTextoGlobal(titulo)}</h4>
+                <h4>${sanearTextoGlobal(titulo)}</h4>
                 <p>${sanearTextoGlobal(mensaje)}</p>
                 <div class="custom-confirm-actions">
                     <button type="button" class="btn-confirm-cancel" id="btnConfirmCancel">Cancelar</button>
@@ -96,18 +96,9 @@ export function mostrarToast(mensaje, tipo = 'info', duracion = 3500) {
         document.body.appendChild(container);
     }
 
-    const iconos = {
-        success: '✅',
-        danger: '⚠️',
-        error: '❌',
-        warning: '🔔',
-        info: 'ℹ️'
-    };
-
     const toast = document.createElement('div');
     toast.className = `toast toast-${tipo}`;
     toast.innerHTML = `
-        <span style="font-size: 1.1rem; display: inline-flex; align-items: center;">${iconos[tipo] || 'ℹ️'}</span>
         <span style="flex: 1;">${sanearTextoGlobal(mensaje)}</span>
         <button type="button" class="toast-close" aria-label="Cerrar">&times;</button>
     `;
@@ -167,12 +158,10 @@ function aplicarTema(tema) {
     }
 }
 
-// Aplicar tema de manera inmediata al cargar el script
 const temaInicial = localStorage.getItem('theme') || 
                    (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 aplicarTema(temaInicial);
 
-// Eventos del DOM
 document.addEventListener('DOMContentLoaded', () => {
     let themeBtn = document.getElementById('themeToggle');
 
@@ -193,7 +182,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Control de Menús Desplegables
+    const menuToggle = document.getElementById('menuToggle');
+    const navMenu = document.getElementById('navMenu');
+    if (menuToggle && navMenu) {
+        menuToggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            navMenu.classList.toggle('active');
+        });
+    }
+
     const dropdowns = document.querySelectorAll(".dropdown");
 
     dropdowns.forEach((dropdown) => {
@@ -223,7 +221,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Manejo de Cierre de Sesión
     const ejecutarCierreSesion = async (e) => {
         if (e) e.preventDefault();
         await cerrarSesion();

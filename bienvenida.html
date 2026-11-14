@@ -2,14 +2,15 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>CRECER &bull; Plataforma Académica Institucional</title>
     
-    <!-- Script síncrono crítico para aplicar el tema de forma automática idéntica al resto de las pantallas -->
+    <!-- Script síncrono unificado para prevenir parpadeos del tema -->
     <script>
         (function() {
-            const tema = localStorage.getItem('theme') || 'light';
-            if (tema === 'dark') {
+            const temaGuardado = localStorage.getItem('theme') || 'light';
+            if (temaGuardado === 'dark') {
                 document.documentElement.setAttribute('data-theme', 'dark');
             } else {
                 document.documentElement.removeAttribute('data-theme');
@@ -52,8 +53,8 @@
             <p>La solución integral diseñada para organizar tus tareas, exámenes, horarios y calificaciones en un entorno seguro, eficiente y optimizado para tu éxito estudiantil.</p>
             
             <div class="hero-buttons">
-                <a href="register.html" id="heroStartBtn" class="btn-hero-primary">Comenzar Ahora 🚀</a>
-                <a href="#caracteristicas" class="btn-hero-secondary">Saber Más 📖</a>
+                <a href="register.html" id="heroStartBtn" class="btn-hero-primary">Comenzar Ahora</a>
+                <a href="#caracteristicas" class="btn-hero-secondary">Saber Más</a>
             </div>
         </section>
 
@@ -66,19 +67,19 @@
 
             <div class="features-grid">
                 <article class="feature-card">
-                    <div class="feature-icon-wrapper">📝</div>
+                    <div class="feature-icon-wrapper" aria-hidden="true">&#128221;</div>
                     <h3>Gestión de Formularios</h3>
                     <p>Crea registros detallados de tus tareas y exámenes, adjuntando material de estudio y controlando fechas límites de entrega sin complicaciones.</p>
                 </article>
 
                 <article class="feature-card">
-                    <div class="feature-icon-wrapper">📊</div>
+                    <div class="feature-icon-wrapper" aria-hidden="true">&#128202;</div>
                     <h3>Seguimiento de Notas</h3>
                     <p>Lleva el control absoluto de tus calificaciones por materia y visualiza tu promedio general en tiempo real con analíticas claras y profesionales.</p>
                 </article>
 
                 <article class="feature-card">
-                    <div class="feature-icon-wrapper">📅</div>
+                    <div class="feature-icon-wrapper" aria-hidden="true">&#128197;</div>
                     <h3>Horario y Recursos</h3>
                     <p>Organiza tu agenda semanal de clases y mantén tu biblioteca personal de documentos y enlaces institucionales siempre al alcance de tu mano.</p>
                 </article>
@@ -87,7 +88,7 @@
 
     </main>
 
-    <!-- Pie de Página Institucional Corregido y Elegante -->
+    <!-- Pie de Página Institucional -->
     <footer class="app-footer" role="contentinfo">
         <div class="footer-container">
             <p>&copy; 2026 <strong>CRECER</strong> &bull; Plataforma Institucional de Gestión Académica</p>

@@ -1,6 +1,6 @@
 /* ==========================================================================
    ESTILOS DE FORMULARIOS Y TARJETAS DE CAPTURA - CRECER
-   Estilo: Formal, Elegante y 1000% Responsivo
+   Estilo: Formal, Elegante y Responsivo
    ========================================================================== */
 
 :root {
@@ -106,10 +106,6 @@ body.dashboard-body {
   display: flex;
   align-items: center;
   gap: 6px;
-}
-
-.app-icon {
-  font-size: 1rem;
 }
 
 .app-name {
@@ -477,10 +473,6 @@ body.dashboard-body {
   justify-content: center;
   gap: 0.6rem;
   pointer-events: none;
-}
-
-.file-icon {
-  font-size: 1.25rem;
 }
 
 .file-text {

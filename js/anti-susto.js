@@ -1,11 +1,23 @@
-document.addEventListener('DOMContentLoaded', async () => {
-    // Configuración de Supabase (Reemplaza con tus credenciales reales o usa respaldo local robusto)
-    const SUPABASE_URL = 'https://tu-proyecto.supabase.co';
-    const SUPABASE_KEY = 'tu-anon-key-aqui';
-    const supabase = (window.supabase && SUPABASE_URL !== 'https://tu-proyecto.supabase.co') 
-        ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) 
-        : null;
+/* =================================================================
+   SISTEMA ANTI-SUSTO - PLATAFORMA CRECER (FIREBASE FIRESTORE)
+   ================================================================= */
 
+import { auth, db } from './firebase-config.js';
+import { 
+    collection, 
+    doc, 
+    setDoc, 
+    getDocs, 
+    deleteDoc, 
+    query, 
+    where, 
+    orderBy, 
+    serverTimestamp 
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { mostrarToast, mostrarConfirmacion } from './global.js';
+
+document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('formCargaTarea');
     const btnEnableNotifications = document.getElementById('btnEnableNotifications');
     const permissionBanner = document.getElementById('permissionBanner');
@@ -19,6 +31,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const themeToggle = document.getElementById('themeToggle');
     const menuToggle = document.getElementById('menuToggle');
     const navMenu = document.getElementById('navMenu');
+
+    let usuarioActualUid = null;
 
     // Sincronización del botón de Modo Claro / Oscuro
     const actualizarIconoTema = (tema) => {
@@ -53,47 +67,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Sistema de Notificaciones Toast Elegantes
-    function mostrarToast(mensaje, tipo = 'success') {
-        let container = document.getElementById('toast-container');
-        if (!container) {
-            container = document.createElement('div');
-            container.id = 'toast-container';
-            document.body.appendChild(container);
+    // Observar sesión activa de Firebase para asociar las tareas al usuario logueado
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            usuarioActualUid = user.uid;
+            refrescarLista();
+        } else {
+            // Si no hay sesión, redirigir al login por seguridad
+            window.location.href = 'login.html';
         }
-
-        const toast = document.createElement('div');
-        toast.className = `toast toast-${tipo}`;
-        toast.innerHTML = `
-            <span>${tipo === 'success' ? '✅' : '⚠️'} ${mensaje}</span>
-            <button type="button" class="toast-close">&times;</button>
-        `;
-
-        container.appendChild(toast);
-        requestAnimationFrame(() => toast.classList.add('show'));
-
-        const cerrar = () => {
-            toast.classList.remove('show');
-            setTimeout(() => toast.remove(), 300);
-        };
-
-        toast.querySelector('.toast-close').addEventListener('click', cerrar);
-        setTimeout(cerrar, 4000);
-    }
-
-    // Registrar Service Worker de forma segura para notificaciones persistentes
-    if ('serviceWorker' in navigator) {
-        try {
-            await navigator.serviceWorker.register('./sw.js');
-        } catch (err) {
-            console.error('Error registrando Service Worker:', err);
-        }
-    }
-
-    // Ocultar notificación al tocarla
-    phoneNotification.addEventListener('click', () => {
-        phoneNotification.classList.remove('show');
     });
+
+    // Registrar Service Worker de forma obligatoria para notificaciones push en segundo plano
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js').catch((err) => {
+            console.error('[CRECER PWA]: Error registrando Service Worker:', err);
+        });
+    }
+
+    // Ocultar notificación in-app al tocarla
+    if (phoneNotification) {
+        phoneNotification.addEventListener('click', () => {
+            phoneNotification.classList.remove('show');
+        });
+    }
 
     // Mostrar cartel emergente flotante in-app con estilo institucional
     function mostrarNotificacionCelular(titulo, mensaje) {
@@ -111,7 +108,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         setTimeout(() => phoneNotification.classList.remove('show'), 5000);
     }
 
-    // Programar la notificación automática 24 horas antes
+    // Programar notificación real 24 horas antes con soporte para Service Worker
     function programarAlerta24Horas(tarea) {
         const ahora = new Date().getTime();
         const tiempoEntrega = new Date(tarea.fechaEntrega).getTime();
@@ -128,67 +125,70 @@ document.addEventListener('DOMContentLoaded', async () => {
                 mostrarNotificacionCelular(titulo, mensaje);
 
                 if ("Notification" in window && Notification.permission === 'granted') {
-                    const registration = await navigator.serviceWorker.ready;
-                    if (registration && registration.showNotification) {
-                        registration.showNotification(titulo, {
-                            body: mensaje,
-                            icon: './img/logo.png',
-                            badge: './img/logo.png',
-                            vibrate: [200, 100, 200]
-                        });
-                    } else {
-                        new Notification(titulo, { body: mensaje });
+                    if ('serviceWorker' in navigator) {
+                        const registration = await navigator.serviceWorker.ready;
+                        if (registration && registration.showNotification) {
+                            registration.showNotification(titulo, {
+                                body: mensaje,
+                                icon: './img/logo.png',
+                                badge: './img/logo.png',
+                                vibrate: [200, 100, 200],
+                                tag: `anti-susto-${tarea.id}`
+                            });
+                            return;
+                        }
                     }
+                    new Notification(titulo, { body: mensaje });
                 }
             }, tiempoFaltante);
         }
     }
 
-    // Obtener tareas desde Supabase o respaldo local seguro (`localStorage`)
+    // Obtener tareas desde Firestore filtradas estrictamente por el usuario actual
     async function obtenerTareasDB() {
+        if (!usuarioActualUid) return [];
         try {
-            if (!supabase) {
-                return JSON.parse(localStorage.getItem('crecer_tareas_antisusto')) || [];
-            }
-            const { data, error } = await supabase.from('tareas').select('*').order('fechaEntrega', { ascending: true });
-            if (error) throw error;
-            return data || [];
+            const q = query(
+                collection(db, 'tareas_antisusto'), 
+                where('userId', '==', usuarioActualUid),
+                orderBy('fechaEntrega', 'asc')
+            );
+            const querySnapshot = await getDocs(q);
+            const tareas = [];
+            querySnapshot.forEach((docSnap) => {
+                tareas.push({ id: docSnap.id, ...docSnap.data() });
+            });
+            return tareas;
         } catch (error) {
-            console.error('Error al sincronizar tareas:', error);
-            return JSON.parse(localStorage.getItem('crecer_tareas_antisusto')) || [];
+            console.error('Error al obtener tareas de Firestore:', error);
+            mostrarToast('No se pudieron sincronizar las tareas del servidor.', 'danger');
+            return [];
         }
     }
 
-    // Guardar tarea con manejo robusto
+    // Guardar tarea directamente en Firestore vinculada al UID del usuario
     async function guardarTareaDB(nuevaTarea) {
         try {
-            if (!supabase) {
-                let local = JSON.parse(localStorage.getItem('crecer_tareas_antisusto')) || [];
-                local.push(nuevaTarea);
-                localStorage.setItem('crecer_tareas_antisusto', JSON.stringify(local));
-                return;
-            }
-            const { error } = await supabase.from('tareas').insert([nuevaTarea]);
-            if (error) throw error;
+            const tareaRef = doc(collection(db, 'tareas_antisusto'));
+            await setDoc(tareaRef, {
+                id: tareaRef.id,
+                userId: usuarioActualUid,
+                ...nuevaTarea,
+                creadoEn: serverTimestamp()
+            });
         } catch (error) {
-            console.error('Error guardando en DB, guardando en respaldo local:', error);
-            let local = JSON.parse(localStorage.getItem('crecer_tareas_antisusto')) || [];
-            local.push(nuevaTarea);
-            localStorage.setItem('crecer_tareas_antisusto', JSON.stringify(local));
+            console.error('Error guardando tarea en Firestore:', error);
+            throw error;
         }
     }
 
-    // Eliminar tarea de la base de datos o almacenamiento local
+    // Eliminar tarea de Firestore con confirmación modal
     async function eliminarTarea(id) {
+        const confirmado = await mostrarConfirmacion('¿Estás seguro de que deseas eliminar esta entrega programada?');
+        if (!confirmado) return;
+
         try {
-            if (!supabase) {
-                let local = JSON.parse(localStorage.getItem('crecer_tareas_antisusto')) || [];
-                local = local.filter(t => t.id !== id);
-                localStorage.setItem('crecer_tareas_antisusto', JSON.stringify(local));
-            } else {
-                const { error } = await supabase.from('tareas').delete().eq('id', id);
-                if (error) throw error;
-            }
+            await deleteDoc(doc(db, 'tareas_antisusto', id));
             mostrarToast('La entrega ha sido eliminada correctamente.', 'success');
             await refrescarLista();
         } catch (error) {
@@ -197,8 +197,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Renderizar la lista de tareas en pantalla
+    // Renderizar lista de tareas en pantalla y programar alertas
     async function refrescarLista() {
+        if (!taskList) return;
         const tareas = await obtenerTareasDB();
         taskList.innerHTML = '';
 
@@ -230,7 +231,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Solicitar permisos nativos de notificaciones
+    // Solicitar permisos nativos de notificaciones al navegador/móvil
     if (btnEnableNotifications) {
         btnEnableNotifications.addEventListener('click', async () => {
             if (!("Notification" in window)) {
@@ -243,6 +244,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (permissionBanner) permissionBanner.style.display = 'none';
                     mostrarNotificacionCelular("¡Alertas Institucionales Activadas!", "Recibirás avisos automáticos 24 horas antes de cada entrega.");
                     mostrarToast("Permisos concedidos con éxito.", "success");
+
+                    if ('serviceWorker' in navigator) {
+                        const reg = await navigator.serviceWorker.ready;
+                        reg.showNotification("CRECER &bull; Sistema Anti-Susto", {
+                            body: "¡Las notificaciones push del sistema están funcionando correctamente!",
+                            icon: "./img/logo.png",
+                            badge: "./img/logo.png"
+                        });
+                    }
                 } else {
                     mostrarToast("Has denegado los permisos de notificación en el navegador.", "danger");
                 }
@@ -257,7 +267,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (permissionBanner) permissionBanner.style.display = 'none';
     }
 
-    // Manejar envío del formulario
+    // Manejar envío del formulario de registro de tarea
     if (form) {
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -272,7 +282,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             const nuevaTarea = {
-                id: Date.now(),
                 materia: materiaInput.value.trim(),
                 titulo: tituloInput.value.trim(),
                 fechaEntrega: fechaInput.value
@@ -289,13 +298,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 mostrarNotificacionCelular(
                     "¡Guardado Exitoso! ☁️",
-                    `Entrega de ${nuevaTarea.materia} sincronizada. Alerta programada para 24hs antes.`
+                    `Entrega de ${nuevaTarea.materia} sincronizada en Firestore.`
                 );
                 mostrarToast("Tarea registrada y alerta configurada correctamente.", "success");
                 form.reset();
             } catch (error) {
                 console.error("Error al procesar formulario:", error);
-                mostrarToast("No se pudo guardar la tarea en el servidor.", "danger");
+                mostrarToast("No se pudo guardar la tarea en Firestore.", "danger");
             } finally {
                 if (btnSubmitTarea) {
                     btnSubmitTarea.disabled = false;
@@ -304,7 +313,4 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     }
-
-    // Carga inicial de datos
-    await refrescarLista();
 });

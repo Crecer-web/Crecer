@@ -12,9 +12,25 @@ import {
     query, 
     where 
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { observarSesion, mostrarToast } from './global.js';
+import { observarSesion, mostrarToast, mostrarConfirmacion } from './global.js';
 
 let currentUser = null;
+
+/**
+ * Valida que una URL sea estrictamente segura (http:// o https://)
+ * y previene la inyección de esquemas maliciosos como javascript:
+ */
+function esUrlSegura(url) {
+    if (!url || typeof url !== 'string') return false;
+    const urlLimpia = url.trim();
+    if (!urlLimpia) return false;
+    try {
+        const parsed = new URL(urlLimpia);
+        return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+    } catch (_) {
+        return false;
+    }
+}
 
 /**
  * Conmutación e inicialización estricta del Tema
@@ -123,6 +139,12 @@ if (resourceForm) {
             return;
         }
 
+        // Validación estricta de protocolo seguro (http:// o https://)
+        if (!esUrlSegura(url)) {
+            mostrarToast('⚠️ Por favor ingresa un enlace web válido que comience con http:// o https://', 'danger');
+            return;
+        }
+
         const btn = document.getElementById('btnGuardarRecurso');
         if (btn) btn.disabled = true;
 
@@ -178,13 +200,19 @@ async function cargarRecursos() {
 
             elementosVisibles++;
 
+            // Verificar si el enlace guardado en la base de datos es seguro
+            const enlaceValido = esUrlSegura(data.url);
+            const enlaceHtml = enlaceValido 
+                ? `<a href="${sanearTexto(data.url)}" target="_blank" rel="noopener noreferrer" class="link-btn">Abrir Recurso 🔗</a>`
+                : `<span class="link-btn disabled" style="opacity:0.6; cursor:not-allowed;">Enlace Inseguro ⚠️</span>`;
+
             const card = document.createElement('div');
             card.className = 'resource-card';
             card.innerHTML = `
                 <div>
                     <span>${sanearTexto(data.materia)}</span>
                     <h4>${sanearTexto(data.titulo)}</h4>
-                    <a href="${sanearTexto(data.url)}" target="_blank" rel="noopener noreferrer" class="link-btn">Abrir Recurso 🔗</a>
+                    ${enlaceHtml}
                 </div>
                 <button type="button" class="btn-delete" data-id="${docSnapshot.id}">🗑️ Eliminar</button>
             `;
@@ -197,11 +225,16 @@ async function cargarRecursos() {
             return;
         }
 
-        // Eventos para mover recurso a la papelera
+        // Eventos para mover recurso a la papelera utilizando mostrarConfirmacion estandarizado
         document.querySelectorAll('.btn-delete').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 const id = e.currentTarget.getAttribute('data-id');
-                if (window.confirm('¿Deseas enviar este recurso a la papelera de reciclaje?')) {
+                const confirmado = await mostrarConfirmacion(
+                    '¿Deseas enviar este recurso a la papelera de reciclaje?',
+                    'Enviar a Papelera'
+                );
+
+                if (confirmado) {
                     try {
                         const docRef = doc(db, "recursos", id);
                         await updateDoc(docRef, {

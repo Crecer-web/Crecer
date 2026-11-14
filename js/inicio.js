@@ -167,24 +167,23 @@ function renderizarTareas() {
             adjuntoHTML = `
                 <div class="card-attachment" style="margin-top: 0.5rem;">
                     <button type="button" class="btn-abrir-archivo" data-url="${tarea.adjuntoUrl}" data-nombre="${tarea.adjuntoNombre || 'archivo'}" style="background: none; border: none; color: var(--accent); font-weight: 600; text-decoration: underline; cursor: pointer; padding: 0; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 0.3rem;">
-                        📎 ${sanearHTML(tarea.adjuntoNombre || 'Ver archivo adjunto')} ↗
+                        ${sanearHTML(tarea.adjuntoNombre || 'Ver archivo adjunto')}
                     </button>
                 </div>`;
         } else if (tarea.adjuntoNombre) {
             adjuntoHTML = `
                 <div class="card-attachment" style="margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.85rem;">
-                    📄 Adjunto: <strong>${sanearHTML(tarea.adjuntoNombre)}</strong>
+                    Adjunto: <strong>${sanearHTML(tarea.adjuntoNombre)}</strong>
                 </div>`;
         }
 
-        // Estructura con los tres botones (Completada, Editar, Eliminar) uno al lado del otro
         card.innerHTML = `
             <div class="card-body-content">
                 <div class="card-header">
                     <span class="badge ${badgeClass}">${sanearHTML(tipoBadge)}</span>
-                    <span class="card-dates">📅 ${sanearHTML(fechaMostrar)} ${sanearHTML(horaMostrar)}</span>
+                    <span class="card-dates">Fecha: ${sanearHTML(fechaMostrar)} ${sanearHTML(horaMostrar)}</span>
                 </div>
-                <h3 style="margin-bottom: 0.2rem;">📚 ${sanearHTML(tarea.materia || 'Materia sin nombre')}</h3>
+                <h3 style="margin-bottom: 0.2rem;">${sanearHTML(tarea.materia || 'Materia sin nombre')}</h3>
                 <p class="card-desc" style="font-size: 0.95rem; margin-bottom: 0.4rem;">
                     <strong>Tema:</strong> ${sanearHTML(temaMostrar)}
                 </p>
@@ -194,13 +193,13 @@ function renderizarTareas() {
             
             <div class="card-actions">
                 <button type="button" class="btn-status" data-id="${tarea.id}">
-                    ${tarea.completada ? '↩️ Pendiente' : '✅ Completada'}
+                    ${tarea.completada ? 'Marcar Pendiente' : 'Completar'}
                 </button>
                 <a href="formularios.html?id=${tarea.id}" class="btn-edit-card" title="Editar tarea">
-                    ✏️ Editar
+                    Editar
                 </a>
                 <button type="button" class="btn-trash" data-id="${tarea.id}" title="Enviar a la papelera">
-                    🗑️ Eliminar
+                    Eliminar
                 </button>
             </div>
         `;

@@ -126,7 +126,7 @@ function descargarCSV(contenido, nombreArchivo) {
 }
 
 /**
- * Función mejorada para abrir la ventana de impresión limpia sin mostrar "about:blank"
+ * Función mejorada para abrir la ventana de impresión limpia
  */
 function abrirVentanaImpresion(titulo, contenidoHTML) {
     const ventana = window.open('', '_blank');
@@ -160,7 +160,6 @@ function abrirVentanaImpresion(titulo, contenidoHTML) {
                     margin: 0;
                 }
 
-                /* Encabezado del reporte ordenado */
                 .report-header {
                     display: flex;
                     justify-content: space-between;
@@ -199,7 +198,6 @@ function abrirVentanaImpresion(titulo, contenidoHTML) {
                     box-shadow: 0 1px 2px rgba(0,0,0,0.05);
                 }
 
-                /* Títulos de sección internos */
                 h2 {
                     color: var(--primary);
                     font-size: 1.1rem;
@@ -211,7 +209,6 @@ function abrirVentanaImpresion(titulo, contenidoHTML) {
                     letter-spacing: -0.01em;
                 }
 
-                /* Tablas ordenadas y limpias */
                 table {
                     width: 100%;
                     border-collapse: collapse;
@@ -252,7 +249,6 @@ function abrirVentanaImpresion(titulo, contenidoHTML) {
                     background-color: #fcfcfd;
                 }
 
-                /* Pie de página institucional */
                 .footer-print {
                     margin-top: 3.5rem;
                     font-size: 0.78rem;
@@ -262,7 +258,6 @@ function abrirVentanaImpresion(titulo, contenidoHTML) {
                     padding-top: 1.2rem;
                 }
 
-                /* Botón flotante de impresión */
                 .print-actions {
                     position: fixed;
                     top: 20px;
@@ -297,7 +292,7 @@ function abrirVentanaImpresion(titulo, contenidoHTML) {
         </head>
         <body>
             <button class="print-actions" onclick="window.print()">
-                🖨️ Imprimir / Guardar PDF
+                Imprimir / Guardar PDF
             </button>
 
             <div class="report-header">
@@ -306,7 +301,7 @@ function abrirVentanaImpresion(titulo, contenidoHTML) {
                     <p>Plataforma Institucional de Gestión Académica</p>
                 </div>
                 <div class="report-badge">
-                    📅 Fecha: ${new Date().toLocaleDateString('es-AR')}
+                    Fecha: ${new Date().toLocaleDateString('es-AR')}
                 </div>
             </div>
 
@@ -328,6 +323,7 @@ function abrirVentanaImpresion(titulo, contenidoHTML) {
     `);
     ventana.document.close();
 }
+
 /**
  * Obtiene todas las calificaciones del usuario ordenadas alfabéticamente por materia
  */
@@ -495,7 +491,7 @@ async function exportarReporteIntegral() {
             obtenerNotasUsuario()
         ]);
 
-        let html = `<h2>1. Tareas y Exámenes de la Agenda </h2>`;
+        let html = `<h2>1. Tareas y Exámenes de la Agenda</h2>`;
         if (listaTareas.length > 0) {
             html += `<table><thead><tr><th>Materia</th><th>Título / Tema</th><th>Tipo</th><th>Fecha y Hora</th><th>Descripción</th><th>Estado</th></tr></thead><tbody>`;
             listaTareas.forEach(d => {
@@ -513,7 +509,7 @@ async function exportarReporteIntegral() {
             html += `<p>No hay tareas registradas en la agenda.</p>`;
         }
 
-        html += `<h2 style="margin-top:2.5rem;">2. Calificaciones Académicas </h2>`;
+        html += `<h2 style="margin-top:2.5rem;">2. Calificaciones Académicas</h2>`;
         if (listaNotas.length > 0) {
             html += `<table><thead><tr><th>Materia</th><th>Evaluación</th><th>Calificación</th><th>Fecha</th></tr></thead><tbody>`;
             listaNotas.forEach(d => {

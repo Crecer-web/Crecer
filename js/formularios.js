@@ -1,5 +1,5 @@
 /* =================================================================
-   MÓDULO DE CARGA Y EDICIÓN DE FORMULARIOS - PLATAFORMA CRECER
+   MÓDULO DE CARGA Y EDICIÓN DE FORMULARIOS - PLATAFORMA CRECER (Con Compresión de Imágenes)
    ================================================================= */
 
 import { db } from './firebase-config.js';
@@ -17,7 +17,7 @@ let editTaskId = null;
 let archivoBase64Global = '';
 let nombreArchivoGlobal = '';
 
-// Registro de Service Worker para soporte PWA y notificaciones
+// Registro seguro de Service Worker para soporte PWA y notificaciones
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch((err) => {
         console.error('Error al registrar Service Worker:', err);
@@ -68,16 +68,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (tituloPrinc) tituloPrinc.textContent = 'Editar Tarea o Examen';
         if (subtitulo) subtitulo.textContent = 'Modifica los campos necesarios y actualiza la información académica al instante.';
-        if (btnGuardar) btnGuardar.textContent = '💾 Actualizar Formulario';
-
-        cargarDatosParaEditar(editTaskId);
+        if (btnGuardar) btnGuardar.textContent = 'Actualizar Formulario';
     }
 });
 
-// Verificación de sesión activa de usuario
+// Verificación asíncrona robusta de la sesión activa de Firebase
 observarSesion((user) => {
     if (user) {
         currentUser = user;
+        if (editTaskId) {
+            cargarDatosParaEditar(editTaskId);
+        }
     } else {
         window.location.href = 'login.html';
     }
@@ -93,6 +94,14 @@ async function cargarDatosParaEditar(id) {
 
         if (docSnap.exists()) {
             const data = docSnap.data();
+            
+            // Validación de seguridad por ID de usuario
+            if (data.userId && data.userId !== currentUser.uid) {
+                mostrarToast("No tienes permisos para editar este registro.", "danger");
+                setTimeout(() => { window.location.href = 'inicio.html'; }, 1500);
+                return;
+            }
+
             document.getElementById('tipoFormulario').value = data.tipo || '';
             document.getElementById('materiaInput').value = data.materia || '';
             document.getElementById('temaInput').value = data.tema || '';
@@ -105,7 +114,7 @@ async function cargarDatosParaEditar(id) {
                 archivoBase64Global = data.adjuntoUrl || '';
                 const fileTextLabel = document.getElementById('fileTextLabel');
                 if (fileTextLabel) {
-                    fileTextLabel.textContent = `📎 Archivo cargado previamente: ${data.adjuntoNombre}`;
+                    fileTextLabel.textContent = `Archivo cargado previamente: ${data.adjuntoNombre}`;
                 }
             }
         } else {
@@ -153,35 +162,83 @@ function mostrarNotificacionFlotante(titulo, mensaje) {
     }, 4500);
 }
 
-// Manejador robusto del campo de archivos con lectura garantizada
+/**
+ * Función para comprimir imágenes automáticamente antes de pasarlas a Base64
+ */
+function comprimirImagen(archivo, calidad = 0.7, anchoMax = 1200) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(archivo);
+        reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = () => {
+                let ancho = img.width;
+                let alto = img.height;
+
+                // Redimensionar si supera las dimensiones máximas
+                if (ancho > alto) {
+                    if (ancho > anchoMax) {
+                        alto = Math.round((alto * anchoMax) / ancho);
+                        ancho = anchoMax;
+                    }
+                } else {
+                    if (alto > anchoMax) {
+                        ancho = Math.round((ancho * anchoMax) / alto);
+                        alto = anchoMax;
+                    }
+                }
+
+                const canvas = document.createElement('canvas');
+                canvas.width = ancho;
+                canvas.height = alto;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, ancho, alto);
+
+                // Exportar como JPEG comprimido a Base64
+                const dataUrlComprimida = canvas.toDataURL('image/jpeg', calidad);
+                resolve(dataUrlComprimida);
+            };
+            img.onerror = (error) => reject(error);
+        };
+        reader.onerror = (error) => reject(error);
+    });
+}
+
+// Manejador del campo de archivos con compresión automática integrada
 const materialInput = document.getElementById('materialInput');
 const fileTextLabel = document.getElementById('fileTextLabel');
 
 if (materialInput && fileTextLabel) {
-    materialInput.addEventListener('change', (e) => {
+    materialInput.addEventListener('change', async (e) => {
         const archivo = e.target.files[0];
         if (archivo) {
             nombreArchivoGlobal = archivo.name;
-            fileTextLabel.textContent = `⏳ Leyendo archivo: ${archivo.name}...`;
+            fileTextLabel.textContent = `Procesando y optimizando: ${archivo.name}...`;
 
-            const reader = new FileReader();
-            
-            reader.onload = function(uploadEvent) {
-                archivoBase64Global = uploadEvent.target.result;
-                fileTextLabel.textContent = `📎 Archivo listo para guardar: ${archivo.name}`;
-                mostrarToast('Archivo cargado con éxito en memoria.', 'success');
-            };
-
-            reader.onerror = function() {
-                console.error("Error al leer el archivo con FileReader.");
-                mostrarToast('Error al leer el archivo adjunto.', 'danger');
+            try {
+                // Verificamos si es una imagen para aplicar compresión canvas
+                if (archivo.type.startsWith('image/')) {
+                    archivoBase64Global = await comprimirImagen(archivo, 0.7, 1200);
+                    fileTextLabel.textContent = `Imagen optimizada y lista: ${archivo.name}`;
+                    mostrarToast('Imagen optimizada y cargada con éxito.', 'success');
+                } else {
+                    // Si es un PDF u otro documento, leemos de forma estándar
+                    const reader = new FileReader();
+                    reader.onload = function(uploadEvent) {
+                        archivoBase64Global = uploadEvent.target.result;
+                        fileTextLabel.textContent = `Archivo listo para guardar: ${archivo.name}`;
+                        mostrarToast('Archivo cargado con éxito.', 'success');
+                    };
+                    reader.readAsDataURL(archivo);
+                }
+            } catch (error) {
+                console.error("Error al procesar el archivo:", error);
+                mostrarToast('Error al procesar el archivo adjunto.', 'danger');
                 fileTextLabel.textContent = 'Error al procesar el archivo. Intenta de nuevo.';
                 archivoBase64Global = '';
                 nombreArchivoGlobal = '';
-            };
-
-            // Lectura como URL de datos (Base64 con metadatos MIME)
-            reader.readAsDataURL(archivo);
+            }
         } else {
             fileTextLabel.textContent = 'Haz clic para adjuntar guías, PDFs o imágenes de apoyo';
         }
@@ -198,7 +255,8 @@ if (formularioForm) {
         e.preventDefault();
 
         if (!currentUser) {
-            mostrarToast("Debes iniciar sesión para realizar esta acción.", "danger");
+            mostrarToast("Tu sesión ha expirado o no se ha inicializado. Por favor, inicia sesión nuevamente.", "danger");
+            setTimeout(() => { window.location.href = 'login.html'; }, 1500);
             return;
         }
 
@@ -217,7 +275,7 @@ if (formularioForm) {
         const btnGuardar = document.getElementById('btnGuardar');
         if (btnGuardar) {
             btnGuardar.disabled = true;
-            btnGuardar.textContent = editTaskId ? 'Actualizando datos... ⚡' : 'Guardando formulario... ⚡';
+            btnGuardar.textContent = editTaskId ? 'Actualizando datos...' : 'Guardando formulario...';
         }
 
         const fechaHoraString = `${fechaEntrega}T${horaEntrega}`;
@@ -232,16 +290,16 @@ if (formularioForm) {
                 horaEntrega,
                 fechaHoraIso: fechaHoraString,
                 adjuntoNombre: nombreArchivoGlobal || '',
-                adjuntoUrl: archivoBase64Global || ''
+                adjuntoUrl: archivoBase64Global || '',
+                userId: currentUser.uid
             };
 
             if (editTaskId) {
                 const docRef = doc(db, "formularios", editTaskId);
                 datosFormulario.actualizadoEn = new Date().toISOString();
                 await updateDoc(docRef, datosFormulario);
-                mostrarToast("¡Formulario actualizado con éxito!", "success");
+                mostrarToast("Formulario actualizado con éxito.", "success");
             } else {
-                datosFormulario.userId = currentUser.uid;
                 datosFormulario.completada = false;
                 datosFormulario.enPapelera = false;
                 datosFormulario.creadoEn = new Date().toISOString();
@@ -249,10 +307,10 @@ if (formularioForm) {
                 await addDoc(collection(db, "formularios"), datosFormulario);
                 
                 mostrarNotificacionFlotante(
-                    "¡Alerta Registrada! 🚨",
-                    `Se programó el aviso automático 24hs antes para ${materia}.`
+                    "Alerta Registrada",
+                    `Se programó el aviso automático previo para ${materia}.`
                 );
-                mostrarToast("¡Formulario guardado con éxito!", "success");
+                mostrarToast("Formulario guardado con éxito.", "success");
             }
 
             setTimeout(() => {
@@ -261,10 +319,10 @@ if (formularioForm) {
 
         } catch (error) {
             console.error("Error al guardar en Firestore:", error);
-            mostrarToast('Error al procesar los datos en la base de datos.', 'danger');
+            mostrarToast(`Error al guardar: ${error.message}`, 'danger');
             if (btnGuardar) {
                 btnGuardar.disabled = false;
-                btnGuardar.textContent = editTaskId ? '💾 Actualizar Formulario' : '💾 Guardar Formulario y Automatizar Alerta';
+                btnGuardar.textContent = editTaskId ? 'Actualizar Formulario' : 'Guardar Formulario y Automatizar Alerta';
             }
         }
     });

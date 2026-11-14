@@ -1,0 +1,14 @@
+# Dependencias y entornos virtuales de Python
+venv/
+__pycache__/
+*.pyc
+
+# Archivo de variables de entorno (Contraseña de aplicación de Gmail, etc.)
+.env
+
+# Credenciales privadas de Firebase Admin (Llave de servicio JSON)
+serviceAccountKey.json
+api/serviceAccountKey.json
+
+# Archivos de configuración local del editor (VS Code)
+.vscode/

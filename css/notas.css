@@ -1,5 +1,5 @@
 /* ==========================================================================
-   MÓDULO DE CALIFICACIONES Y PROMEDIOS POR MATERIA - CRECER (Formato Compacto + Modal)
+   MÓDULO DE CALIFICACIONES Y PROMEDIOS POR MATERIA - CRECER
    ========================================================================== */
 
 :root {
@@ -464,7 +464,7 @@ body.dashboard-body {
   color: #b91c1c;
 }
 
-/* Lista de Evaluaciones Compactas con botones de edición */
+/* Lista de Evaluaciones Compactas */
 .evaluaciones-list {
   display: flex;
   flex-direction: column;
@@ -534,9 +534,7 @@ body.dashboard-body {
   background: rgba(239, 68, 68, 0.15);
 }
 
-/* ==========================================
-   MINI VENTANA MODAL EMERGENTE
-   ========================================== */
+/* Modal de Edición */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -568,18 +566,6 @@ body.dashboard-body {
   width: 100%;
   max-width: 420px;
   padding: 1.25rem;
-  animation: modalEntrada 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes modalEntrada {
-  from {
-    transform: scale(0.95) translateY(10px);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1) translateY(0);
-    opacity: 1;
-  }
 }
 
 .modal-header {
@@ -628,7 +614,6 @@ body.dashboard-body {
   grid-column: 1 / -1;
 }
 
-/* Modo Oscuro Badges */
 :root[data-theme="dark"] .materia-promedio-badge.aprobado,
 body[data-theme="dark"] .materia-promedio-badge.aprobado {
   background: rgba(22, 101, 52, 0.35);
@@ -643,8 +628,7 @@ body[data-theme="dark"] .materia-promedio-badge.reprobado {
   border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
-/* Footer */
-.app-footer, .auth-footer-simple {
+.auth-footer-simple {
   background-color: var(--header-bg, #0f172a);
   color: #94a3b8;
   text-align: center;
@@ -653,16 +637,15 @@ body[data-theme="dark"] .materia-promedio-badge.reprobado {
   width: 100%;
 }
 
-.app-footer p, .auth-footer-simple p {
+.auth-footer-simple p {
   margin: 0;
   font-size: 0.8rem;
 }
 
-.app-footer strong, .auth-footer-simple strong {
+.auth-footer-simple strong {
   color: #f8fafc;
 }
 
-/* Responsivo Mobile */
 @media (max-width: 860px) {
   .menu-toggle {
     display: flex;

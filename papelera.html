@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Papelera - CRECER</title>
     
-    <!-- Script síncrono para prevenir parpadeos del tema -->
+    <!-- Script síncrono unificado para prevenir parpadeos del tema -->
     <script>
         (function() {
             const temaGuardado = localStorage.getItem('theme') || 'light';
@@ -78,8 +78,8 @@
                     <p>Los elementos eliminados se borran automáticamente de forma definitiva tras 48 horas. Puedes restaurarlos o vaciar la papelera manualmente.</p>
                 </div>
                 <div class="trash-actions-header">
-                    <button type="button" id="btnVaciarPapelera" class="btn-danger-outline">🗑️ Vaciar Papelera</button>
-                    <a href="inicio.html" class="btn-secondary">← Volver al Panel</a>
+                    <button type="button" id="btnVaciarPapelera" class="btn-danger-outline">Vaciar Papelera</button>
+                    <a href="inicio.html" class="btn-secondary">Volver al Panel</a>
                 </div>
             </div>
 
@@ -96,7 +96,7 @@
     <div id="modalConfirmacion" class="modal-overlay hidden">
         <div class="modal-card">
             <div class="modal-header">
-                <h3>⚠️ Confirmar Eliminación</h3>
+                <h3>Confirmar Eliminación</h3>
                 <button type="button" id="btnCerrarModal" class="btn-close-modal">&times;</button>
             </div>
             <div class="modal-body">

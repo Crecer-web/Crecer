@@ -1,5 +1,5 @@
 /* =================================================================
-   MÓDULO PAPELERA DE RECICLAJE - CRECER (Versión Definitiva)
+   MÓDULO PAPELERA DE RECICLAJE - CRECER
    ================================================================= */
 
 import { db } from './firebase-config.js';
@@ -37,7 +37,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const navMenu = document.getElementById('navMenu');
     const btnVaciarPapelera = document.getElementById('btnVaciarPapelera');
 
-    // Variables de control para el Modal
     const modal = document.getElementById('modalConfirmacion');
     const btnCerrarModal = document.getElementById('btnCerrarModal');
     const btnCancelarModal = document.getElementById('btnCancelarModal');
@@ -45,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalMensajeTexto = document.getElementById('modalMensajeTexto');
 
     let accionPendiente = null;
+    let currentUser = null;
 
     const abrirModal = (mensaje, callback) => {
         if (modalMensajeTexto) modalMensajeTexto.textContent = mensaje;
@@ -112,39 +112,38 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    if (btnVaciarPapelera) {
+        btnVaciarPapelera.addEventListener('click', () => {
+            if (!currentUser) return;
+            abrirModal('¿Estás seguro de vaciar toda la papelera? Se eliminarán permanentemente todos los elementos.', async () => {
+                await vaciarPapeleraCompleta(currentUser.uid);
+            });
+        });
+    }
+
     observarSesion(async (user) => {
         if (!user) {
             window.location.href = 'login.html';
             return;
         }
-        await cargarElementosPapelera(user.uid);
-
-        if (btnVaciarPapelera) {
-            btnVaciarPapelera.addEventListener('click', () => {
-                abrirModal('¿Estás seguro de vaciar toda la papelera? Se eliminarán permanentemente todos los elementos.', async () => {
-                    await vaciarPapeleraCompleta(user.uid);
-                });
-            });
-        }
+        currentUser = user;
+        await cargarElementosPapelera(currentUser.uid);
     });
 
-    /**
-     * Carga elementos, evalúa expiración automática a las 48 horas y los depura en Firestore[cite: 10].
-     */
     async function cargarElementosPapelera(userId) {
         if (!trashGrid) return;
 
         try {
             trashGrid.innerHTML = `
                 <div class="trash-empty" style="font-style: normal;">
-                    <p>🔄 Verificando registros y aplicando retención de 48 horas...</p>
+                    <p>Verificando registros y aplicando retención de 48 horas...</p>
                 </div>
             `;
 
             let elementosValidos = [];
-            const coleccionesAEvaluar = ['formularios', 'notas', 'tareas'];
+            const coleccionesAEvaluar = ['formularios', 'notas', 'recursos', 'horarios'];
             const ahora = new Date().getTime();
-            const LIMITE_48HS = 48 * 60 * 60 * 1000; // 48 horas en milisegundos
+            const LIMITE_48HS = 48 * 60 * 60 * 1000;
 
             for (const nombreColeccion of coleccionesAEvaluar) {
                 try {
@@ -162,10 +161,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                               data.eliminado === "true";
 
                         if (estaEliminado) {
-                            // Evaluar antigüedad de 48 horas
                             let tiempoEliminacion = data.eliminadoEn ? new Date(data.eliminadoEn).getTime() : 0;
                             
-                            // Si no tiene fecha registrada, se le asigna la actual para empezar a contar
                             if (!tiempoEliminacion) {
                                 await updateDoc(doc(db, nombreColeccion, documento.id), {
                                     eliminadoEn: new Date().toISOString()
@@ -173,10 +170,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                 tiempoEliminacion = ahora;
                             }
 
-                            // Si superó las 48 horas, se elimina automáticamente de Firestore[cite: 10]
                             if (ahora - tiempoEliminacion >= LIMITE_48HS) {
                                 await deleteDoc(doc(db, nombreColeccion, documento.id));
-                                console.log(`Auto-eliminado por superar 48hs: ${documento.id}`);
                             } else {
                                 if (!elementosValidos.some(el => el.id === documento.id)) {
                                     elementosValidos.push({
@@ -217,13 +212,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         elementos.forEach((item) => {
-            const tituloVisual = item.titulo || item.nombre || item.materia || item.tema || 'Sin título o tema';
-            const descripcionVisual = item.contenido || item.descripcion || item.evaluacion || item.detalle || 'Sin descripción adicional.';
+            let tituloVisual = item.titulo || item.nombre || item.materia || item.tema || 'Sin título';
+            let descripcionVisual = item.contenido || item.descripcion || item.evaluacion || item.detalle || item.url || (item.horaInicio ? `Clase: ${item.horaInicio} - ${item.horaFin}` : 'Sin descripción adicional.');
             
             let tipoEtiqueta = 'Elemento';
-            if (item.coleccion === 'tareas') tipoEtiqueta = 'Tarea';
-            else if (item.coleccion === 'notas') tipoEtiqueta = 'Nota';
-            else if (item.tipo) tipoEtiqueta = item.tipo;
+            if (item.coleccion === 'formularios') tipoEtiqueta = 'Tarea / Recordatorio';
+            else if (item.coleccion === 'notas') tipoEtiqueta = 'Calificación';
+            else if (item.coleccion === 'recursos') tipoEtiqueta = 'Recurso / Enlace';
+            else if (item.coleccion === 'horarios') tipoEtiqueta = 'Clase / Horario';
 
             const card = document.createElement('div');
             card.className = 'trash-item';
@@ -231,14 +227,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="trash-item-info">
                     <span class="trash-item-badge">${sanearTexto(tipoEtiqueta)}</span>
                     <strong>${sanearTexto(tituloVisual)}</strong>
-                    <span>${sanearTexto(descripcionVisual.substring(0, 75))}${descripcionVisual.length > 75 ? '...' : ''}</span>
+                    <span>${sanearTexto(String(descripcionVisual).substring(0, 75))}${String(descripcionVisual).length > 75 ? '...' : ''}</span>
                 </div>
                 <div class="trash-actions">
                     <button type="button" class="btn-restore" data-id="${item.id}" data-coleccion="${item.coleccion}">
-                        ↩️ Restaurar
+                        Restaurar
                     </button>
                     <button type="button" class="btn-delete-perm" data-id="${item.id}" data-coleccion="${item.coleccion}">
-                        ❌ Eliminar
+                        Eliminar
                     </button>
                 </div>
             `;
@@ -264,7 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
 
                     mostrarToast('Elemento restaurado con éxito al panel activo', 'success');
-                    observarSesion(user => { if (user) cargarElementosPapelera(user.uid); });
+                    if (currentUser) cargarElementosPapelera(currentUser.uid);
                 } catch (err) {
                     console.error("Error al restaurar:", err);
                     mostrarToast('Error al restaurar el elemento', 'danger');
@@ -281,7 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     try {
                         await deleteDoc(doc(db, coleccion, id));
                         mostrarToast('Elemento eliminado permanentemente de Firestore', 'success');
-                        observarSesion(user => { if (user) cargarElementosPapelera(user.uid); });
+                        if (currentUser) cargarElementosPapelera(currentUser.uid);
                     } catch (err) {
                         console.error("Error al eliminar:", err);
                         mostrarToast('No se pudo eliminar el elemento', 'danger');
@@ -293,7 +289,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function vaciarPapeleraCompleta(userId) {
         try {
-            const coleccionesAEvaluar = ['formularios', 'notas', 'tareas'];
+            const coleccionesAEvaluar = ['formularios', 'notas', 'recursos', 'horarios'];
             let contadorBorrados = 0;
 
             for (const nombreColeccion of coleccionesAEvaluar) {

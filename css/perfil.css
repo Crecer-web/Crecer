@@ -1,5 +1,5 @@
 /* ==========================================================================
-   ESTILOS PERFIL - CRECER (1000% RESPONSIVE)
+   ESTILOS PERFIL - CRECER
    ========================================================================== */
 
 :root {
@@ -56,9 +56,7 @@ body.dashboard-body {
   transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-/* --------------------------------------------------------------------------
-   1. CABECERA Y NAVEGACIÓN
-   -------------------------------------------------------------------------- */
+/* Cabecera y Navegación */
 .app-header {
   background-color: var(--header-bg);
   color: var(--header-text);
@@ -113,9 +111,7 @@ body.dashboard-body {
   color: #ffffff;
 }
 
-/* --------------------------------------------------------------------------
-   2. DESPLEGABLE DE MÓDULOS
-   -------------------------------------------------------------------------- */
+/* Desplegable de Módulos */
 .dropdown {
   position: relative;
   display: inline-block;
@@ -226,9 +222,7 @@ body.dashboard-body {
   transition: all 0.3s ease;
 }
 
-/* --------------------------------------------------------------------------
-   3. CONTENEDOR PRINCIPAL Y TARJETA
-   -------------------------------------------------------------------------- */
+/* Contenedor Principal y Tarjeta */
 .app-main-container {
   flex: 1;
   width: 100%;
@@ -277,9 +271,7 @@ body.dashboard-body {
   margin: 0;
 }
 
-/* --------------------------------------------------------------------------
-   4. SECCIÓN AVATAR
-   -------------------------------------------------------------------------- */
+/* Sección Avatar */
 .profile-avatar-section {
   display: flex;
   align-items: center;
@@ -383,9 +375,7 @@ body.dashboard-body {
   letter-spacing: 0.03em;
 }
 
-/* --------------------------------------------------------------------------
-   5. DETALLES DEL PERFIL
-   -------------------------------------------------------------------------- */
+/* Detalles del Perfil */
 .profile-details-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -418,9 +408,7 @@ body.dashboard-body {
   word-break: break-all;
 }
 
-/* --------------------------------------------------------------------------
-   6. MODAL
-   -------------------------------------------------------------------------- */
+/* Modal */
 .photo-modal-overlay {
   position: fixed;
   top: 0;
@@ -595,9 +583,7 @@ body.dashboard-body {
   background-color: rgba(148, 163, 184, 0.12);
 }
 
-/* --------------------------------------------------------------------------
-   7. FOOTER
-   -------------------------------------------------------------------------- */
+/* Footer */
 .app-footer, 
 .auth-footer-simple {
   background-color: var(--header-bg, #0f172a);
@@ -628,9 +614,7 @@ body.dashboard-body {
   font-weight: 600;
 }
 
-/* --------------------------------------------------------------------------
-   8. ADAPTABILIDAD RESPONSIVA MÓVIL EXTREMA
-   -------------------------------------------------------------------------- */
+/* Adaptabilidad Responsiva Móvil */
 @media (max-width: 768px) {
   .menu-toggle {
     display: flex;

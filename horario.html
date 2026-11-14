@@ -5,6 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Horario - CRECER</title>
+
+    <!-- Script síncrono unificado para prevenir parpadeos del tema -->
+    <script>
+        (function() {
+            const temaGuardado = localStorage.getItem('theme') || 'light';
+            if (temaGuardado === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+            }
+        })();
+    </script>
     
     <!-- Iconos y Manifest PWA -->
     <link rel="icon" type="image/png" sizes="32x32" href="img/logo.png">
@@ -67,7 +79,7 @@
             <section class="next-class-banner">
                 <div class="next-class-card">
                     <div class="next-class-info">
-                        <span class="badge-status">⏰ Próxima Clase de Hoy</span>
+                        <span class="badge-status">Próxima Clase de Hoy</span>
                         <h2 id="nextClassSubject">Cargando horario...</h2>
                         <p id="nextClassDetails">Sincronizando información de tu agenda.</p>
                     </div>
@@ -79,7 +91,7 @@
                 
                 <!-- Formulario Lateral de Carga de Clases -->
                 <section class="form-card-horario">
-                    <h3>Registrar Clase</h3>
+                    <h3 id="formTitle">Registrar Clase</h3>
                     <form id="horarioForm" novalidate>
                         <div class="form-group">
                             <label for="materiaHorarioInput">Materia *</label>
@@ -94,6 +106,7 @@
                                 <option value="miercoles">Miércoles</option>
                                 <option value="jueves">Jueves</option>
                                 <option value="viernes">Viernes</option>
+                                <option value="sabado">Sábado</option>
                             </select>
                         </div>
 
@@ -129,7 +142,7 @@
 
                 <!-- Grilla Semanal de Clases -->
                 <section class="grid-section-horario">
-                    <h3>Agenda Semanal (Lunes a Viernes)</h3>
+                    <h3>Agenda Semanal (Lunes a Sábado)</h3>
                     
                     <!-- Pestañas de día exclusivas para vista en celular -->
                     <div class="mobile-day-tabs" id="mobileDayTabs">
@@ -138,6 +151,7 @@
                         <button type="button" class="tab-btn" data-day="miercoles">Mié</button>
                         <button type="button" class="tab-btn" data-day="jueves">Jue</button>
                         <button type="button" class="tab-btn" data-day="viernes">Vie</button>
+                        <button type="button" class="tab-btn" data-day="sabado">Sáb</button>
                     </div>
 
                     <div class="table-responsive">
@@ -150,6 +164,7 @@
                                     <th class="col-day day-miercoles">Miércoles</th>
                                     <th class="col-day day-jueves">Jueves</th>
                                     <th class="col-day day-viernes">Viernes</th>
+                                    <th class="col-day day-sabado">Sábado</th>
                                 </tr>
                             </thead>
                             <tbody id="horarioTableBody">
@@ -172,13 +187,14 @@
                 <button type="button" class="btn-close-modal" id="btnCloseModal">✕</button>
             </header>
             <div class="modal-body">
-                <p><strong>📅 Día y Hora:</strong> <span id="modalClassTime">--</span></p>
-                <p><strong>🏫 Ubicación:</strong> <span id="modalClassRoom">--</span></p>
-                <p><strong>👨‍🏫 Profesor/a:</strong> <span id="modalClassProf">--</span></p>
+                <p><strong>Día y Hora:</strong> <span id="modalClassTime">--</span></p>
+                <p><strong>Ubicación:</strong> <span id="modalClassRoom">--</span></p>
+                <p><strong>Profesor/a:</strong> <span id="modalClassProf">--</span></p>
                 <div id="modalClassLinkContainer" style="margin-top: 1rem;"></div>
+                <div id="modalEditBtnContainer"></div>
             </div>
             <footer class="modal-footer">
-                <button type="button" id="btnDeleteClass" class="btn-delete-modal">🗑️ Eliminar Clase</button>
+                <button type="button" id="btnDeleteClass" class="btn-delete-modal">Eliminar Clase</button>
             </footer>
         </div>
     </div>

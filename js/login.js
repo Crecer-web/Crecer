@@ -1,18 +1,21 @@
 /* =================================================================
-   LÓGICA DE INICIO DE SESIÓN Y GUÍA DE ACCESO - PLATAFORMA CRECER
+   LÓGICA DE INICIO DE SESIÓN - PLATAFORMA CRECER
    ================================================================= */
 
 import { auth, db } from './firebase-config.js';
 import { 
     signInWithEmailAndPassword, 
     signInWithPopup, 
-    GoogleAuthProvider 
+    GoogleAuthProvider,
+    onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { mostrarToast } from './global.js';
 
+let autenticandoEnCurso = false;
+
 /**
- * Aplica el tema (claro / oscuro) de forma sincronizada en la vista de inicio de sesión.
+ * Aplica el tema de forma sincronizada en la vista de inicio de sesión
  */
 function aplicarTemaDirecto(tema) {
     const themeToggle = document.getElementById('themeToggle');
@@ -31,40 +34,42 @@ function aplicarTemaDirecto(tema) {
 }
 
 /**
- * Guarda o actualiza la información básica del usuario en Firestore al iniciar sesión.
+ * Guarda o actualiza los datos del usuario en Firestore al iniciar sesión,
+ * preservando la foto de perfil personalizada si ya existe.
  */
 async function guardarPerfilUsuario(uid, datos) {
     try {
         const userRef = doc(db, 'usuarios', uid);
-        await setDoc(userRef, {
-            uid: uid,
-            ...datos
-        }, { merge: true });
+        const docSnap = await getDoc(userRef);
+        let datosFinales = { uid: uid, ...datos };
+
+        if (docSnap.exists()) {
+            const dataActual = docSnap.data();
+            // Si el usuario ya tiene una foto personalizada guardada y no viene una nueva por parámetro, se preserva
+            if (dataActual.fotoPerfil && (!datos.fotoPerfil || datos.fotoPerfil === '')) {
+                delete datosFinales.fotoPerfil;
+            }
+        }
+
+        await setDoc(userRef, datosFinales, { merge: true });
     } catch (error) {
         console.error("Error al guardar perfil en Firestore:", error);
     }
 }
 
 /**
- * Resalta visualmente el enlace "¿Olvidaste tu contraseña?" para guiar al usuario
- * cuando ocurre un fallo por incompatibilidad de proveedor o credencial.
+ * Valida formato básico de correo electrónico
  */
-function resaltarEnlaceRecuperacion() {
-    const linkOlvido = document.getElementById('linkOlvidoPassword');
-    if (linkOlvido) {
-        linkOlvido.style.transition = 'all 0.3s ease';
-        linkOlvido.style.fontWeight = 'bold';
-        linkOlvido.style.color = '#ef4444'; // Color rojo destacado
-        linkOlvido.style.textDecoration = 'underline';
-
-        // Retorna a su estilo original suavemente tras 6 segundos
-        setTimeout(() => {
-            linkOlvido.style.fontWeight = 'normal';
-            linkOlvido.style.color = '';
-            linkOlvido.style.textDecoration = '';
-        }, 6000);
-    }
+function esEmailValido(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
+
+// Redirigir si ya existe una sesión activa al cargar la página
+onAuthStateChanged(auth, (user) => {
+    if (user && !autenticandoEnCurso) {
+        window.location.href = 'inicio.html';
+    }
+});
 
 document.addEventListener('DOMContentLoaded', () => {
     let themeToggle = document.getElementById('themeToggle');
@@ -72,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnGoogleAuth = document.getElementById('btnGoogleAuth');
     const btnSubmitLogin = document.getElementById('btnSubmitLogin');
 
-    // Inicialización del tema en la vista de Login
+    // Inicialización del tema
     const temaGuardado = localStorage.getItem('theme');
     const prefiereDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const temaInicial = temaGuardado ? temaGuardado : (prefiereDark ? 'dark' : 'light');
@@ -96,29 +101,44 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 1. Manejo del Formulario de Inicio de Sesión (Email / Password)
+    const alternarEstadoBotones = (deshabilitado, textoSubmit = 'Ingresar', textoGoogle = 'Continuar con Google') => {
+        if (btnSubmitLogin) {
+            btnSubmitLogin.disabled = deshabilitado;
+            btnSubmitLogin.textContent = textoSubmit;
+        }
+        if (btnGoogleAuth) {
+            btnGoogleAuth.disabled = deshabilitado;
+            const spanGoogle = btnGoogleAuth.querySelector('span');
+            if (spanGoogle) spanGoogle.textContent = textoGoogle;
+        }
+    };
+
+    // 1. Iniciar sesión con Correo y Contraseña
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (autenticandoEnCurso) return;
             
             const emailInput = document.getElementById('loginEmail');
             const passwordInput = document.getElementById('loginPassword');
 
             const email = emailInput ? emailInput.value.trim() : '';
-            const password = passwordInput ? passwordInput.value.trim() : '';
+            const password = passwordInput ? passwordInput.value : '';
 
             if (!email || !password) {
                 mostrarToast('Por favor, ingresa tu correo y contraseña.', 'danger');
                 return;
             }
 
-            if (btnSubmitLogin) {
-                btnSubmitLogin.disabled = true;
-                btnSubmitLogin.textContent = 'Ingresando... ⏳';
+            if (!esEmailValido(email)) {
+                mostrarToast('El formato del correo ingresado no es válido.', 'danger');
+                return;
             }
 
+            autenticandoEnCurso = true;
+            alternarEstadoBotones(true, 'Ingresando...', 'Continuar con Google');
+
             try {
-                // Intento de autenticación con Firebase Auth
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
@@ -127,49 +147,40 @@ document.addEventListener('DOMContentLoaded', () => {
                     ultimoAcceso: new Date().toISOString()
                 });
 
-                mostrarToast('¡Bienvenido de nuevo!', 'success');
+                mostrarToast('Sesión iniciada correctamente.', 'success');
 
                 setTimeout(() => {
                     window.location.href = 'inicio.html';
-                }, 600);
+                }, 500);
 
             } catch (error) {
-                console.error("Error en Login:", error.code, error.message);
+                console.error("Error en Login:", error);
+                autenticandoEnCurso = false;
+                
+                let msg = 'Credenciales inválidas. Verifica tu correo y contraseña.';
 
-                // Captura y manejo guiado de los errores de Firebase Auth
-                if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-                    mostrarToast(
-                        'Credenciales incorrectas. Si te registraste con Google, usa el botón de Google o haz clic en "¿Olvidaste tu contraseña?" para crear una.',
-                        'danger'
-                    );
-                    resaltarEnlaceRecuperacion();
-
-                } else if (error.code === 'auth/user-not-found') {
-                    mostrarToast('No existe una cuenta registrada con este correo electrónico.', 'danger');
-
-                } else if (error.code === 'auth/invalid-email') {
-                    mostrarToast('El correo electrónico ingresado no es válido.', 'danger');
-
+                if (error.code === 'auth/invalid-email') {
+                    msg = 'El formato del correo ingresado no es válido.';
+                } else if (error.code === 'auth/too-many-requests') {
+                    msg = 'Demasiados intentos fallidos. Intenta nuevamente más tarde.';
                 } else if (error.code === 'auth/network-request-failed') {
-                    mostrarToast('Error de conexión a internet. Revisa tu red.', 'danger');
-
-                } else {
-                    mostrarToast('Error al iniciar sesión: ' + error.message, 'danger');
+                    msg = 'Error de conexión a internet. Revisa tu red.';
                 }
 
-                if (btnSubmitLogin) {
-                    btnSubmitLogin.disabled = false;
-                    btnSubmitLogin.textContent = 'Ingresar';
-                }
+                mostrarToast(msg, 'danger');
+                alternarEstadoBotones(false, 'Ingresar', 'Continuar con Google');
             }
         });
     }
 
-    // 2. Manejo del Inicio de Sesión con Google (OAuth)
+    // 2. Iniciar sesión / Registrarse con Google
     if (btnGoogleAuth) {
         btnGoogleAuth.addEventListener('click', async () => {
+            if (autenticandoEnCurso) return;
+
             const provider = new GoogleAuthProvider();
-            btnGoogleAuth.disabled = true;
+            autenticandoEnCurso = true;
+            alternarEstadoBotones(true, 'Ingresar', 'Conectando con Google...');
 
             try {
                 const result = await signInWithPopup(auth, provider);
@@ -182,24 +193,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     ultimoAcceso: new Date().toISOString()
                 });
 
-                mostrarToast('¡Sesión iniciada con éxito!', 'success');
+                mostrarToast('Sesión iniciada con éxito.', 'success');
 
                 setTimeout(() => {
                     window.location.href = 'inicio.html';
-                }, 600);
+                }, 500);
 
             } catch (error) {
-                console.error("Error Google Auth:", error.code, error.message);
+                console.error("Error Google Auth:", error);
+                autenticandoEnCurso = false;
                 let errorMsg = 'No se pudo iniciar sesión con Google.';
 
-                if (error.code === 'auth/popup-closed-by-user') {
-                    errorMsg = 'Cancelaste la ventana de inicio de sesión de Google.';
+                if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
+                    errorMsg = 'Se canceló la ventana de inicio de sesión de Google.';
                 } else if (error.code === 'auth/network-request-failed') {
                     errorMsg = 'Error de red al intentar conectar con Google.';
                 }
 
                 mostrarToast(errorMsg, 'danger');
-                btnGoogleAuth.disabled = false;
+                alternarEstadoBotones(false, 'Ingresar', 'Continuar con Google');
             }
         });
     }
