@@ -1,5 +1,5 @@
 // ==========================================
-// MÓDULO GLOBAL Y UTILIDADES - CRECER (Versión Definitiva)
+// MÓDULO GLOBAL Y UTILIDADES - CRECER (Versión Definitiva Unificada)
 // ==========================================
 import { auth } from './firebase-config.js';
 import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -182,16 +182,39 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // =========================================================================
+    // CONTROLADOR ÚNICO Y CENTRALIZADO DEL MENÚ HAMBURGUESA (Móvil y Escritorio)
+    // =========================================================================
     const menuToggle = document.getElementById('menuToggle');
     const navMenu = document.getElementById('navMenu');
+
     if (menuToggle && navMenu) {
-        menuToggle.addEventListener('click', (e) => {
+        const toggleMenuAction = (e) => {
             e.preventDefault();
             e.stopPropagation();
+            
+            menuToggle.classList.toggle('active');
             navMenu.classList.toggle('active');
+            
+            const isOpen = navMenu.classList.contains('active');
+            menuToggle.setAttribute('aria-expanded', isOpen);
+        };
+
+        menuToggle.addEventListener('click', toggleMenuAction);
+        menuToggle.addEventListener('touchend', toggleMenuAction, { passive: false });
+
+        // Cerrar menú automáticamente al hacer clic en cualquier enlace interno de navegación
+        const enlacesNav = navMenu.querySelectorAll('a');
+        enlacesNav.forEach(enlace => {
+            enlace.addEventListener('click', () => {
+                menuToggle.classList.remove('active');
+                navMenu.classList.remove('active');
+                menuToggle.setAttribute('aria-expanded', 'false');
+            });
         });
     }
 
+    // Gestión unificada de desplegables (Dropdowns)
     const dropdowns = document.querySelectorAll(".dropdown");
 
     dropdowns.forEach((dropdown) => {
@@ -219,6 +242,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 dropdown.classList.remove("active");
             }
         });
+
+        // Cerrar menú hamburguesa si se hace clic fuera en pantalla móvil
+        if (navMenu && navMenu.classList.contains('active')) {
+            if (!navMenu.contains(e.target) && menuToggle && !menuToggle.contains(e.target)) {
+                menuToggle.classList.remove('active');
+                navMenu.classList.remove('active');
+                menuToggle.setAttribute('aria-expanded', 'false');
+            }
+        }
     });
 
     const ejecutarCierreSesion = async (e) => {

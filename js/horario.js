@@ -75,15 +75,7 @@ function aplicarTemaDirecto(tema) {
 
 document.addEventListener('DOMContentLoaded', () => {
     inicializarTema();
-
-    const menuToggle = document.getElementById('menuToggle');
-    const navMenu = document.getElementById('navMenu');
-
-    if (menuToggle && navMenu) {
-        menuToggle.addEventListener('click', () => {
-            navMenu.classList.toggle('active');
-        });
-    }
+    // Nota: El evento del menú hamburguesa ya está centralizado y optimizado en global.js
 });
 
 observarSesion((user) => {

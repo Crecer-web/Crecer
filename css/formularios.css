@@ -1,17 +1,17 @@
 /* ==========================================================================
-   ESTILOS DE FORMULARIOS Y TARJETAS DE CAPTURA - CRECER
+   ESTILOS DE FORMULARIOS Y TARJETAS DE CAPTURA - CRECER (Unificado)
    Estilo: Formal, Elegante y Responsivo
    ========================================================================== */
 
 :root {
-  --bg-color: #f1f5f9;
-  --card-bg: #ffffff;
+  --bg-color: #ffffff;           /* Fondo blanco puro en modo claro */
+  --card-bg: #ffffff;            /* Tarjetas con fondo blanco puro */
   --border-color: #e2e8f0;
-  --text-primary: #0f172a;
+  --text-primary: #0f172a;       /* Letra negra / oscura formal */
   --text-secondary: #475569;
   --text-muted: #94a3b8;
   --filter-bg: #f8fafc;
-  --header-bg: #0f172a;
+  --header-bg: #1e273b;          /* Encabezado y Footer en Modo Claro (#1e273b) */
   --header-text: #ffffff;
   --accent: #2563eb;
   --accent-hover: #1d4ed8;
@@ -24,18 +24,19 @@
   --radius-lg: 14px;
 }
 
-[data-theme="dark"] {
-  --bg-color: #090d16;
-  --card-bg: #1e293b;
-  --border-color: #334155;
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-  --filter-bg: #0f172a;
-  --header-bg: #0f172a;
-  --header-text: #ffffff;
-  --accent: #3b82f6;
-  --accent-hover: #2563eb;
+[data-theme="dark"],
+body[data-theme="dark"] {
+  --bg-color: #000000 !important;        /* Fondo negro absoluto en modo oscuro */
+  --card-bg: #121212 !important;         /* Tarjetas en negro profundo */
+  --border-color: #27272a !important;
+  --text-primary: #ffffff !important;    /* Letra blanca pura en modo oscuro */
+  --text-secondary: #cbd5e1 !important;
+  --text-muted: #71717a !important;
+  --filter-bg: #1e293b !important;
+  --header-bg: #0d1322 !important;       /* Encabezado y Footer en Modo Oscuro (#0d1322) */
+  --header-text: #ffffff !important;
+  --accent: #3b82f6 !important;
+  --accent-hover: #2563eb !important;
   --modal-overlay: rgba(0, 0, 0, 0.82);
   --shadow-md: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
 }
@@ -193,7 +194,10 @@ body.dashboard-body {
   color: #ffffff;
 }
 
-/* Dropdown */
+/* --------------------------------------------------------------------------
+   ESTILOS DE MENÚ DESPLEGABLE (DROPDOWN) 
+   Sincronizado estricto: Claro = Blanco/Negro | Oscuro = Oscuro/Blanco
+   -------------------------------------------------------------------------- */
 .dropdown {
   position: relative;
   display: inline-block;
@@ -222,10 +226,10 @@ body.dashboard-body {
   position: absolute;
   right: 0;
   top: calc(100% + 0.5rem);
-  background-color: var(--card-bg);
+  background-color: var(--card-bg) !important;
   min-width: 200px;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-color) !important;
   border-radius: 10px;
   z-index: 1005;
   overflow: hidden;
@@ -234,18 +238,21 @@ body.dashboard-body {
 }
 
 .dropdown-content a {
-  color: var(--text-primary);
+  color: var(--text-primary) !important;
+  background-color: transparent !important;
   padding: 0.7rem 1.2rem;
   text-decoration: none;
   display: block;
   font-size: 0.9rem;
   font-weight: 500;
   transition: background 0.18s ease, color 0.18s ease;
+  text-align: left;
 }
 
-.dropdown-content a:hover, .dropdown-content a.active {
-  background-color: rgba(37, 99, 235, 0.12);
-  color: var(--accent);
+.dropdown-content a:hover, 
+.dropdown-content a.active {
+  background-color: rgba(37, 99, 235, 0.12) !important;
+  color: var(--accent) !important;
 }
 
 .dropdown-divider {
@@ -537,7 +544,7 @@ body.dashboard-body {
    PIE DE PÁGINA PROFESIONAL Y RESPONSIVO - CRECER
    -------------------------------------------------------------------------- */
 .app-footer {
-    background-color: var(--header-bg, #0f172a);
+    background-color: var(--header-bg);
     color: #94a3b8;
     text-align: center;
     padding: 1.4rem 2rem;
@@ -606,14 +613,14 @@ body.dashboard-body {
   .dropdown-content {
     position: static;
     box-shadow: none;
-    border: none;
-    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color) !important;
+    background-color: var(--card-bg) !important;
     margin-top: 0.5rem;
     width: 100%;
   }
 
   .dropdown-content a {
-    color: #cbd5e1;
+    color: var(--text-primary) !important;
   }
 
   .app-main-container {

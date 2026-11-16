@@ -1,16 +1,16 @@
 /* ==========================================================================
-   MÓDULO DE HORARIO / AGENDA SEMANAL - CRECER (Responsive & Themed)
+   MÓDULO DE HORARIO / AGENDA SEMANAL - CRECER (Responsive & Themed Unificado)
    ========================================================================== */
 
 :root {
-  --bg-color: #f1f5f9;
+  --bg-color: #ffffff;
   --card-bg: #ffffff;
   --border-color: #e2e8f0;
   --text-primary: #0f172a;
   --text-secondary: #475569;
   --text-muted: #94a3b8;
   --filter-bg: #f8fafc;
-  --header-bg: #0f172a;
+  --header-bg: #1e273b;       /* Encabezado y Footer en Modo Claro (#1e273b) */
   --header-text: #ffffff;
   --accent: #2563eb;
   --accent-hover: #1d4ed8;
@@ -24,17 +24,17 @@
 
 :root[data-theme="dark"],
 body[data-theme="dark"] {
-  --bg-color: #090d16;
-  --card-bg: #1e293b;
-  --border-color: #334155;
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-  --filter-bg: #0f172a;
-  --header-bg: #0f172a;
-  --header-text: #ffffff;
-  --accent: #3b82f6;
-  --accent-hover: #2563eb;
+  --bg-color: #000000 !important;
+  --card-bg: #121212 !important;
+  --border-color: #27272a !important;
+  --text-primary: #ffffff !important;
+  --text-secondary: #cbd5e1 !important;
+  --text-muted: #71717a !important;
+  --filter-bg: #1e293b !important;
+  --header-bg: #0d1322 !important;     /* Encabezado y Footer en Modo Oscuro (#0d1322) */
+  --header-text: #ffffff !important;
+  --accent: #3b82f6 !important;
+  --accent-hover: #2563eb !important;
   --modal-overlay: rgba(0, 0, 0, 0.82);
   --shadow-md: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
 }
@@ -72,6 +72,7 @@ body.dashboard-body {
   z-index: 1000;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
   width: 100%;
+  transition: background-color 0.3s ease;
 }
 
 .header-container {
@@ -118,7 +119,10 @@ body.dashboard-body {
   color: #ffffff;
 }
 
-/* Dropdown */
+/* ==========================================
+   ESTILOS DE MENÚ DESPLEGABLE (DROPDOWN) 
+   Sincronizado estricto: Claro = Blanco/Negro | Oscuro = Oscuro/Blanco
+   ========================================== */
 .dropdown {
   position: relative;
   display: inline-block;
@@ -147,10 +151,10 @@ body.dashboard-body {
   position: absolute;
   right: 0;
   top: calc(100% + 0.5rem);
-  background-color: var(--card-bg);
+  background-color: var(--card-bg) !important;
   min-width: 200px;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-color) !important;
   border-radius: 10px;
   z-index: 1005;
   overflow: hidden;
@@ -159,7 +163,8 @@ body.dashboard-body {
 }
 
 .dropdown-content a {
-  color: var(--text-primary);
+  color: var(--text-primary) !important;
+  background-color: transparent !important;
   padding: 0.7rem 1.2rem;
   text-decoration: none;
   display: block;
@@ -171,8 +176,8 @@ body.dashboard-body {
 
 .dropdown-content a:hover,
 .dropdown-content a.active {
-  background-color: rgba(37, 99, 235, 0.12);
-  color: var(--accent);
+  background-color: rgba(37, 99, 235, 0.12) !important;
+  color: var(--accent) !important;
 }
 
 .dropdown-logout {
@@ -585,7 +590,7 @@ body.dashboard-body {
 /* PIE DE PÁGINA */
 .app-footer, 
 .auth-footer-simple {
-  background-color: var(--header-bg, #0f172a);
+  background-color: var(--header-bg);
   color: #94a3b8;
   text-align: center;
   padding: 1.15rem 1.5rem;
@@ -593,6 +598,7 @@ body.dashboard-body {
   width: 100%;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   box-sizing: border-box;
+  transition: background-color 0.3s ease;
 }
 
 .app-footer .footer-container, 
@@ -660,14 +666,14 @@ body.dashboard-body {
   .dropdown-content {
     position: static;
     box-shadow: none;
-    border: none;
-    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color) !important;
+    background-color: var(--card-bg) !important;
     margin-top: 0.5rem;
     width: 100%;
   }
 
   .dropdown-content a {
-    color: #cbd5e1;
+    color: var(--text-primary) !important;
   }
 
   .app-footer, 

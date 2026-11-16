@@ -1,10 +1,41 @@
 /* ==========================================================================
-   ESTILOS DE MÓDULO RESPALDO Y REPORTES - PLATAFORMA CRECER
+   ESTILOS DE MÓDULO RESPALDO Y REPORTES - PLATAFORMA CRECER (Unificado)
    ========================================================================== */
 
+:root {
+  --header-bg: #1e273b;       /* Encabezado y Footer en Modo Claro (#1e273b) */
+  --header-text: #ffffff;
+  --bg-color: #ffffff;        /* Fondo blanco / blando puro en modo claro */
+  --card-bg: #ffffff;         /* Tarjetas blancas puras */
+  --filter-bg: #f8fafc;
+  --text-primary: #0f172a;    /* Letra negra / oscura formal */
+  --text-secondary: #475569;  /* Texto secundario legible */
+  --border-color: #e2e8f0;    /* Bordes sutiles */
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+}
+
+[data-theme="dark"],
+body[data-theme="dark"] {
+  --header-bg: #0d1322 !important;      /* Encabezado y Footer en Modo Oscuro (#0d1322) */
+  --header-text: #ffffff !important;
+  --bg-color: #000000 !important;     /* Fondo negro absoluto en modo oscuro */
+  --card-bg: #121212 !important;      /* Tarjetas en negro profundo */
+  --filter-bg: #1e293b !important;
+  --text-primary: #ffffff !important; /* Letra blanca pura en modo oscuro */
+  --text-secondary: #cbd5e1 !important;
+  --border-color: #27272a !important;
+  --accent: #3b82f6 !important;
+  --accent-hover: #2563eb !important;
+}
+
 .app-header {
-  background-color: var(--header-bg, #0f172a);
-  color: var(--header-text, #ffffff);
+  background-color: var(--header-bg);
+  color: var(--header-text);
   padding: 0.75rem 1.5rem;
   display: flex;
   justify-content: center;
@@ -14,6 +45,7 @@
   z-index: 1000;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
   width: 100%;
+  transition: background-color 0.3s ease;
 }
 
 .header-container {
@@ -56,6 +88,77 @@
   color: #ffffff;
 }
 
+/* ==========================================
+   ESTILOS DE MENÚ DESPLEGABLE (DROPDOWN) 
+   Sincronizado estricto: Claro = Blanco/Negro | Oscuro = Oscuro/Blanco
+   ========================================== */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  cursor: pointer;
+  padding: 0.45rem 0.95rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.dropdown-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.5rem);
+  background-color: var(--card-bg) !important; /* Blanco en modo claro, negro profundo en modo oscuro */
+  min-width: 200px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--border-color) !important;
+  border-radius: 8px;
+  z-index: 1005;
+  overflow: hidden;
+  padding: 0.35rem 0;
+}
+
+.dropdown-content a {
+  color: var(--text-primary) !important; /* Negro en modo claro, Blanco en modo oscuro */
+  background-color: transparent !important;
+  padding: 0.6rem 1.2rem;
+  text-decoration: none;
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background 0.18s ease, color 0.18s ease;
+  text-align: left;
+}
+
+.dropdown-content a:hover,
+.dropdown-content a.active {
+  background-color: rgba(37, 99, 235, 0.12) !important;
+  color: var(--accent) !important;
+}
+
+.dropdown-logout {
+  color: #ef4444 !important;
+}
+
+.dropdown-logout:hover {
+  background-color: rgba(239, 68, 68, 0.12) !important;
+}
+
+.dropdown:hover .dropdown-content,
+.dropdown.active .dropdown-content {
+  display: block;
+}
+
 /* Botón Hamburguesa (Oculto en Desktop) */
 .menu-toggle {
   display: none;
@@ -84,6 +187,8 @@
   display: flex;
   justify-content: center;
   padding: 2rem 0;
+  background-color: var(--bg-color);
+  transition: background-color 0.3s ease;
 }
 
 .main-container { 
@@ -104,12 +209,14 @@
   font-weight: 700;
   letter-spacing: -0.02em;
   margin: 0 0 0.25rem 0;
+  transition: color 0.3s ease;
 }
 
 .page-header p {
   color: var(--text-secondary);
   font-size: 0.88rem;
   margin: 0;
+  transition: color 0.3s ease;
 }
 
 .export-grid {
@@ -120,27 +227,27 @@
 }
 
 .export-card {
-  background-color: var(--card-bg, #ffffff);
-  border: 1px solid var(--border-color, #e2e8f0);
-  border-radius: var(--radius-md, 10px);
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
   padding: 1.25rem;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.1));
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.25s ease;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.25s ease, background-color 0.3s ease;
 }
 
 .export-card:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md, 0 4px 6px rgba(0,0,0,0.1));
-  border-color: var(--accent, #2563eb);
+  box-shadow: var(--shadow-md);
+  border-color: var(--accent);
 }
 
 .export-card.featured-card {
   grid-column: 1 / -1;
-  border: 2px solid var(--accent, #2563eb);
-  background: linear-gradient(135deg, var(--card-bg, #ffffff) 0%, var(--filter-bg, #f1f5f9) 100%);
+  border: 2px solid var(--accent);
+  background: linear-gradient(135deg, var(--card-bg) 0%, var(--filter-bg) 100%);
 }
 
 .card-content h3 {
@@ -148,6 +255,7 @@
   font-weight: 700;
   color: var(--text-primary);
   margin: 0 0 0.35rem 0;
+  transition: color 0.3s ease;
 }
 
 .card-content p {
@@ -155,6 +263,7 @@
   color: var(--text-secondary);
   margin: 0 0 1.15rem 0;
   line-height: 1.5;
+  transition: color 0.3s ease;
 }
 
 .card-actions {
@@ -174,44 +283,44 @@
   font-family: inherit;
   font-size: 0.85rem;
   font-weight: 600;
-  border-radius: var(--radius-sm, 6px);
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  border: 1px solid var(--border-color, #e2e8f0);
+  border: 1px solid var(--border-color);
   transition: all 0.2s ease;
 }
 
 .btn-csv {
-  background-color: var(--filter-bg, #f1f5f9);
+  background-color: var(--filter-bg);
   color: var(--text-primary);
 }
 
 .btn-csv:hover {
-  background-color: var(--accent, #2563eb);
+  background-color: var(--accent);
   color: #ffffff;
-  border-color: var(--accent, #2563eb);
+  border-color: var(--accent);
 }
 
 .btn-pdf {
-  background-color: var(--accent, #2563eb);
+  background-color: var(--accent);
   color: #ffffff;
-  border-color: var(--accent, #2563eb);
+  border-color: var(--accent);
 }
 
 .btn-pdf:hover {
-  background-color: var(--accent-hover, #1d4ed8);
+  background-color: var(--accent-hover);
 }
 
 .btn-primary-export {
   width: 100%;
-  background-color: var(--accent, #2563eb);
+  background-color: var(--accent);
   color: #ffffff;
   font-size: 0.9rem;
   padding: 0.75rem;
-  border-color: var(--accent, #2563eb);
+  border-color: var(--accent);
 }
 
 .btn-primary-export:hover {
-  background-color: var(--accent-hover, #1d4ed8);
+  background-color: var(--accent-hover);
 }
 
 /* Vista de Impresión / PDF Optimizada */
@@ -263,7 +372,7 @@
     right: -100%;
     width: 260px;
     height: calc(100vh - 60px);
-    background-color: var(--header-bg, #0f172a);
+    background-color: var(--header-bg);
     flex-direction: column;
     align-items: flex-start;
     padding: 1.5rem;
@@ -284,14 +393,14 @@
   .dropdown-content {
     position: static;
     box-shadow: none;
-    border: none;
-    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color) !important;
+    background-color: var(--card-bg) !important;
     margin-top: 0.5rem;
     width: 100%;
   }
 
   .dropdown-content a {
-    color: #cbd5e1;
+    color: var(--text-primary) !important;
   }
 }
 

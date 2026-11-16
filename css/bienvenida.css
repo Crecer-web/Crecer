@@ -1,18 +1,22 @@
+/* ==========================================================================
+   ESTILOS DE BIENVENIDA - PLATAFORMA CRECER (Versión Definitiva Unificada)
+   ========================================================================== */
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-  --primary: #0f172a;          
-  --primary-light: #1e293b;   
+  --primary: #1e273b;          /* Encabezado y Footer en Modo Claro (#1e273b) */
+  --primary-light: #334155;   
   --secondary: #2563eb;        
   --secondary-hover: #1d4ed8;
   --accent: #0d9488;          
   
-  --bg-color: #f8fafc;
-  --card-bg: #ffffff;
+  --bg-color: #ffffff;         /* Fondo blanco / blando puro en modo claro */
+  --card-bg: #ffffff;          /* Tarjetas con fondo blanco puro */
   
-  /* Jerarquía de Texto */
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
+  /* Jerarquía de Texto para Modo Claro */
+  --text-primary: #0f172a;     /* Letra negra / oscura formal */
+  --text-secondary: #475569;   /* Texto secundario legible */
   --text-muted: #94a3b8;
   --header-text: #ffffff;
   
@@ -26,25 +30,26 @@
   --shadow-hover: 0 12px 24px -4px rgba(15, 23, 42, 0.12);
 }
 
-[data-theme="dark"] {
-  --primary: #1e293b;
-  --primary-light: #334155;
-  --secondary: #3b82f6;
-  --secondary-hover: #2563eb;
-  --accent: #14b8a6;
+[data-theme="dark"],
+body[data-theme="dark"] {
+  --primary: #0d1322 !important;          /* Encabezado y Footer en Modo Oscuro (#0d1322) */
+  --primary-light: #1e293b !important;
+  --secondary: #3b82f6 !important;
+  --secondary-hover: #2563eb !important;
+  --accent: #14b8a6 !important;
   
-  --bg-color: #0f172a;
-  --card-bg: #1e293b;
+  --bg-color: #000000 !important;         /* Fondo negro absoluto en modo oscuro */
+  --card-bg: #121212 !important;          /* Tarjetas en negro profundo */
   
-  --text-primary: #f8fafc;
-  --text-secondary: #cbd5e1;
-  --text-muted: #64748b;
-  --header-text: #f8fafc;
+  --text-primary: #ffffff !important;     /* Letra blanca pura en modo oscuro */
+  --text-secondary: #cbd5e1 !important;
+  --text-muted: #71717a !important;
+  --header-text: #ffffff !important;
   
-  --border: #334155;
-  --border-color: #334155;
-  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-  --shadow-hover: 0 12px 24px -4px rgba(0, 0, 0, 0.5);
+  --border: #27272a !important;
+  --border-color: #27272a !important;
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5) !important;
+  --shadow-hover: 0 12px 24px -4px rgba(0, 0, 0, 0.8) !important;
 }
 
 /* ==========================================

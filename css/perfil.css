@@ -1,15 +1,15 @@
 /* ==========================================================================
-   ESTILOS PERFIL - CRECER
+   ESTILOS PERFIL - CRECER (Unificado)
    ========================================================================== */
 
 :root {
-  --bg-color: #f1f5f9;
+  --bg-color: #ffffff;
   --card-bg: #ffffff;
   --border-color: #e2e8f0;
   --text-primary: #0f172a;
   --text-secondary: #475569;
   --filter-bg: #f8fafc;
-  --header-bg: #0f172a;
+  --header-bg: #1e273b;       /* Encabezado y Footer en Modo Claro (#1e273b) */
   --header-text: #ffffff;
   --accent: #2563eb;
   --accent-hover: #1d4ed8;
@@ -21,16 +21,16 @@
 
 :root[data-theme="dark"],
 body[data-theme="dark"] {
-  --bg-color: #090d16;
-  --card-bg: #1e293b;
-  --border-color: #334155;
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --filter-bg: #0f172a;
-  --header-bg: #0f172a;
-  --header-text: #ffffff;
-  --accent: #3b82f6;
-  --accent-hover: #2563eb;
+  --bg-color: #000000 !important;
+  --card-bg: #121212 !important;
+  --border-color: #27272a !important;
+  --text-primary: #ffffff !important;
+  --text-secondary: #cbd5e1 !important;
+  --filter-bg: #1e293b !important;
+  --header-bg: #0d1322 !important;     /* Encabezado y Footer en Modo Oscuro (#0d1322) */
+  --header-text: #ffffff !important;
+  --accent: #3b82f6 !important;
+  --accent-hover: #2563eb !important;
   --modal-overlay: rgba(0, 0, 0, 0.82);
   --shadow-md: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
 }
@@ -56,7 +56,9 @@ body.dashboard-body {
   transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-/* Cabecera y Navegación */
+/* ==========================================
+   1. CABECERA Y NAVEGACIÓN
+   ========================================== */
 .app-header {
   background-color: var(--header-bg);
   color: var(--header-text);
@@ -66,6 +68,7 @@ body.dashboard-body {
   z-index: 1000;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
   width: 100%;
+  transition: background-color 0.3s ease;
 }
 
 .header-container {
@@ -99,11 +102,17 @@ body.dashboard-body {
   gap: 1.25rem;
 }
 
+.nav-link,
+.dropdown-btn,
+.dropdown-content a {
+  font-size: 1rem !important;
+  font-weight: 500;
+  font-family: inherit;
+}
+
 .nav-link {
   color: #94a3b8;
   text-decoration: none;
-  font-weight: 500;
-  font-size: 0.92rem;
   transition: color 0.2s ease;
 }
 
@@ -111,7 +120,10 @@ body.dashboard-body {
   color: #ffffff;
 }
 
-/* Desplegable de Módulos */
+/* ==========================================
+   ESTILOS DE MENÚ DESPLEGABLE (DROPDOWN) 
+   Sincronizado estricto: Claro = Blanco/Negro | Oscuro = Oscuro/Blanco
+   ========================================== */
 .dropdown {
   position: relative;
   display: inline-block;
@@ -121,9 +133,6 @@ body.dashboard-body {
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.18);
   color: #ffffff;
-  font-family: inherit;
-  font-weight: 600;
-  font-size: 0.88rem;
   cursor: pointer;
   padding: 0.45rem 0.95rem;
   border-radius: 8px;
@@ -140,10 +149,10 @@ body.dashboard-body {
   position: absolute;
   right: 0;
   top: calc(100% + 0.5rem);
-  background-color: var(--card-bg);
+  background-color: var(--card-bg) !important;
   min-width: 200px;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-color) !important;
   border-radius: 10px;
   z-index: 1005;
   overflow: hidden;
@@ -152,18 +161,18 @@ body.dashboard-body {
 }
 
 .dropdown-content a {
-  color: var(--text-primary);
+  color: var(--text-primary) !important;
+  background-color: transparent !important;
   padding: 0.7rem 1.2rem;
   text-decoration: none;
   display: block;
-  font-size: 0.9rem;
-  font-weight: 500;
+  text-align: left;
   transition: background 0.18s ease, color 0.18s ease;
 }
 
 .dropdown-content a:hover, .dropdown-content a.active {
-  background-color: rgba(37, 99, 235, 0.12);
-  color: var(--accent);
+  background-color: rgba(37, 99, 235, 0.12) !important;
+  color: var(--accent) !important;
 }
 
 .dropdown-logout {
@@ -222,7 +231,19 @@ body.dashboard-body {
   transition: all 0.3s ease;
 }
 
-/* Contenedor Principal y Tarjeta */
+.menu-toggle.active .bar:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+.menu-toggle.active .bar:nth-child(2) {
+  opacity: 0;
+}
+.menu-toggle.active .bar:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
+}
+
+/* ==========================================
+   2. CONTENEDOR PRINCIPAL Y TARJETA DE PERFIL
+   ========================================== */
 .app-main-container {
   flex: 1;
   width: 100%;
@@ -375,7 +396,9 @@ body.dashboard-body {
   letter-spacing: 0.03em;
 }
 
-/* Detalles del Perfil */
+/* ==========================================
+   3. DETALLES DEL PERFIL
+   ========================================== */
 .profile-details-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -408,7 +431,9 @@ body.dashboard-body {
   word-break: break-all;
 }
 
-/* Modal */
+/* ==========================================
+   4. MODAL DE EDICIÓN DE FOTO
+   ========================================== */
 .photo-modal-overlay {
   position: fixed;
   top: 0;
@@ -434,6 +459,7 @@ body.dashboard-body {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  transition: background-color 0.25s ease, border-color 0.25s ease;
 }
 
 .photo-modal-header {
@@ -490,6 +516,7 @@ body.dashboard-body {
   font-family: inherit;
   font-size: 0.88rem;
   outline: none;
+  transition: border-color 0.2s ease, background-color 0.25s ease, color 0.25s ease;
 }
 
 .form-group input:focus {
@@ -503,6 +530,11 @@ body.dashboard-body {
   padding: 0.85rem;
   background-color: var(--filter-bg);
   cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.25s ease;
+}
+
+.custom-file-dropzone:hover {
+  border-color: var(--accent);
 }
 
 .input-file-hidden {
@@ -577,16 +609,19 @@ body.dashboard-body {
   cursor: pointer;
   font-weight: 600;
   font-size: 0.88rem;
+  transition: background-color 0.2s ease;
 }
 
 .btn-secondary:hover {
   background-color: rgba(148, 163, 184, 0.12);
 }
 
-/* Footer */
+/* ==========================================
+   5. FOOTER
+   ========================================== */
 .app-footer, 
 .auth-footer-simple {
-  background-color: var(--header-bg, #0f172a);
+  background-color: var(--header-bg);
   color: #94a3b8;
   text-align: center;
   padding: 1.15rem 1.5rem;
@@ -597,6 +632,7 @@ body.dashboard-body {
   display: flex;
   justify-content: center;
   align-items: center;
+  transition: background-color 0.3s ease;
 }
 
 .auth-footer-simple p {
@@ -614,10 +650,12 @@ body.dashboard-body {
   font-weight: 600;
 }
 
-/* Adaptabilidad Responsiva Móvil */
+/* ==========================================
+   6. ADAPTABILIDAD RESPONSIVA MÓVIL
+   ========================================== */
 @media (max-width: 768px) {
   .menu-toggle {
-    display: flex;
+    display: flex !important;
   }
 
   .nav-menu {
@@ -629,15 +667,16 @@ body.dashboard-body {
     background-color: var(--header-bg);
     flex-direction: column;
     align-items: flex-start;
-    padding: 1.5rem;
-    gap: 1.25rem;
+    padding: 1rem 1.25rem;
+    gap: 0.75rem;
     box-shadow: -5px 0 15px rgba(0,0,0,0.3);
     transition: right 0.3s ease;
     z-index: 999;
+    overflow-y: auto;
   }
 
   .nav-menu.active {
-    right: 0;
+    right: 0 !important;
   }
 
   .dropdown, .dropdown-btn {
@@ -645,16 +684,18 @@ body.dashboard-body {
   }
 
   .dropdown-content {
-    position: static;
-    box-shadow: none;
-    border: none;
-    background-color: rgba(255, 255, 255, 0.05);
-    margin-top: 0.5rem;
+    position: static !important;
+    box-shadow: none !important;
+    border: 1px solid var(--border-color) !important;
+    background-color: var(--card-bg) !important;
+    margin-top: 0.35rem;
     width: 100%;
+    padding: 0.15rem 0;
   }
 
   .dropdown-content a {
-    color: #cbd5e1;
+    color: var(--text-primary) !important;
+    padding: 0.5rem 1rem !important;
   }
 
   .app-main-container {

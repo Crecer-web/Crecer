@@ -1,15 +1,17 @@
 /* ==========================================================================
-   ESTILOS DE RECUPERACIÓN DE CONTRASEÑA - PLATAFORMA CRECER
+   ESTILOS DE RECUPERACIÓN DE CONTRASEÑA - PLATAFORMA CRECER (Unificado)
    ========================================================================== */
 
 :root {
-  --bg-color: #f1f5f9;
+  --bg-color: #ffffff;
   --card-bg: #ffffff;
   --border-color: #e2e8f0;
   --text-primary: #0f172a;
   --text-secondary: #475569;
   --text-muted: #94a3b8;
-  --header-bg: #0f172a;
+  --input-bg: #f8fafc;
+  --header-bg: #1e273b;       /* Encabezado y Footer en Modo Claro (#1e273b) */
+  --header-text: #ffffff;
   --accent: #2563eb;
   --accent-hover: #1d4ed8;
   --shadow-md: 0 10px 30px -5px rgba(15, 23, 42, 0.08);
@@ -19,14 +21,17 @@
 
 :root[data-theme="dark"],
 body[data-theme="dark"] {
-  --bg-color: #090d16;
-  --card-bg: #1e293b;
-  --border-color: #334155;
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-  --accent: #3b82f6;
-  --accent-hover: #2563eb;
+  --bg-color: #000000 !important;
+  --card-bg: #121212 !important;
+  --border-color: #27272a !important;
+  --text-primary: #ffffff !important;
+  --text-secondary: #cbd5e1 !important;
+  --text-muted: #71717a !important;
+  --input-bg: #1e293b !important;
+  --header-bg: #0d1322 !important;     /* Encabezado y Footer en Modo Oscuro (#0d1322) */
+  --header-text: #ffffff !important;
+  --accent: #3b82f6 !important;
+  --accent-hover: #2563eb !important;
   --shadow-md: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
 }
 
@@ -64,7 +69,7 @@ body.auth-body {
   align-items: center;
   justify-content: center;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  transition: transform 0.2s ease, background 0.2s ease;
+  transition: transform 0.2s ease, background-color 0.25s ease, border-color 0.25s ease;
   z-index: 100;
 }
 
@@ -154,14 +159,14 @@ body.auth-body {
 .form-group input {
   width: 100%;
   padding: 0.7rem 0.9rem;
-  background-color: var(--bg-color);
+  background-color: var(--input-bg);
   color: var(--text-primary);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   font-family: inherit;
   font-size: 0.9rem;
   outline: none;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.25s ease, color 0.25s ease;
 }
 
 .form-group input:focus {
@@ -203,6 +208,27 @@ body.auth-body {
 
 .auth-redirect-text a:hover {
   text-decoration: underline;
+}
+
+/* Pie de página simplificado opcional */
+.auth-footer-simple {
+  background-color: var(--header-bg);
+  color: #94a3b8;
+  text-align: center;
+  padding: 1.15rem 1.5rem;
+  margin-top: auto;
+  width: 100%;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  transition: background-color 0.3s ease;
+}
+
+.auth-footer-simple p {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.auth-footer-simple strong {
+  color: #f8fafc;
 }
 
 @media (max-width: 480px) {
