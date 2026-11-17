@@ -1,5 +1,5 @@
 /* =================================================================
-   MÓDULO DE RECURSOS Y APUNTES - PLATAFORMA CRECER (Versión Definitiva)
+   MÓDULO DE RECURSOS Y APUNTES - PLATAFORMA CRECER (Unificado y Completo)
    ================================================================= */
 
 import { db } from './firebase-config.js';
@@ -81,12 +81,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Menú hamburguesa para vista móvil
+    // Menú hamburguesa para vista móvil con animación de rotación en cruz (X)
     if (menuToggle && navMenu) {
         menuToggle.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
+            menuToggle.classList.toggle('active');
             navMenu.classList.toggle('active');
+        });
+
+        // Cierre automático del menú móvil al hacer clic en enlaces u opciones
+        document.querySelectorAll('.nav-link, .dropdown-content a').forEach(link => {
+            link.addEventListener('click', () => {
+                menuToggle.classList.remove('active');
+                navMenu.classList.remove('active');
+            });
         });
     }
 

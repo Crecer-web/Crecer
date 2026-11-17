@@ -1,3 +1,7 @@
+/* =================================================================
+   MÓDULO DE HORARIO / AGENDA SEMANAL - CRECER (Unificado con Animación Hamburguesa)
+   ================================================================= */
+
 import { db } from './firebase-config.js';
 import { 
     collection, 
@@ -75,7 +79,44 @@ function aplicarTemaDirecto(tema) {
 
 document.addEventListener('DOMContentLoaded', () => {
     inicializarTema();
-    // Nota: El evento del menú hamburguesa ya está centralizado y optimizado en global.js
+
+    // Control robusto de animación del menú hamburguesa móvil
+    const menuToggle = document.getElementById('menuToggle');
+    const navMenu = document.getElementById('navMenu');
+
+    if (menuToggle && navMenu) {
+        menuToggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            menuToggle.classList.toggle('active');
+            navMenu.classList.toggle('active');
+        });
+
+        // Cierre automático del menú móvil al hacer clic en opciones
+        document.querySelectorAll('.nav-link, .dropdown-content a').forEach(link => {
+            link.addEventListener('click', () => {
+                menuToggle.classList.remove('active');
+                navMenu.classList.remove('active');
+            });
+        });
+    }
+
+    const dropdown = document.querySelector(".dropdown");
+    const dropdownBtn = document.getElementById("dropdownBtn");
+
+    if (dropdownBtn && dropdown) {
+        dropdownBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropdown.classList.toggle("active");
+        });
+
+        window.addEventListener("click", (e) => {
+            if (!dropdown.contains(e.target)) {
+                dropdown.classList.remove("active");
+            }
+        });
+    }
 });
 
 observarSesion((user) => {

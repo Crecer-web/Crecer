@@ -1,3 +1,7 @@
+/* =================================================================
+   MÓDULO DE REGISTRO - PLATAFORMA CRECER (Unificado y Completo)
+   ================================================================= */
+
 import { auth, db } from './firebase-config.js';
 import { 
     createUserWithEmailAndPassword, 

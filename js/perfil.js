@@ -1,5 +1,5 @@
 /* =================================================================
-   MÓDULO DE PERFIL - PLATAFORMA CRECER
+   MÓDULO DE PERFIL - PLATAFORMA CRECER (Unificado y Completo)
    ================================================================= */
 
 import { db } from './firebase-config.js';
@@ -146,11 +146,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Control robusto de animación del menú hamburguesa móvil con rotación en cruz (X)
     if (menuToggle && navMenu) {
         menuToggle.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
+            menuToggle.classList.toggle('active');
             navMenu.classList.toggle('active');
+        });
+
+        // Cierre automático del menú móvil al hacer clic en enlaces u opciones
+        document.querySelectorAll('.nav-link, .dropdown-content a').forEach(link => {
+            link.addEventListener('click', () => {
+                menuToggle.classList.remove('active');
+                navMenu.classList.remove('active');
+            });
         });
     }
 
@@ -307,7 +317,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 nombre = data.nombre || '';
                 apellido = data.apellido || '';
                 fechaNac = data.fechaNacimiento || '';
-                // Mantenemos la foto guardada en Firestore de forma prioritaria
                 if (data.fotoPerfil) {
                     foto = data.fotoPerfil;
                 }

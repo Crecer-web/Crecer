@@ -76,11 +76,17 @@ body[data-theme="dark"] {
   gap: 1.25rem;
 }
 
+.nav-link,
+.dropdown-btn,
+.dropdown-content a {
+  font-size: 1rem !important;
+  font-weight: 500;
+  font-family: inherit;
+}
+
 .nav-link {
   color: #94a3b8;
   text-decoration: none;
-  font-weight: 500;
-  font-size: 0.9rem;
   transition: color 0.2s ease;
 }
 
@@ -104,8 +110,6 @@ body[data-theme="dark"] {
   cursor: pointer;
   padding: 0.45rem 0.95rem;
   border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 500;
   transition: all 0.2s ease;
 }
 
@@ -118,26 +122,25 @@ body[data-theme="dark"] {
   position: absolute;
   right: 0;
   top: calc(100% + 0.5rem);
-  background-color: var(--card-bg) !important; /* Blanco en modo claro, negro profundo en modo oscuro */
+  background-color: var(--card-bg) !important;
   min-width: 200px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
   border: 1px solid var(--border-color) !important;
-  border-radius: 8px;
+  border-radius: 10px;
   z-index: 1005;
   overflow: hidden;
   padding: 0.35rem 0;
+  transition: background-color 0.25s ease, border-color 0.25s ease;
 }
 
 .dropdown-content a {
-  color: var(--text-primary) !important; /* Negro en modo claro, Blanco en modo oscuro */
+  color: var(--text-primary) !important;
   background-color: transparent !important;
-  padding: 0.6rem 1.2rem;
+  padding: 0.7rem 1.2rem;
   text-decoration: none;
   display: block;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: background 0.18s ease, color 0.18s ease;
   text-align: left;
+  transition: background 0.18s ease, color 0.18s ease;
 }
 
 .dropdown-content a:hover,
@@ -159,26 +162,43 @@ body[data-theme="dark"] {
   display: block;
 }
 
-/* Botón Hamburguesa (Oculto en Desktop) */
+/* ==========================================
+   ANIMACIÓN DEL BOTÓN HAMBURGUESA Y MENÚ
+   ========================================== */
 .menu-toggle {
   display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 30px;
+  height: 21px;
   background: transparent;
   border: none;
   cursor: pointer;
-  flex-direction: column;
-  justify-content: space-between;
-  width: 28px;
-  height: 20px;
   padding: 0;
-  z-index: 1001;
+  z-index: 1010;
 }
 
 .menu-toggle .bar {
-  width: 100%;
   height: 3px;
+  width: 100%;
   background-color: #ffffff;
-  border-radius: 2px;
-  transition: all 0.3s ease;
+  border-radius: 3px;
+  transition: all 0.3s ease-in-out;
+  transform-origin: center;
+}
+
+/* Transformación de barras a "X" cuando está activo */
+.menu-toggle.active .bar:nth-child(1) {
+  transform: translateY(9px) rotate(45deg);
+}
+
+.menu-toggle.active .bar:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+
+.menu-toggle.active .bar:nth-child(3) {
+  transform: translateY(-9px) rotate(-45deg);
 }
 
 .app-main-container {
@@ -363,7 +383,7 @@ body[data-theme="dark"] {
    ========================================================================== */
 @media (max-width: 768px) {
   .menu-toggle {
-    display: flex;
+    display: flex !important;
   }
 
   .nav-menu {
@@ -375,15 +395,16 @@ body[data-theme="dark"] {
     background-color: var(--header-bg);
     flex-direction: column;
     align-items: flex-start;
-    padding: 1.5rem;
-    gap: 1.25rem;
+    padding: 1rem 1.25rem;
+    gap: 0.75rem;
     box-shadow: -5px 0 15px rgba(0,0,0,0.3);
-    transition: right 0.3s ease;
+    transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 999;
+    overflow-y: auto;
   }
 
   .nav-menu.active {
-    right: 0;
+    right: 0 !important;
   }
 
   .dropdown, .dropdown-btn {
@@ -391,16 +412,18 @@ body[data-theme="dark"] {
   }
 
   .dropdown-content {
-    position: static;
-    box-shadow: none;
+    position: static !important;
+    box-shadow: none !important;
     border: 1px solid var(--border-color) !important;
     background-color: var(--card-bg) !important;
-    margin-top: 0.5rem;
+    margin-top: 0.35rem;
     width: 100%;
+    padding: 0.15rem 0;
   }
 
   .dropdown-content a {
     color: var(--text-primary) !important;
+    padding: 0.5rem 1rem !important;
   }
 }
 

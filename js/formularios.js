@@ -1,5 +1,5 @@
 /* =================================================================
-   MÓDULO DE CARGA Y EDICIÓN DE FORMULARIOS - PLATAFORMA CRECER (Con Compresión de Imágenes)
+   MÓDULO DE CARGA Y EDICIÓN DE FORMULARIOS - PLATAFORMA CRECER (Con Compresión y Animación Hamburguesa)
    ================================================================= */
 
 import { db } from './firebase-config.js';
@@ -48,12 +48,21 @@ document.addEventListener('DOMContentLoaded', () => {
         attributeFilter: ['data-theme']
     });
 
-    // Control del menú hamburguesa responsivo en móviles
+    // Control del menú hamburguesa responsivo con animación de cruz (X)
     if (menuToggle && navMenu) {
         menuToggle.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
+            menuToggle.classList.toggle('active');
             navMenu.classList.toggle('active');
+        });
+
+        // Cerrar menú al hacer clic en opciones
+        document.querySelectorAll('.nav-link, .dropdown-content a').forEach(link => {
+            link.addEventListener('click', () => {
+                menuToggle.classList.remove('active');
+                navMenu.classList.remove('active');
+            });
         });
     }
 

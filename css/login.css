@@ -336,7 +336,7 @@ body[data-theme="dark"] {
 }
 
 /* ==========================================
-   PIE DE PÁGINA SIMPLIFICADO (SI APLICA)
+   PIE DE PÁGINA SIMPLIFICADO INSTITUCIONAL
    ========================================== */
 
 .auth-footer-simple {
@@ -353,6 +353,12 @@ body[data-theme="dark"] {
 .auth-footer-simple p {
     margin: 0;
     font-size: 0.85rem;
+    color: #cbd5e1;
+}
+
+.auth-footer-simple strong {
+    color: #ffffff;
+    font-weight: 600;
 }
 
 /* ==========================================

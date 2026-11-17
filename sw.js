@@ -2,7 +2,7 @@
    SERVICE WORKER SEGURO - PLATAFORMA CRECER
    ================================================================= */
 
-const CACHE_NAME = 'crecer-cache-v11';
+const CACHE_NAME = 'crecer-cache-v13';
 const ASSETS_TO_CACHE = [
     '/',
     '/bienvenida.html',

@@ -314,7 +314,7 @@ body[data-theme="dark"] {
 }
 
 /* ==========================================
-   PIE DE PÁGINA SIMPLIFICADO (SI APLICA)
+   PIE DE PÁGINA SIMPLIFICADO
    ========================================== */
 
 .auth-footer-simple {
@@ -331,10 +331,12 @@ body[data-theme="dark"] {
 .auth-footer-simple p {
     margin: 0;
     font-size: 0.85rem;
+    color: #cbd5e1;
 }
 
 .auth-footer-simple strong {
-    color: #f8fafc;
+    color: #ffffff;
+    font-weight: 600;
 }
 
 /* ==========================================
@@ -352,7 +354,6 @@ body[data-theme="dark"] {
     pointer-events: none;
 }
 
-/* Adaptación para pantallas móviles muy estrechas */
 @media (max-width: 420px) {
     .form-row {
         flex-direction: column;

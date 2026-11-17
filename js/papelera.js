@@ -1,5 +1,5 @@
 /* =================================================================
-   MÓDULO PAPELERA DE RECICLAJE - CRECER
+   MÓDULO PAPELERA DE RECICLAJE - CRECER (Unificado con Animación Hamburguesa)
    ================================================================= */
 
 import { db } from './firebase-config.js';
@@ -87,11 +87,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Control robusto de animación del menú hamburguesa móvil con rotación en cruz (X)
     if (menuToggle && navMenu) {
         menuToggle.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
+            menuToggle.classList.toggle('active');
             navMenu.classList.toggle('active');
+        });
+
+        // Cierre automático del menú móvil al hacer clic en enlaces o opciones
+        document.querySelectorAll('.nav-link, .dropdown-content a').forEach(link => {
+            link.addEventListener('click', () => {
+                menuToggle.classList.remove('active');
+                navMenu.classList.remove('active');
+            });
         });
     }
 

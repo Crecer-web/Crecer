@@ -1,5 +1,5 @@
 /* =================================================================
-   SISTEMA DE ENVÍO DE CORREO DE RECUPERACIÓN (FLASK + SMTP) - CRECER
+   SISTEMA DE ENVÍO DE CORREO DE RECUPERACIÓN (FLASK + SMTP) - CRECER (Unificado)
    ================================================================= */
 
 import { mostrarToast } from './global.js';

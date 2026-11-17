@@ -210,7 +210,7 @@ body.auth-body {
   text-decoration: underline;
 }
 
-/* Pie de página simplificado opcional */
+/* Pie de página simplificado */
 .auth-footer-simple {
   background-color: var(--header-bg);
   color: #94a3b8;
@@ -225,10 +225,12 @@ body.auth-body {
 .auth-footer-simple p {
   margin: 0;
   font-size: 0.85rem;
+  color: #cbd5e1;
 }
 
 .auth-footer-simple strong {
-  color: #f8fafc;
+  color: #ffffff;
+  font-weight: 600;
 }
 
 @media (max-width: 480px) {

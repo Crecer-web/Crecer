@@ -1,8 +1,24 @@
 /* =================================================================
-   SISTEMA DE CAMBIO DE CONTRASEÑA (FLASK SMTP + FIREBASE) - CRECER
+   SISTEMA DE CAMBIO DE CONTRASEÑA (FLASK SMTP + FIREBASE) - CRECER (Unificado)
    ================================================================= */
 
 import { mostrarToast } from './global.js';
+
+function aplicarTemaDirecto(tema) {
+    const themeToggle = document.getElementById('themeToggle');
+
+    if (tema === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.body.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
+        if (themeToggle) themeToggle.textContent = '☀️';
+    } else {
+        document.documentElement.removeAttribute('data-theme');
+        document.body.removeAttribute('data-theme');
+        localStorage.setItem('theme', 'light');
+        if (themeToggle) themeToggle.textContent = '🌙';
+    }
+}
 
 const urlParams = new URLSearchParams(window.location.search);
 const userEmail = urlParams.get('email');
@@ -11,10 +27,35 @@ const timeStampParam = urlParams.get('tstamp');
 const EXPIRATION_LIMIT_MS = 10 * 60 * 1000; // 10 minutos exactos de validez
 
 document.addEventListener('DOMContentLoaded', () => {
+    let themeToggle = document.getElementById('themeToggle');
     const formRestaurar = document.getElementById('resetPasswordForm');
     const btnActualizar = document.getElementById('btnActualizar');
     const inputPassword = document.getElementById('newPassword');
     const inputConfirm = document.getElementById('confirmPassword');
+
+    // Inicialización del tema
+    const temaGuardado = localStorage.getItem('theme');
+    const prefiereDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const temaInicial = temaGuardado ? temaGuardado : (prefiereDark ? 'dark' : 'light');
+    
+    aplicarTemaDirecto(temaInicial);
+
+    if (themeToggle) {
+        const nuevoBtn = themeToggle.cloneNode(true);
+        themeToggle.parentNode.replaceChild(nuevoBtn, themeToggle);
+        themeToggle = nuevoBtn;
+
+        themeToggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const esOscuroActual = document.documentElement.getAttribute('data-theme') === 'dark' || 
+                                   document.body.getAttribute('data-theme') === 'dark';
+            
+            const nuevoTema = esOscuroActual ? 'light' : 'dark';
+            aplicarTemaDirecto(nuevoTema);
+        });
+    }
 
     if (!userEmail) {
         mostrarToast('Enlace de restablecimiento inválido o incompleto.', 'danger');

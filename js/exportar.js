@@ -1,5 +1,5 @@
 /* =================================================================
-   MÓDULO DE RESPALDO Y REPORTES - PLATAFORMA CRECER (Versión Definitiva)
+   MÓDULO DE RESPALDO Y REPORTES - PLATAFORMA CRECER (Versión Definitiva Unificada)
    ================================================================= */
 
 import { db } from './firebase-config.js';
@@ -55,6 +55,7 @@ function aplicarTemaDirecto(tema) {
 document.addEventListener('DOMContentLoaded', () => {
     inicializarTema();
 
+    // Lógica optimizada del menú hamburguesa con animación de cruz (X)
     const menuToggle = document.getElementById('menuToggle');
     const navMenu = document.getElementById('navMenu');
 
@@ -62,7 +63,16 @@ document.addEventListener('DOMContentLoaded', () => {
         menuToggle.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
+            menuToggle.classList.toggle('active');
             navMenu.classList.toggle('active');
+        });
+
+        // Cerrar el menú al hacer clic en cualquier opción de navegación
+        document.querySelectorAll('.nav-link, .dropdown-content a').forEach(link => {
+            link.addEventListener('click', () => {
+                menuToggle.classList.remove('active');
+                navMenu.classList.remove('active');
+            });
         });
     }
 

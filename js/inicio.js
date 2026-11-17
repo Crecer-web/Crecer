@@ -1,5 +1,5 @@
 /* =================================================================
-   PANEL PRINCIPAL DE INICIO - PLATAFORMA CRECER (Velocidad Optimizada)
+   PANEL PRINCIPAL DE INICIO - PLATAFORMA CRECER (Unificado y Completo)
    ================================================================= */
 
 import { db } from './firebase-config.js';
@@ -54,11 +54,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Control robusto del menú hamburguesa con animación de cruz (X)
     if (menuToggle && navMenu) {
         menuToggle.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
+            menuToggle.classList.toggle('active');
             navMenu.classList.toggle('active');
+        });
+
+        // Cerrar menú al hacer clic en opciones de navegación
+        document.querySelectorAll('.nav-link, .dropdown-content a').forEach(link => {
+            link.addEventListener('click', () => {
+                menuToggle.classList.remove('active');
+                navMenu.classList.remove('active');
+            });
         });
     }
 
@@ -78,6 +88,51 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // =================================================================
+    // LÓGICA DEL MODAL DE ACTUALIZACIÓN AUTOMÁTICA DE LA AGENDA
+    // =================================================================
+    const updateModal = document.getElementById('updateModal');
+    const btnUpdateNow = document.getElementById('btnUpdateNow');
+    const btnLater = document.getElementById('btnLater');
+
+    const VERSION_ACTUAL = "1.2.0"; // Incrementa esta versión cuando subas mejoras
+    const ultimaVersionIgnorada = localStorage.getItem('crecer_ignore_version');
+    const versionServidor = "1.3.0"; // Versión disponible más reciente en el servidor
+
+    if (updateModal && versionServidor !== VERSION_ACTUAL && ultimaVersionIgnorada !== versionServidor) {
+        setTimeout(() => {
+            updateModal.style.display = 'flex';
+        }, 1000);
+    }
+
+    if (btnLater) {
+        btnLater.addEventListener('click', (e) => {
+            e.preventDefault();
+            updateModal.style.display = 'none';
+            localStorage.setItem('crecer_ignore_version', versionServidor);
+        });
+    }
+
+    if (btnUpdateNow) {
+        btnUpdateNow.addEventListener('click', (e) => {
+            e.preventDefault();
+            btnUpdateNow.disabled = true;
+            btnUpdateNow.textContent = 'Actualizando...';
+
+            setTimeout(() => {
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.getRegistrations().then((registrations) => {
+                        for(let registration of registrations) {
+                            registration.update();
+                        }
+                    });
+                }
+                window.location.reload(true);
+            }, 800);
+        });
+    }
+    // =================================================================
 
     observarSesion((user) => {
         if (user) {

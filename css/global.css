@@ -521,3 +521,129 @@ body {
     font-size: 0.78rem;
   }
 }
+
+/* ==========================================================================
+   5.1. MODAL DE ACTUALIZACIÓN DE AGENDA
+   ========================================================================== */
+.update-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 1rem;
+  opacity: 0;
+  animation: fadeInModal 0.25s ease forwards;
+}
+
+@keyframes fadeInModal {
+  to {
+    opacity: 1;
+  }
+}
+
+.update-modal-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg, 14px);
+  width: 100%;
+  max-width: 440px;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(15px) scale(0.97);
+  animation: scaleUpModal 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes scaleUpModal {
+  to {
+    transform: translateY(0) scale(1);
+  }
+}
+
+.update-modal-header {
+  padding: 1.25rem 1.5rem;
+  background-color: var(--header-bg);
+  color: var(--header-text);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.update-modal-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.update-modal-body {
+  padding: 1.5rem;
+  color: var(--text-primary);
+  font-size: 0.92rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.update-modal-body p {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.update-modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  background-color: var(--filter-bg);
+}
+
+.update-modal-footer .btn-secondary {
+  background-color: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  padding: 0.55rem 1.1rem;
+  border-radius: var(--radius-sm, 6px);
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.update-modal-footer .btn-secondary:hover {
+  background-color: rgba(148, 163, 184, 0.12);
+}
+
+.update-modal-footer .btn-save {
+  background-color: var(--accent);
+  color: #ffffff;
+  border: none;
+  padding: 0.55rem 1.1rem;
+  border-radius: var(--radius-sm, 6px);
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.update-modal-footer .btn-save:hover {
+  background-color: var(--accent-hover);
+}
+
+@media (max-width: 480px) {
+  .update-modal-footer {
+    flex-direction: column-reverse;
+  }
+  
+  .update-modal-footer button {
+    width: 100%;
+  }
+}

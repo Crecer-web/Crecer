@@ -1,5 +1,5 @@
 /* =================================================================
-   LÓGICA DE INICIO DE SESIÓN - PLATAFORMA CRECER
+   LÓGICA DE INICIO DE SESIÓN - PLATAFORMA CRECER (Unificado)
    ================================================================= */
 
 import { auth, db } from './firebase-config.js';
